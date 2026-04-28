@@ -1,0 +1,11 @@
+.env
+projects/
+gmail_credentials.json
+gmail_token.json
+current_project.json
+project_log.json
+__pycache__/
+*.pyc
+*.pyo
+term-extract/input/
+term-extract/output/

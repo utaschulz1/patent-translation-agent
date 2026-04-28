@@ -1,0 +1,290 @@
+"""
+xtrf_job_setup.py  —  XTRF workflow step 4
+
+Given an XTRF job URL or numeric job ID (from the start email link),
+performs the full step-4 setup:
+  4.1  Parse job number + project ID, create project folder + pre-processing/
+  4.2  Download source files, unzip, locate Clean_XTM.docx
+  4.3  Extract EPO title from job instructions, write glossary CSV
+
+Usage:
+    python xtrf_job_setup.py <job-url-or-id>
+
+    Examples:
+        python xtrf_job_setup.py https://comunicadk.s.xtrf.eu/vendors/#/jobs/classic/316307
+        python xtrf_job_setup.py 316307
+"""
+
+import argparse
+import csv
+import os
+import re
+import time
+import zipfile
+from pathlib import Path
+
+import requests
+from dotenv import load_dotenv
+from openai import OpenAI
+
+import project_log
+from config import PROJECTS_DIR, WORK_DIR
+
+BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
+MODEL = "deepseek/deepseek-chat-v3-0324"
+
+_ENV = Path(__file__).parent / ".env"
+
+
+def _load_creds() -> dict:
+    """Load XTRF login credentials from .env."""
+    load_dotenv(_ENV)
+    return {
+        "email": os.environ["COMUNICA_JOBLIST_USERNAME"],
+        "password": os.environ["COMUNICA_JOBLIST_PASSWORD"],
+    }
+
+
+def _llm_extract_terms(en_title: str, de_title: str, retries: int = 5) -> list[tuple[str, str]]:
+    """Use DeepSeek to extract bilingual term pairs from an EN/DE patent title."""
+    load_dotenv(_ENV)
+    client = OpenAI(
+        api_key=os.environ["OPENROUTER_API_KEY"],
+        base_url="https://openrouter.ai/api/v1",
+    )
+    prompt = (
+        "You are a patent terminology extractor. "
+        "Given an English and German patent title, extract all meaningful noun phrases and technical terms as bilingual pairs. "
+        "English lowercase, German with correct noun capitalisation. "
+        "Return ONLY CSV with two columns EN,DE — one term pair per line, no header, no explanation.\n\n"
+        f"English title: {en_title}\n"
+        f"German title: {de_title}"
+    )
+    for attempt in range(1, retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model=MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0,
+            )
+            raw = response.choices[0].message.content.strip()
+            pairs = []
+            for line in raw.splitlines():
+                line = line.strip()
+                if not line or line.lower().startswith("en,"):
+                    continue
+                parts = line.split(",", 1)
+                if len(parts) == 2:
+                    pairs.append((parts[0].strip(), parts[1].strip()))
+            if pairs:
+                return pairs
+        except Exception as e:
+            print(f"  DeepSeek attempt {attempt}/{retries} failed: {e}")
+            if attempt < retries:
+                time.sleep(3 * attempt)
+    print("  DeepSeek extraction failed after all retries — glossary will be empty.")
+    return []
+
+def _extract_job_id(raw: str) -> str:
+    """Extract the numeric job ID from a full XTRF URL or a bare ID string."""
+    # ignores "classic/" if present
+    m = re.search(r"/jobs?/(?:classic/)?([^/?#]+)", raw)
+    if m:
+        return m.group(1)
+    
+    if re.fullmatch(r"\d+", raw.strip()):
+        return raw.strip()
+        
+    raise ValueError(f"Cannot extract job ID from: {raw!r}")
+
+def _login(session: requests.Session, creds: dict) -> None:
+    """Authenticate the session against the XTRF vendor portal."""
+    r = session.post(
+        f"{BASE_URL}/sign-in",
+        json={"email": creds["email"], "password": creds["password"]},
+        headers={"time-zone-offset-in-minutes": "60"},
+    )
+    r.raise_for_status()
+
+
+def _get_job(session: requests.Session, job_id: str) -> dict:
+    """Fetch full job JSON from the XTRF API."""
+    # singular 'job/classic' endpoint per confirmed GET trace
+    endpoint = f"{BASE_URL}/job/classic/{job_id}"
+    
+    r = session.get(endpoint, headers={"time-zone-offset-in-minutes": "60"})
+    r.raise_for_status()
+    return r.json()
+
+
+def _make_folder_name(id_number: str, project_id: str) -> str:
+    """Build a filesystem-safe folder name from the job ID number and project ID."""
+    # "2026/4545/EN » DE/1/1"  →  "20264545ENDE11"
+    folder_id = re.sub(r"[^a-zA-Z0-9]", "", id_number)
+    return f"{folder_id}_{project_id}"
+
+
+def _download_file(session: requests.Session, url: str, dest: Path) -> Path:
+    """Download a single file, using the content-disposition filename when available."""
+    r = session.get(url, headers={"time-zone-offset-in-minutes": "60"}, stream=True)
+    r.raise_for_status()
+    cd = r.headers.get("content-disposition", "")
+    m = re.search(r'filename[^;=\n]*=\s*["\']?([^"\';\n]+)', cd)
+    fname = m.group(1).strip() if m else dest.name
+    out = dest.parent / fname if dest.is_dir() else dest
+    with open(out, "wb") as f:
+        for chunk in r.iter_content(8192):
+            f.write(chunk)
+    return out
+
+
+def _download_source_files(
+    session: requests.Session, job_id: str, source_files: list, dest_folder: Path
+) -> list[Path]:
+    """Download all downloadable source files for a job into dest_folder."""
+    downloaded = []
+    for sf in source_files:
+        if not sf.get("downloadable"):
+            continue
+        file_id = sf["id"]
+        filename = sf["name"]
+        
+        # Again, use singular 'job/classic'
+        url = f"{BASE_URL}/job/classic/{job_id}/source-files/{file_id}"
+            
+        out_path = dest_folder / filename
+        print(f"  Downloading {filename}...")
+        _download_file(session, url, out_path)
+        downloaded.append(out_path)
+    return downloaded
+
+
+def _unzip_all(zip_paths: list[Path], dest_folder: Path) -> list[Path]:
+    """Extract all zip archives into dest_folder and return the list of extracted paths."""
+    extracted = []
+    for zp in zip_paths:
+        if zp.suffix.lower() != ".zip":
+            continue
+        with zipfile.ZipFile(zp) as zf:
+            zf.extractall(dest_folder)
+            extracted.extend(dest_folder / n for n in zf.namelist())
+    return extracted
+
+
+def _parse_epo_title(instructions_html: str) -> tuple[str, str]:
+    """Extract the English and German EPO title strings from the job instructions HTML."""
+    text = re.sub(r"<[^>]+>", " ", instructions_html)
+    text = re.sub(r"&nbsp;", " ", text)
+    de_m = re.search(r"German:\s*(.*?)(?=\s*(?:English|French):|$)", text, re.DOTALL)
+    en_m = re.search(r"English:\s*(.*?)(?=\s*(?:German|French):|$)", text, re.DOTALL)
+    de = de_m.group(1).strip() if de_m else ""
+    en = en_m.group(1).strip() if en_m else ""
+    return en, de
+
+
+def _write_glossary(project_id: str, pairs: list[tuple[str, str]], dest_dir: Path) -> Path:
+    """Write EN/DE term pairs to a CSV glossary file named after the project."""
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = dest_dir / f"glossary_{project_id}.csv"
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["EN", "DE"])
+        writer.writerows(pairs)
+    return csv_path
+
+
+def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
+    """Run the full step-4 setup: login, fetch job, create folders, download files, write glossary."""
+    creds = _load_creds()
+    job_id = _extract_job_id(job_url_or_id)
+
+    session = requests.Session()
+    session.headers.update({
+        "Accept": "application/json, text/plain",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0",
+    })
+
+    print(f"Logging in to XTRF...")
+    _login(session, creds)
+
+    print(f"Fetching job {job_id}...")
+    job = _get_job(session, job_id)
+    overview = job["overview"]
+
+    id_number = overview["idNumber"]       # "2026/4545/EN » DE/1/1"
+    project_name = overview["projectName"] # "Patents | RTC_2604_P0732"
+    task_type = overview["type"]           # "Post-editing" or "Revision"
+    source_files = job.get("sourceFiles") or []
+    instructions = job.get("instructions") or ""
+
+    # project_id_override comes from the email subject (e.g. "HUAW_2604_P0843");
+    # fall back to the XTRF project name when no override is supplied.
+    project_id = project_id_override or project_name.split("|")[-1].strip()
+    folder_name = _make_folder_name(id_number, project_id)
+
+    # 4.1  Create folders
+    project_folder = WORK_DIR / folder_name          # OneDrive — source files
+    pre_folder = project_folder / "pre-processing"
+    project_folder.mkdir(parents=True, exist_ok=True)
+    pre_folder.mkdir(exist_ok=True)
+    print(f"Created XTRF folder: {project_folder}")
+
+    # 4.1b  Create working folder in codebase and set active project context
+    work_folder = PROJECTS_DIR / project_id
+    work_folder.mkdir(parents=True, exist_ok=True)
+    project_log.set_context(project_id, work_folder, xtrf_job_folder=str(project_folder))
+    print(f"Created project folder: {work_folder}")
+
+    # 4.2  Download + unzip source files
+    if source_files:
+        downloaded = _download_source_files(session, job_id, source_files, project_folder)
+        zip_files = [p for p in downloaded if p.suffix.lower() == ".zip"]
+        if zip_files:
+            extracted = _unzip_all(zip_files, project_folder)
+            cat_files = [p for p in extracted if "Clean_XTM" in p.name and p.suffix.lower() == ".docx"]
+            if cat_files:
+                print(f"  CAT file: {cat_files[0].name}")
+            else:
+                print(f"  Extracted {len(extracted)} file(s) — no Clean_XTM.docx found, check manually")
+    else:
+        print("No source files attached to this job.")
+
+    # 4.3  EPO title → DeepSeek term extraction → glossary CSV
+    en_title, de_title = _parse_epo_title(instructions)
+    if en_title:
+        print(f"EPO title found — extracting terms with DeepSeek...")
+        pairs = _llm_extract_terms(en_title, de_title)
+        csv_path = _write_glossary(project_id, pairs, work_folder)
+        print(f"Glossary written: {csv_path}  ({len(pairs)} term(s))")
+        for en, de in pairs:
+            print(f"  {en}  →  {de}")
+    else:
+        print("EPO title not found in instructions — create glossary manually.")
+
+    # Summary
+    print()
+    print("=" * 50)
+    print(f"Job:        {id_number}")
+    print(f"Project:    {project_id}")
+    print(f"Task type:  {task_type}  ({'1/1 translation' if 'edit' in task_type.lower() or 'translat' in task_type.lower() else '1/2 review'})")
+    print(f"Folder:     {folder_name}")
+    if en_title:
+        print(f"EPO EN:     {en_title}")
+        print(f"EPO DE:     {de_title}")
+    print("=" * 50)
+    print("Step 4 complete. Next: open XTM link from the XTRF job page (step 5).")
+    print(f"XTM login: https://word.welocalize.com/project-manager-gui/login.jsp?client=IP#!/login")
+    return {"project_id": project_id, "project_folder": str(work_folder)}
+
+
+def main():
+    """CLI entry point — parse arguments and call run()."""
+    parser = argparse.ArgumentParser(description="XTRF step 4: job setup")
+    parser.add_argument("job", help="XTRF job URL or numeric job ID from the start email")
+    args = parser.parse_args()
+    result = run(args.job)
+    print(f"Project folder: {result['project_folder']}")
+
+
+if __name__ == "__main__":
+    main()
