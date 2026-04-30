@@ -168,6 +168,7 @@ def _unzip_all(zip_paths: list[Path], dest_folder: Path) -> list[Path]:
         with zipfile.ZipFile(zp) as zf:
             zf.extractall(dest_folder)
             extracted.extend(dest_folder / n for n in zf.namelist())
+        zp.unlink()
     return extracted
 
 
@@ -182,13 +183,16 @@ def _parse_epo_title(instructions_html: str) -> tuple[str, str]:
     return en, de
 
 
-def _write_glossary(project_id: str, pairs: list[tuple[str, str]], dest_dir: Path) -> Path:
+def _write_glossary(project_id: str, pairs: list[tuple[str, str]], dest_dir: Path, en_title: str = "", de_title: str = "") -> Path:
     """Write EN/DE term pairs to a CSV glossary file named after the project."""
     dest_dir.mkdir(parents=True, exist_ok=True)
     csv_path = dest_dir / f"glossary_{project_id}.csv"
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["EN", "DE"])
+        if en_title or de_title:
+            writer.writerow([f"EPO EN: {en_title}", f"EPO DE: {de_title}"])
+            writer.writerow([])
         writer.writerows(pairs)
     return csv_path
 
@@ -254,7 +258,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     if en_title:
         print(f"EPO title found — extracting terms with DeepSeek...")
         pairs = _llm_extract_terms(en_title, de_title)
-        csv_path = _write_glossary(project_id, pairs, work_folder)
+        csv_path = _write_glossary(project_id, pairs, work_folder, en_title, de_title)
         print(f"Glossary written: {csv_path}  ({len(pairs)} term(s))")
         for en, de in pairs:
             print(f"  {en}  →  {de}")

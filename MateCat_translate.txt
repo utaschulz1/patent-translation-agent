@@ -27,7 +27,7 @@ Step 1 — Find source file
 
 The script needs a file MateCat can actually parse. Two options in order of preference:
 
-XLIFF from XTM — cleanest, preserves all segment structure. XTM can export XLIFF via API (same API used by xtm_xlsx_download_w_API.py, different export format). We'd add a small helper to request XLIFF instead of Excel.
+XLIFF from XTM — cleanest, preserves all segment structure. XTM can export XLIFF via API (same API used by xtm_initial_download.py, different export format). We'd add a small helper to request XLIFF instead of Excel.
 Source DOCX — if it's in the project folder. MateCat handles DOCX natively.
 The XTM bilingual Excel (*_lara.xlsx) won't work — it's an XTM-specific format MateCat won't understand.
 

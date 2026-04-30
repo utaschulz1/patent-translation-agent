@@ -1,5 +1,6 @@
 """
 glossary_compare_revised_translation.py — Verb and noun glossary compliance check.
+No LLM used — only lookup-based lemmatization and truncation matching.
 
 Reads the *_translated_checks.xlsx for the active project, copies ID/EN/DE
 into a new revised_translation_checks.xlsx, then annotates column D with

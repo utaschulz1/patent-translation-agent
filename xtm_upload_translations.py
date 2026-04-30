@@ -32,7 +32,7 @@ import requests
 import websocket as _websocket
 from dotenv import load_dotenv
 
-from xtm_xlsx_download_w_API import (
+from xtm_initial_download import (
     BASE_URL,
     WB_BASE,
     _find_pre_folder,

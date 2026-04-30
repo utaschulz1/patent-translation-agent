@@ -7,7 +7,7 @@ the closest deadline, and runs the full intake pipeline:
   1. Extract XTRF job URL from the "Open Job Manager" anchor
   2. Run xtrf_job_setup: login to XTRF, create folders, download source files,
      extract EPO title and write glossary CSV
-  3. Download the bilingual XTM Excel via the XTM Workbench API directly into
+  3. Download the bilingual XTM Excel and XLF (Xbench paket) via the XTM Workbench API directly into
      the project folder; falls back to copying from the Downloads folder if the
      API download fails; logs XLSX_NOT_FOUND and returns None if neither works
      (workflow will retry on the next run once the file is available)
@@ -49,7 +49,7 @@ from googleapiclient.discovery import build
 
 import project_log
 import xtrf_job_setup
-import xtm_xlsx_download_w_API as xtm_download
+import xtm_initial_download as xtm_download
 
 HERE        = Path(__file__).parent
 DOWNLOADS   = Path(r"C:\Users\utasc\Downloads")
@@ -325,15 +325,33 @@ def run(target_project_id: str | None = None) -> str | None:
         print(f"ERROR: Job setup failed — {e}")
         return None
 
-    # ── Download XTM Excel ────────────────────────────────────────────────────
+    # ── Download XTM Excel + XLIFF ────────────────────────────────────────────
     proj_dir = project_log.project_dir()
     xlsx_path: Path | None = None
 
-    # 1. Try XTM API download directly into project folder
+    # 1. Try XTM API: originals → pre-processing, trimmed xlsx + xliff → project folder
     try:
-        print("Downloading XTM Excel via API...")
-        xlsx_path = xtm_download.run(project_id, dest_folder=proj_dir)
-        print(f"  Downloaded: {xlsx_path.name}")
+        print("Downloading XTM Excel + XLIFF via API...")
+        result = xtm_download.run(project_id)  # dest_folder=None → pre-processing
+        xlsx_orig = result["xlsx"]
+        xliff_paths = result["xliff"]
+
+        xlsx_dest = proj_dir / xlsx_orig.name
+        shutil.copy2(xlsx_orig, xlsx_dest)
+        wb = openpyxl.load_workbook(xlsx_dest)
+        ws = wb.active
+        while ws.max_column > 3:
+            ws.delete_cols(ws.max_column)
+        wb.save(xlsx_dest)
+        xlsx_path = xlsx_dest
+
+        for xlf in xliff_paths:
+            shutil.copy2(xlf, proj_dir / xlf.name)
+
+        print(f"  xlsx original: {xlsx_orig.name} (pre-processing)")
+        print(f"  xlsx trimmed copy: {xlsx_dest.name} (project folder)")
+        for xlf in xliff_paths:
+            print(f"  xliff copy: {xlf.name} (project folder)")
         project_log.log_event(msg_id, "XLSX_DOWNLOADED", detail=str(xlsx_path))
     except Exception as e:
         print(f"  XTM download failed ({e}) — falling back to Downloads folder.")
@@ -342,6 +360,13 @@ def run(target_project_id: str | None = None) -> str | None:
     if xlsx_path is None:
         found = _find_xlsx(project_id)
         if found:
+            try:
+                pre_folder = xtm_download._find_pre_folder(project_id)
+                shutil.copy2(found, pre_folder / found.name)
+                print(f"  Original saved: {found.name} (pre-processing)")
+            except Exception:
+                pass
+
             dest = proj_dir / found.name
             shutil.copy2(found, dest)
             wb = openpyxl.load_workbook(dest)
@@ -356,8 +381,8 @@ def run(target_project_id: str | None = None) -> str | None:
     if xlsx_path is None:
         project_log.log_event(msg_id, "XLSX_NOT_FOUND")
         print(
-            f"WARNING: Could not obtain xlsx for {project_id}.\n"
-            f"  Place it in {proj_dir} and re-run."
+            f"WARNING: Could not obtain xlsx/xlf for {project_id}.\n"
+            f"  Place xlsx and xlf in {proj_dir} and re-run."
         )
         return None
 

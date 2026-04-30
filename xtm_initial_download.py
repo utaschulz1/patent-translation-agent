@@ -382,7 +382,7 @@ def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | li
 def main():
     """CLI entry point: read project_id from argv and call run()."""
     if len(sys.argv) < 2:
-        print("Usage: python xtm_xlsx_download_w_API.py <project_id>")
+        print("Usage: python xtm_initial_download.py <project_id>")
         raise SystemExit(1)
     result = run(sys.argv[1], dest_folder=Path(r"C:\Users\utasc\Downloads"))
     print(f"Excel:  {result['xlsx']}")
