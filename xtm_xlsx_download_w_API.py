@@ -18,6 +18,7 @@ Usage:
 
 import json
 import os
+import zipfile
 import random
 import re
 import string
@@ -39,8 +40,6 @@ BASE_URL = "https://word.welocalize.com/project-manager-gui"
 WB_BASE  = "https://word.welocalize.com/workbench"
 
 _ENV = Path(__file__).parent / ".env"
-
-KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
 
 
 def _load_creds() -> tuple[str, str]:
@@ -193,8 +192,8 @@ def _init_workbench(session: requests.Session, wb_url: str, session_token: str) 
     return csrf_token
 
 
-def _generate_preview(session: requests.Session, session_token: str, csrf_token: str) -> str:
-    """Connect via WebSocket STOMP, request EXCEL_EXTENDED_TABLE generation, return download ticket."""
+def _generate_preview(session: requests.Session, session_token: str, csrf_token: str, preview_type: str = "EXCEL_EXTENDED_TABLE") -> str:
+    """Connect via WebSocket STOMP, request preview generation, return download ticket."""
     server_id = str(random.randint(0, 999)).zfill(3)
     session_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
     ws_url = (
@@ -218,7 +217,7 @@ def _generate_preview(session: requests.Session, session_token: str, csrf_token:
         ws.send(json.dumps(["SUBSCRIBE\nid:sub-0\ndestination:/user/queue/main\n\n\x00"]))
 
         request_id = str(int(time.time() * 1000))
-        body = json.dumps({"requestId": request_id, "previewType": "EXCEL_EXTENDED_TABLE"})
+        body = json.dumps({"requestId": request_id, "previewType": preview_type})
         send_frame = (
             f"SEND\ndestination:/workbench/document/preview/generate\n"
             f"_s:{session_token}\ncontent-length:{len(body)}\n\n{body}\x00"
@@ -226,22 +225,23 @@ def _generate_preview(session: requests.Session, session_token: str, csrf_token:
         ws.send(json.dumps([send_frame]))
 
         ws.settimeout(30)
-        while True:
-            raw = ws.recv()
-            if not raw or raw == "h":
-                continue
-            if raw.startswith("a"):
-                for stomp_msg in json.loads(raw[1:]):
-                    if "PREVIEW_GENERATION_FINISHED" in stomp_msg:
-                        body_str = stomp_msg[stomp_msg.rfind("\n\n") + 2:].rstrip("\x00")
-                        payload = json.loads(body_str).get("payload", {})
-                        if payload.get("resultType") == "SUCCESS":
-                            return payload["downloadTicket"]
-                        raise RuntimeError(f"Preview generation failed: {payload}")
+        try:
+            while True:
+                raw = ws.recv()
+                if not raw or raw == "h":
+                    continue
+                if raw.startswith("a"):
+                    for stomp_msg in json.loads(raw[1:]):
+                        if "PREVIEW_GENERATION_FINISHED" in stomp_msg:
+                            body_str = stomp_msg[stomp_msg.rfind("\n\n") + 2:].rstrip("\x00")
+                            payload = json.loads(body_str).get("payload", {})
+                            if payload.get("resultType") == "SUCCESS":
+                                return payload["downloadTicket"]
+                            raise RuntimeError(f"Preview generation failed: {payload}")
+        except (_websocket.WebSocketConnectionClosedException, _websocket.WebSocketTimeoutException) as e:
+            raise RuntimeError("WebSocket closed before download ticket was received") from e
     finally:
         ws.close()
-
-    raise RuntimeError("WebSocket closed before download ticket was received")
 
 
 def _keepalive(session: requests.Session) -> None:
@@ -293,8 +293,30 @@ def _find_pre_folder(project_id: str) -> Path:
     )
 
 
-def run(project_id: str, dest_folder: Path | None = None) -> Path:
-    """Log in to XTM, locate the task for project_id, and download its bilingual Excel file."""
+XLIFF_EXTENSIONS = {".xlf", ".xliff", ".sdlxliff", ".mqxliff"}
+
+
+def _unpack_xbpkg(xbpkg: Path) -> list[Path]:
+    """Extract XLIFF files from an xbpkg ZIP, delete the package, return extracted paths."""
+    dest = xbpkg.parent
+    xliffs = []
+    with zipfile.ZipFile(xbpkg) as z:
+        members = z.namelist()
+        print(f"  Contents: {members}")
+        for member in members:
+            if Path(member).suffix.lower() in XLIFF_EXTENSIONS:
+                target = dest / Path(member).name
+                target.write_bytes(z.read(member))
+                xliffs.append(target)
+                print(f"  Extracted: {target.name}")
+    if not xliffs:
+        raise RuntimeError(f"No XLIFF files found inside {xbpkg.name}. Contents: {members}")
+    xbpkg.unlink()
+    return xliffs
+
+
+def _setup_session(project_id: str) -> tuple[requests.Session, str, str]:
+    """Login, find task, open workbench. Returns (session, session_token, csrf_token)."""
     username, password = _load_creds()
 
     session = requests.Session()
@@ -320,27 +342,52 @@ def run(project_id: str, dest_folder: Path | None = None) -> Path:
     print(f"  Session token: {session_token[:12]}...")
 
     csrf_token = _init_workbench(session, wb_url, session_token)
-
-    # Brief pause so workbench finishes loading, then keepalive
     time.sleep(3)
     _keepalive(session)
 
-    print("Step 4 — Downloading Excel bilingual file...")
-    ticket = _generate_preview(session, session_token, csrf_token)
+    return session, session_token, csrf_token
+
+
+def _download_preview(
+    session: requests.Session,
+    session_token: str,
+    csrf_token: str,
+    preview_type: str,
+    folder: Path,
+    project_id: str,
+) -> Path:
+    print(f"  Generating preview ({preview_type})...")
+    ticket = _generate_preview(session, session_token, csrf_token, preview_type)
     print(f"  Preview ticket: {ticket}")
-    folder = dest_folder if dest_folder is not None else _find_pre_folder(project_id)
     out_path = _download_excel(session, session_token, ticket, folder, project_id)
     print(f"  Saved: {out_path}")
-
     return out_path
+
+
+def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | list[Path]]:
+    """Login once, download both the bilingual Excel and the XLIFF. Returns dict with both paths."""
+    session, session_token, csrf_token = _setup_session(project_id)
+    folder = dest_folder if dest_folder is not None else _find_pre_folder(project_id)
+
+    print("Step 4 — Downloading bilingual Excel...")
+    xlsx = _download_preview(session, session_token, csrf_token, "EXCEL_EXTENDED_TABLE", folder, project_id)
+
+    print("Step 5 — Downloading XLIFF...")
+    xbpkg = _download_preview(session, session_token, csrf_token, "XBENCH_INTERACTIVE", folder, project_id)
+    xliffs = _unpack_xbpkg(xbpkg)
+
+    return {"xlsx": xlsx, "xliff": xliffs}
 
 
 def main():
     """CLI entry point: read project_id from argv and call run()."""
     if len(sys.argv) < 2:
-        print("Usage: python xtm_workbench.py <project_id>")
+        print("Usage: python xtm_xlsx_download_w_API.py <project_id>")
         raise SystemExit(1)
-    run(sys.argv[1], dest_folder=Path(r"C:\Users\utasc\Downloads"))
+    result = run(sys.argv[1], dest_folder=Path(r"C:\Users\utasc\Downloads"))
+    print(f"Excel:  {result['xlsx']}")
+    for p in result["xliff"]:
+        print(f"XLIFF:  {p}")
 
 
 if __name__ == "__main__":

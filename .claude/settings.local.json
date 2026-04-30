@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.matecat.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/matecat/MateCat/master/public/api/swagger-source.js\")"
+    ]
+  }
+}

@@ -7,8 +7,12 @@ matching XTM segment via the STOMP WebSocket protocol.
 
 Rows 1–3 of the Excel are header rows and are skipped automatically.
 Column A must contain the integer segment ID that matches the XTM unitId.
+Report column written to Excel
 
 Usage:
+    - activate project manually in XTM,
+    - set TEST_SEGMENT_LIMIT to 10-15 since session expire is not solved yet, and START_FROM_SEGMENT_ID to the desired segment ID, the server crashes frequently on hickups, saving and tag issues anyway, so better repeat the script.
+    - then run this script with the project ID as argument:
     python xtm_upload_translations.py <project_id>
     e.g.  python xtm_upload_translations.py AIPX_2604_P0012
 """
@@ -40,16 +44,17 @@ from xtm_xlsx_download_w_API import (
     _find_task,
 )
 
+AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
 KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
-RECONNECT_EVERY    = 15  # reopen WebSocket every N segments to prevent server state buildup
-TEST_SEGMENT_LIMIT: int | None = 10   # set to None to process all segments
-START_FROM_SEGMENT_ID: int = 358     # skip segments with ID below this value
-DEBUG_SOURCE_NODES_LIMIT = 10       # print source nodes for first N segments; set to 0 to disable
+RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~15 ops)
+TEST_SEGMENT_LIMIT: int | None = 15   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
+START_FROM_SEGMENT_ID: int = 837     # skip segments with ID below this value
+DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
 
 
 # ---------------------------------------------------------------------------
 # Claim group task (USERGROUP → INTERNALLINGUIST)
-# ---------------------------------------------------------------------------
+# Doesnt work yet, activate project manually ---------------------------------------------------------------------------
 
 def _claim_group_task(
     session: requests.Session, task: dict, uust: str, project_id: str
@@ -92,7 +97,7 @@ def _claim_group_task(
         return task
 
     # Re-fetch the task list so the updated actorType is visible
-    time.sleep(2)
+    time.sleep(4)
     updated_tasks = _get_tasks(session)
     updated_task = _find_task(updated_tasks, project_id)
     new_actor = updated_task["additionalData"].get("actorType", "?")
@@ -228,7 +233,9 @@ def _write_results_to_excel(path: Path, results: dict[int, str]) -> None:
         unit_id = ws.cell(row=row, column=1).value
         if unit_id is None:
             continue
-        ws.cell(row=row, column=status_col).value = results.get(int(unit_id), "not attempted")
+        uid = int(unit_id)
+        if uid in results:
+            ws.cell(row=row, column=status_col).value = results[uid]
 
     wb.save(path)
     print(f"  Results written to column {status_col} of {path.name}")
@@ -279,6 +286,25 @@ def _parse_stomp_messages(raw: str) -> list[dict]:
 # Tag-aware target node builder
 # ---------------------------------------------------------------------------
 
+def _clean_source_nodes(nodes: list[dict]) -> list[dict]:
+    """Remove fuzzy-match diff markers from a source node list.
+
+    matchesInfo.matches[n].source.nodes contains a DELETION/INSERTION diff when the
+    match is a fuzzy TM hit.  DELETION nodes belong to the old TM entry, not the
+    current segment — they must be removed.  INSERTION nodes are new in the current
+    segment — keep them but strip the diff decoration so downstream code sees clean nodes.
+    """
+    result = []
+    for node in nodes:
+        decs = node.get("decorations", [])
+        if any(d.get("type") == "DELETION" for d in decs):
+            continue
+        clean = dict(node)
+        clean["decorations"] = [d for d in decs if d.get("type") not in ("DELETION", "INSERTION")]
+        result.append(clean)
+    return result
+
+
 def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]:
     """Build target nodes preserving INLINE tags from the source in correct positions.
 
@@ -313,17 +339,26 @@ def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]
         # Trailing-only INLINE (e.g. "text <X/>") — no prefix, tag goes after translation
         return [{"type": "TEXT", "decorations": [], "content": excel_text}, *closing]
 
-    # Strip the paragraph-number prefix from the Excel text (e.g. "[0033]")
+    # Strip the paragraph-number prefix from the Excel text (e.g. "[0033]").
+    # Source nodes may use NBSP ( ) inside the bracket while the Excel text
+    # uses a regular space or no space — build a whitespace-flexible regex so the
+    # comparison succeeds regardless of which Unicode space variant is present.
     text = excel_text
     prefix_stripped = prefix.strip()
-    if prefix_stripped and text.startswith(prefix_stripped):
-        text = text[len(prefix_stripped):].lstrip()
+    if prefix_stripped:
+        _ws_re = re.compile(r"[\s  ]+")
+        _parts = [re.escape(p) for p in _ws_re.split(prefix_stripped) if p]
+        if _parts:
+            _prefix_pat = re.compile(r"[\s ]*".join(_parts))
+            _m = _prefix_pat.match(text)
+            if _m:
+                text = text[_m.end():].lstrip()
 
     nodes: list[dict] = []
     if prefix_stripped:
-        nodes.append({"type": "TEXT", "decorations": [], "content": prefix_stripped + " "})
+        nodes.append({"type": "TEXT", "decorations": [], "content": prefix_stripped})
     nodes.extend(opening)
-    nodes.append({"type": "TEXT", "decorations": [], "content": text})
+    nodes.append({"type": "TEXT", "decorations": [], "content": " " + text})
     nodes.extend(closing)
     return nodes
 
@@ -409,11 +444,6 @@ def _upload_via_stomp(
         ws.send(json.dumps(["SUBSCRIBE\nid:sub-0\ndestination:/user/queue/main\n\n\x00"]))
 
     def _reconnect(current_unit_id: int) -> None:
-        """Close the current WebSocket and open a fresh one, restoring STOMP state.
-
-        Reassigning `ws` here (via nonlocal) is seen by all other inner functions
-        because they read `ws` from the enclosing scope at call time.
-        """
         nonlocal ws, last_keepalive
         print(f"  [{current_unit_id}/{segments[-1][0]}] Reconnecting WebSocket...")
         try:
@@ -483,16 +513,18 @@ def _upload_via_stomp(
         last_id = segments[-1][0]
         total = len(segments)
         consecutive_errors = 0
-        _MAX_CONSECUTIVE_ERRORS = 10  # abort early if server keeps rejecting every save
+        _MAX_CONSECUTIVE_ERRORS = 2  # abort early if server keeps rejecting every save
         _debug_printed = 0
 
         for i, (unit_id, text) in enumerate(segments):
+            # --- Reconnect (periodic session refresh) ---
             if i > 0 and i % RECONNECT_EVERY == 0:
                 _reconnect(unit_id)
 
             is_last = (i == total - 1)
             next_uid = segments[i + 1][0] if not is_last else None
 
+            # --- Skip empty segments ---
             if not text:
                 results[unit_id] = "skipped"
                 print(f"  [{unit_id}/{last_id}] skipped (empty)")
@@ -514,15 +546,48 @@ def _upload_via_stomp(
             preview = text[:70] + ("…" if len(text) > 70 else "")
 
             try:
+                # --- Classify match type (ICE / 100% / repetition / fuzzy) ---
                 tu_payload = tu_updates.get(unit_id, {})
-                source_nodes = tu_payload.get("source", {}).get("nodes", [])
-                if not source_nodes:
-                    _matches = tu_payload.get("matchesInfo", {}).get("matches", [])
-                    if _matches:
-                        source_nodes = _matches[0].get("source", {}).get("nodes", [])
-                have_source = bool(source_nodes)
-                target_nodes = _build_target_nodes(source_nodes, text)
+                _best_match = (tu_payload.get("matchesInfo", {}).get("matches") or [{}])[0]
+                _match_quality = _best_match.get("matchQuality", "")
+                # A non-empty quality that is not "100%" means a genuine fuzzy match.
+                # Guard every auto-confirm check so fuzzy quality always wins.
+                _is_fuzzy = bool(_match_quality) and _match_quality != "100%"
+                _is_ice = _best_match.get("iceMatch", False) and not _is_fuzzy
+                _is_rep = (
+                    _best_match.get("repetitionType") == "INTERNAL" and not _is_fuzzy
+                )
+                _is_100 = (
+                    _match_quality == "100%"
+                    and _best_match.get("matchType") != "MACHINE_TRANSLATION"
+                )
+                auto_confirm_label = (
+                    "ICE" if _is_ice else
+                    "repetition" if _is_rep else
+                    "100%" if _is_100 else
+                    None
+                )
 
+                # --- Build target nodes ---
+                # ICE / 100% / repetition → use XTM's pre-built TM target directly.
+                # Fuzzy or no match       → reconstruct target from source tags + Excel text.
+                if AUTO_CONFIRM_MATCHES and auto_confirm_label:
+                    target_nodes = _best_match.get("target", {}).get("nodes", [])
+                    have_source = bool(target_nodes)
+                    source_nodes = []
+                else:
+                    auto_confirm_label = None
+                    source_nodes = tu_payload.get("source", {}).get("nodes", [])
+                    if not source_nodes:
+                        _matches = tu_payload.get("matchesInfo", {}).get("matches", [])
+                        if _matches:
+                            source_nodes = _clean_source_nodes(
+                                _matches[0].get("source", {}).get("nodes", [])
+                            )
+                    have_source = bool(source_nodes)
+                    target_nodes = _build_target_nodes(source_nodes, text)
+
+                # --- Debug dump (controlled by DEBUG_SOURCE_NODES_LIMIT) ---
                 if DEBUG_SOURCE_NODES_LIMIT and _debug_printed < DEBUG_SOURCE_NODES_LIMIT:
                     raw_tu = tu_updates.get(unit_id)
                     print(f"\n  [DEBUG unit {unit_id}] tu_updates entry: {json.dumps(raw_tu, ensure_ascii=False) if raw_tu is not None else 'NOT IN CACHE'}")
@@ -531,6 +596,7 @@ def _upload_via_stomp(
                 elif not have_source:
                     print(f"  [{unit_id}/{last_id}] WARNING: source nodes not received — saving as plain text (tags may be lost)")
 
+                # --- Send save-unit + activate next ---
                 ts_ms = int(time.time() * 1000)
                 send("/workbench/save-unit", {
                     "requestId": str(ts_ms),
@@ -542,9 +608,8 @@ def _upload_via_stomp(
                         "unitId": unit_id,
                     }],
                 })
-
-                # Immediately activate next segment — XTM processes the save only after
-                # seeing activate (mirrors browser: confirm button + click next = hourglass).
+                # XTM processes the save only after seeing activate
+                # (mirrors browser: confirm button + click next = hourglass).
                 if next_uid is not None:
                     send("/workbench/trans-unit/activate", {
                         "requestId": _ts(),
@@ -553,11 +618,11 @@ def _upload_via_stomp(
                         "deactivatedTransUnitId": unit_id,
                     })
 
-                # Drain until both SAVE_RESPONSE for this segment and TRANS_UNIT_UPDATED
-                # for the next are in hand — both arrive shortly after the activate above.
+                # --- Drain WebSocket responses ---
+                # Wait for SAVE_RESPONSE (this segment) and TRANS_UNIT_UPDATED (next segment).
                 save_resp = None
                 next_tu_ready = (next_uid is None)
-                deadline = time.time() + 30.0
+                deadline = time.time() + 9.0
                 while time.time() < deadline and not (save_resp is not None and next_tu_ready):
                     try:
                         raw = ws.recv()
@@ -591,6 +656,7 @@ def _upload_via_stomp(
                 if not next_tu_ready:
                     print(f"  [{unit_id}/{last_id}] Warning: no TRANS_UNIT_UPDATED for segment {next_uid}, tags may be missing")
 
+                # --- Record result ---
                 result_type = save_resp.get("result", {}).get("type", "UNKNOWN") if save_resp else "TIMEOUT"
                 if result_type != "SUCCESS":
                     reason = save_resp.get("result", {}).get("message", result_type) if save_resp else "timeout after 30s"
@@ -609,7 +675,10 @@ def _upload_via_stomp(
                         break
                 else:
                     consecutive_errors = 0
-                    if have_source:
+                    if auto_confirm_label:
+                        results[unit_id] = f"confirmed ({auto_confirm_label})"
+                        print(f"  [{unit_id}/{last_id}] confirmed ({auto_confirm_label})  ({word_count}w)")
+                    elif have_source:
                         results[unit_id] = "saved"
                         print(f"  [{unit_id}/{last_id}] {preview}  ({word_count}w)")
                     else:
@@ -624,6 +693,7 @@ def _upload_via_stomp(
                 break
 
             maybe_keepalive()
+            time.sleep(4)
 
         return results
 
@@ -696,6 +766,7 @@ def run(project_id: str) -> None:
     _write_results_to_excel(excel_path, results)
 
     saved         = sum(1 for s in results.values() if s == "saved")
+    confirmed     = sum(1 for s in results.values() if s.startswith("confirmed"))
     skipped       = sum(1 for s in results.values() if s == "skipped")
     not_attempted = sum(1 for s in results.values() if s == "not attempted")
     failed        = {uid: s for uid, s in results.items() if s.startswith("failed")}
@@ -703,6 +774,7 @@ def run(project_id: str) -> None:
     print()
     print("=== Upload summary ===")
     print(f"  Saved:         {saved}")
+    print(f"  Confirmed:     {confirmed}  (ICE / 100% / repetition)")
     print(f"  Skipped:       {skipped}  (empty translation)")
     if not_attempted:
         print(f"  Not attempted: {not_attempted}  (connection lost before attempt)")

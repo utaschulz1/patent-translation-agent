@@ -1,0 +1,63 @@
+How the MateCat API works
+Auth: single header x-matecat-key: {APIkey}-{APIsecret} on every request.
+
+Core flow for automated translation:
+
+
+POST /api/v1/new           → create project (returns id_project + project_pass)
+  poll creation_status     → GET /api/v3/projects/{id}/{pass}/creation_status
+  poll analysis/status     → GET /api/v3/projects/{id}/{pass}/analysis/status  (wait for "DONE")
+GET /api/v3/translation/{id_job}/{pass}  → download translated file (binary)
+Profiles / templates: The API has full project template support (GET/POST /api/v3/project-template). You can create a template once with your Lara engine, TM keys, QA model etc., then reference it by ID when creating projects — equivalent to selecting a profile manually. You also just set everything inline in POST /api/v1/new.
+
+Lara specifically: There's a dedicated lara_glossaries parameter in POST /api/v1/new (takes ["gls_xyz123"]), and mt_engine takes the Lara engine ID (which varies per account — must query /api/v3/engines/list with your key to find it).
+
+TM adaptation: This is the private_tm_key / private_tm_key_json parameter — your MateCat TM key(s), which gives you the adaptive effect you get in the GUI for free.
+
+Plan for matecat_translate.py
+Config block at top:
+
+
+MATECAT_MT_ENGINE_ID = None   # fill after querying /api/v3/engines/list
+MATECAT_TM_KEY       = None   # your MateCat private TM key (optional)
+MATECAT_TEMPLATE_ID  = None   # project template ID (optional)
+SRC_LANG = "en-US"
+TGT_LANG = "de-DE"
+Step 1 — Find source file
+
+The script needs a file MateCat can actually parse. Two options in order of preference:
+
+XLIFF from XTM — cleanest, preserves all segment structure. XTM can export XLIFF via API (same API used by xtm_xlsx_download_w_API.py, different export format). We'd add a small helper to request XLIFF instead of Excel.
+Source DOCX — if it's in the project folder. MateCat handles DOCX natively.
+The XTM bilingual Excel (*_lara.xlsx) won't work — it's an XTM-specific format MateCat won't understand.
+
+Step 2 — Create project
+
+
+POST /api/v1/new  (multipart/form-data)
+  files[]              = source file
+  project_name         = project_id
+  source_lang          = "en-US"
+  target_lang          = "de-DE"
+  mt_engine            = MATECAT_MT_ENGINE_ID
+  private_tm_key       = MATECAT_TM_KEY  (or private_tm_key_json for penalty control)
+  pretranslate_100     = 1
+  lara_glossaries      = []  (empty on round 1 — glossary doesn't exist yet)
+Step 3 — Poll until ready
+
+Poll creation_status every 3s until status indicates the project is built
+Poll analysis/status every 5s until status == "DONE"
+Extract id_job + password from the jobs array in the status response
+Step 4 — Download translation
+
+
+GET /api/v3/translation/{id_job}/{password}  → binary file
+Save to project folder as *_matecat_round1.*
+
+Step 5 — Save project record
+Write id_project, project_pass, id_job, job_password to matecat_projects.json (same pattern as lara_glossaries.json) — needed if you want to re-download or check status later.
+
+Two questions to resolve once you have the API key
+Lara engine ID: run a one-liner against /api/v3/engines/list — I'll include a small helper in the script that prints your available engines on first run so you can fill in MATECAT_MT_ENGINE_ID.
+
+Source file format: do you have a way to get the XLIFF out of XTM, or should we use the source DOCX from the project folder? The XLIFF route is cleaner because it maps 1:1 to segments; DOCX re-segmentation by MateCat might not align with what XTM has.
