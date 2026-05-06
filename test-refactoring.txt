@@ -1,0 +1,36 @@
+After the refactoring, run these in order — each one builds on the previous:
+
+1. Dry-read of project_log context
+After a real job run, open project_log.json and confirm gmail_msg_id is saved alongside project_id and project_folder.
+
+2. Re-run get_XTRF_link.py on an already-processed email
+It should skip the email (state is JOB_FINISHED_SUCCESSFULLY) and return None — confirms the log-state guard still works after the refactor.
+
+3. Run the full workflow on a new job email (step 3 path)
+Check:
+
+Correct XTRF URL extracted from the email
+xtrf_job_setup creates both the OneDrive folder and the projects/ folder
+xtm_initial_download saves xlsx + xlf originals in pre-processing/
+Trimmed xlsx (columns A–C only) and xlf copy land in projects/<project_id>/
+project_log.json shows events LINK_EXTRACTED → JOB_SETUP_OK → XLSX_DOWNLOADED → JOB_FINISHED_SUCCESSFULLY, all under the same msg_id
+4. Simulate XTM download failure (step 3, fallback path)
+Temporarily break the XTM credentials or disconnect from the internet, then run on a new email with an xlsx already in Downloads/.
+Check:
+
+Falls back to the Downloads file
+Original is copied to pre-processing/
+Trimmed copy goes to projects/<project_id>/
+Log shows XLSX_FOUND, not XLSX_DOWNLOADED
+
+5. Run the manual URL path (--manual, step 4)
+Paste a real XTRF job URL when prompted.
+Check:
+
+xtrf_job_setup runs correctly
+xtm_initial_download runs correctly
+No Gmail-related code is invoked, no crash on missing msg_id
+
+6. Re-run workflow on same project (idempotency)
+Run step 3 again for a project already marked JOB_FINISHED_SUCCESSFULLY.
+Check: skipped cleanly, nothing overwritten.

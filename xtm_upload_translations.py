@@ -47,8 +47,8 @@ from xtm_initial_download import (
 AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
 KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
 RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~15 ops)
-TEST_SEGMENT_LIMIT: int | None = 15   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
-START_FROM_SEGMENT_ID: int = 837     # skip segments with ID below this value
+TEST_SEGMENT_LIMIT: int | None = 12   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
+START_FROM_SEGMENT_ID: int = 3     # skip segments with ID below this value
 DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
 
 
@@ -549,7 +549,9 @@ def _upload_via_stomp(
                 # --- Classify match type (ICE / 100% / repetition / fuzzy) ---
                 tu_payload = tu_updates.get(unit_id, {})
                 _best_match = (tu_payload.get("matchesInfo", {}).get("matches") or [{}])[0]
-                _match_quality = _best_match.get("matchQuality", "")
+                # `or ""` normalises JSON null → "" so the fuzzy guard works even
+                # when XTM sends "matchQuality": null for untranslated repetitions.
+                _match_quality = _best_match.get("matchQuality") or ""
                 # A non-empty quality that is not "100%" means a genuine fuzzy match.
                 # Guard every auto-confirm check so fuzzy quality always wins.
                 _is_fuzzy = bool(_match_quality) and _match_quality != "100%"
@@ -571,9 +573,17 @@ def _upload_via_stomp(
                 # --- Build target nodes ---
                 # ICE / 100% / repetition → use XTM's pre-built TM target directly.
                 # Fuzzy or no match       → reconstruct target from source tags + Excel text.
-                if AUTO_CONFIRM_MATCHES and auto_confirm_label:
+                # If the TM target is empty (untranslated repetition backed by a fuzzy
+                # TM hit), fall through to the Excel path rather than saving empty nodes.
+                _use_tm = AUTO_CONFIRM_MATCHES and auto_confirm_label
+                if _use_tm:
                     target_nodes = _best_match.get("target", {}).get("nodes", [])
-                    have_source = bool(target_nodes)
+                    if not target_nodes:
+                        _use_tm = False
+                        auto_confirm_label = None
+
+                if _use_tm:
+                    have_source = True
                     source_nodes = []
                 else:
                     auto_confirm_label = None

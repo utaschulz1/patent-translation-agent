@@ -2,7 +2,7 @@
 glossary_compare_revised_translation.py — Verb and noun glossary compliance check.
 No LLM used — only lookup-based lemmatization and truncation matching.
 
-Reads the *_translated_checks.xlsx for the active project, copies ID/EN/DE
+Reads the *_translated.xlsx for the active project, copies ID/EN/DE
 into a new revised_translation_checks.xlsx, then annotates column D with
 glossary mismatches found via lookup-based lemmatization (verbs) and
 truncation matching (nouns).
@@ -172,16 +172,14 @@ for en, de in glossary_noun_lookup.items():
 # ── Source xlsx ───────────────────────────────────────────────────────────────
 
 for pattern in [
-    str(proj_dir / "*_translated_checks.xlsx"),
-    str(proj_dir / "*_checks.xlsx"),
-    str(proj_dir / "*_translated.xlsx"),
+    str(proj_dir / "*_translated.xlsx")
 ]:
     src_files = [f for f in glob.glob(pattern) if not Path(f).name.startswith("~$")]
     if src_files:
         break
 
 if not src_files:
-    raise FileNotFoundError(f"No translated_checks xlsx found in {proj_dir}")
+    raise FileNotFoundError(f"No _translated.xlsx found in {proj_dir}")
 
 src_path = Path(src_files[0])
 print(f"\nSource: {src_path.name}")

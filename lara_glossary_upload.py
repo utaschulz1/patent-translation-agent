@@ -9,7 +9,7 @@
 #   2. Deletes any existing Lara glossary     (Pro plan: max 1)
 #   3. Creates a new glossary named after the project
 #   4. Uploads a clean en/de CSV
-#   5. Writes LARA_GLOSSARY_IDS=<id> to .env
+#   5. Writes LARA_GLOSSARY_IDS=<id> to lara_glossaries.json for lara_translate.py to use
 #
 # SETUP
 #   LARA_ACCESS_KEY_ID and LARA_ACCESS_KEY_SECRET must be in .env

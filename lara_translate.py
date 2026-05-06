@@ -66,18 +66,25 @@ memory_ids = _parse_ids("LARA_MEMORY_IDS")   # Team plan required for adapt_to
 
 _glossaries_file = Path(__file__).parent / "lara_glossaries.json"
 _glossaries_registry: dict = json.loads(_glossaries_file.read_text(encoding="utf-8")) if _glossaries_file.exists() else {}
-glossary_ids = list(_glossaries_registry.values())
 
 if memory_ids:
     print(f"TM adaptation: {memory_ids}")
-if glossary_ids:
-    print(f"Glossaries:    {glossary_ids}  ({', '.join(_glossaries_registry.keys())})")
 
 # ============================================================
 # Load Excel
 # ============================================================
 
 proj_dir = _pdir()
+
+_glossary_key = f"glossary_{proj_dir.name}"
+if _glossary_key in _glossaries_registry:
+    glossary_ids = [_glossaries_registry[_glossary_key]]
+    print(f"Glossary:      {glossary_ids[0]}  ({_glossary_key})")
+elif _glossaries_registry:
+    print(f"No glossary found for project {proj_dir.name!r} — none will be used.")
+    glossary_ids = []
+else:
+    glossary_ids = []
 xlsx_files = glob.glob(str(proj_dir / "*.xlsx"))
 xlsx_files = [f for f in xlsx_files if not os.path.basename(f).startswith("~$") and not f.endswith("_translated.xlsx")]
 

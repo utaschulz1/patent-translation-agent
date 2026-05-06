@@ -22,6 +22,7 @@ from pathlib import Path
 
 import project_log
 import xtrf_job_setup
+import xtm_initial_download as xtm_download
 
 HERE = Path(__file__).parent
 
@@ -34,16 +35,22 @@ def _run(script: Path, *args) -> None:
 
 def step3(target_project_id: str | None = None) -> str:
     import get_XTRF_link
-    project_id = get_XTRF_link.run(target_project_id=target_project_id)
-    if not project_id:
-        raise RuntimeError("Step 3: no project returned from email intake.")
+    extracted = get_XTRF_link.run(target_project_id=target_project_id)
+    if not extracted:
+        raise RuntimeError("Step 3: no project found in email intake.")
+    xtrf_url, project_id, msg_id = extracted
+    xtrf_job_setup.run(xtrf_url, project_id_override=project_id)
+    if not xtm_download.run_workflow(project_id, msg_id=msg_id):
+        raise RuntimeError(f"Step 3: could not obtain xlsx/xlf for {project_id}.")
     return project_id
 
 
 def step4() -> str:
     job = input("Step 4 — Paste XTRF job URL or ID: ").strip()
     result = xtrf_job_setup.run(job)
-    return result["project_id"]
+    project_id = result["project_id"]
+    xtm_download.run_workflow(project_id)
+    return project_id
 
 
 def step5():

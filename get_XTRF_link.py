@@ -1,24 +1,12 @@
 """
-get_XTRF_link.py — Step 3: Gmail intake → XTRF job setup → XTM Excel download
+get_XTRF_link.py — Step 3a: Gmail intake → extract XTRF job URL and project ID
 
 Reads the ComunicaDK/TODO label in Gmail, selects the unprocessed email with
-the closest deadline, and runs the full intake pipeline:
-
-  1. Extract XTRF job URL from the "Open Job Manager" anchor
-  2. Run xtrf_job_setup: login to XTRF, create folders, download source files,
-     extract EPO title and write glossary CSV
-  3. Download the bilingual XTM Excel and XLF (Xbench paket) via the XTM Workbench API directly into
-     the project folder; falls back to copying from the Downloads folder if the
-     API download fails; logs XLSX_NOT_FOUND and returns None if neither works
-     (workflow will retry on the next run once the file is available)
+the closest deadline, and extracts the XTRF job link and project ID from it.
 
 State logged to project_log.json per Gmail message ID:
-  LINK_EXTRACTED          XTRF URL found in email
-  JOB_SETUP_OK / FAILED   XTRF job setup result
-  XLSX_DOWNLOADED         XTM API download succeeded
-  XLSX_FOUND              fallback copy from Downloads succeeded
-  XLSX_NOT_FOUND          no xlsx available — needs retry
-  JOB_FINISHED_SUCCESSFULLY  all steps completed, email will be skipped next run
+  LINK_EXTRACTED   XTRF URL found and returned
+  PARSE_FAILED     could not extract project ID or XTRF URL
 
 FIRST-TIME SETUP
   1. Go to https://console.cloud.google.com/
@@ -30,14 +18,8 @@ FIRST-TIME SETUP
 """
 
 import base64
-import glob
-import os
 import re
-import shutil
 from datetime import datetime
-
-import openpyxl
-from email import message_from_bytes
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -48,11 +30,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 import project_log
-import xtrf_job_setup
-import xtm_initial_download as xtm_download
 
 HERE        = Path(__file__).parent
-DOWNLOADS   = Path(r"C:\Users\utasc\Downloads")
 GMAIL_LABEL = "ComunicaDK/TODO"
 SCOPES      = ["https://www.googleapis.com/auth/gmail.readonly"]
 CREDS_FILE  = HERE / "gmail_credentials.json"
@@ -202,24 +181,16 @@ def _parse_deadline(html_body: str) -> datetime | None:
     return None
 
 
-# ── Downloads lookup ──────────────────────────────────────────────────────────
-
-def _find_xlsx(project_id: str) -> Path | None:
-    matches = sorted(
-        glob.glob(str(DOWNLOADS / f"{project_id}*.xlsx")),
-        key=os.path.getmtime,
-        reverse=True,
-    )
-    return Path(matches[0]) if matches else None
-
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def run(target_project_id: str | None = None) -> str | None:
+def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
     """
-    Process the oldest unhandled email in ComunicaDK/TODO.
+    Find the oldest unhandled email in ComunicaDK/TODO, extract the XTRF job
+    URL and project ID from it.
+
     If target_project_id is given, only the email for that project is processed.
-    Returns project_id on success, None if nothing to do or on failure.
+    Returns (xtrf_url, project_id, msg_id) on success, None if nothing to do or
+    on failure.
     """
     service = _get_service()
     label_id = _get_label_id(service, GMAIL_LABEL)
@@ -315,80 +286,7 @@ def run(target_project_id: str | None = None) -> str | None:
     project_log.log_event(msg_id, "LINK_EXTRACTED", detail=xtrf_url)
     print(f"XTRF URL: {xtrf_url}")
 
-    # ── Step 4: XTRF job setup ────────────────────────────────────────────────
-    try:
-        setup_result = xtrf_job_setup.run(xtrf_url, project_id_override=project_id)
-        project_log.log_event(msg_id, "JOB_SETUP_OK", detail=setup_result["project_folder"])
-        print(f"Job setup complete → {setup_result['project_folder']}")
-    except Exception as e:
-        project_log.log_event(msg_id, "JOB_SETUP_FAILED", detail=str(e))
-        print(f"ERROR: Job setup failed — {e}")
-        return None
-
-    # ── Download XTM Excel + XLIFF ────────────────────────────────────────────
-    proj_dir = project_log.project_dir()
-    xlsx_path: Path | None = None
-
-    # 1. Try XTM API: originals → pre-processing, trimmed xlsx + xliff → project folder
-    try:
-        print("Downloading XTM Excel + XLIFF via API...")
-        result = xtm_download.run(project_id)  # dest_folder=None → pre-processing
-        xlsx_orig = result["xlsx"]
-        xliff_paths = result["xliff"]
-
-        xlsx_dest = proj_dir / xlsx_orig.name
-        shutil.copy2(xlsx_orig, xlsx_dest)
-        wb = openpyxl.load_workbook(xlsx_dest)
-        ws = wb.active
-        while ws.max_column > 3:
-            ws.delete_cols(ws.max_column)
-        wb.save(xlsx_dest)
-        xlsx_path = xlsx_dest
-
-        for xlf in xliff_paths:
-            shutil.copy2(xlf, proj_dir / xlf.name)
-
-        print(f"  xlsx original: {xlsx_orig.name} (pre-processing)")
-        print(f"  xlsx trimmed copy: {xlsx_dest.name} (project folder)")
-        for xlf in xliff_paths:
-            print(f"  xliff copy: {xlf.name} (project folder)")
-        project_log.log_event(msg_id, "XLSX_DOWNLOADED", detail=str(xlsx_path))
-    except Exception as e:
-        print(f"  XTM download failed ({e}) — falling back to Downloads folder.")
-
-    # 2. Fall back to pre-downloaded file in Downloads
-    if xlsx_path is None:
-        found = _find_xlsx(project_id)
-        if found:
-            try:
-                pre_folder = xtm_download._find_pre_folder(project_id)
-                shutil.copy2(found, pre_folder / found.name)
-                print(f"  Original saved: {found.name} (pre-processing)")
-            except Exception:
-                pass
-
-            dest = proj_dir / found.name
-            shutil.copy2(found, dest)
-            wb = openpyxl.load_workbook(dest)
-            ws = wb.active
-            while ws.max_column > 3:
-                ws.delete_cols(ws.max_column)
-            wb.save(dest)
-            xlsx_path = dest
-            print(f"  Copied from Downloads: {found.name}")
-            project_log.log_event(msg_id, "XLSX_FOUND", detail=str(xlsx_path))
-
-    if xlsx_path is None:
-        project_log.log_event(msg_id, "XLSX_NOT_FOUND")
-        print(
-            f"WARNING: Could not obtain xlsx/xlf for {project_id}.\n"
-            f"  Place xlsx and xlf in {proj_dir} and re-run."
-        )
-        return None
-
-    project_log.log_event(msg_id, "JOB_FINISHED_SUCCESSFULLY", detail=project_id)
-    return project_id
-
+    return xtrf_url, project_id, msg_id
 
 
 if __name__ == "__main__":

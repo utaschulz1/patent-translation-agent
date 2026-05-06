@@ -16,8 +16,10 @@ Usage:
     e.g.  python xtm_workbench.py RTC_2604_P0732
 """
 
+import glob
 import json
 import os
+import shutil
 import zipfile
 import random
 import re
@@ -28,12 +30,15 @@ import uuid
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-
+import openpyxl
 import requests
 import websocket as _websocket
 from dotenv import load_dotenv
 
+import project_log
 from config import WORK_DIR
+
+DOWNLOADS = Path(r"C:\Users\utasc\Downloads")
 
 
 BASE_URL = "https://word.welocalize.com/project-manager-gui"
@@ -377,6 +382,90 @@ def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | li
     xliffs = _unpack_xbpkg(xbpkg)
 
     return {"xlsx": xlsx, "xliff": xliffs}
+
+
+def _find_xlsx(project_id: str) -> Path | None:
+    """Return the most recently modified xlsx in Downloads matching project_id, or None."""
+    matches = sorted(
+        glob.glob(str(DOWNLOADS / f"{project_id}*.xlsx")),
+        key=os.path.getmtime,
+        reverse=True,
+    )
+    return Path(matches[0]) if matches else None
+
+
+def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
+    """Download originals to pre-processing, copy trimmed xlsx + xliff to project folder.
+
+    msg_id: Gmail message ID used to write log events; pass None for the manual path.
+    Returns True on success, False if no files could be obtained.
+    """
+    proj_dir = project_log.project_dir()
+    xlsx_path: Path | None = None
+
+    def _log(state, detail=None):
+        if msg_id:
+            project_log.log_event(msg_id, state, detail=detail)
+
+    # 1. Try XTM API: originals → pre-processing, trimmed xlsx + xliff → project folder
+    try:
+        print("Downloading XTM Excel + XLIFF via API...")
+        result = run(project_id)  # dest_folder=None → _find_pre_folder → pre-processing
+        xlsx_orig = result["xlsx"]
+        xliff_paths = result["xliff"]
+
+        xlsx_dest = proj_dir / xlsx_orig.name
+        shutil.copy2(xlsx_orig, xlsx_dest)
+        wb = openpyxl.load_workbook(xlsx_dest)
+        ws = wb.active
+        while ws.max_column > 3:
+            ws.delete_cols(ws.max_column)
+        wb.save(xlsx_dest)
+        xlsx_path = xlsx_dest
+
+        for xlf in xliff_paths:
+            shutil.copy2(xlf, proj_dir / xlf.name)
+
+        print(f"  xlsx original: {xlsx_orig.name} (pre-processing)")
+        print(f"  xlsx trimmed copy: {xlsx_dest.name} (project folder)")
+        for xlf in xliff_paths:
+            print(f"  xliff copy: {xlf.name} (project folder)")
+        _log("XLSX_DOWNLOADED", detail=str(xlsx_path))
+    except Exception as e:
+        print(f"  XTM download failed ({e}) — falling back to Downloads folder.")
+
+    # 2. Fall back to pre-downloaded xlsx in Downloads (no xliff in this path)
+    if xlsx_path is None:
+        found = _find_xlsx(project_id)
+        if found:
+            try:
+                pre_folder = _find_pre_folder(project_id)
+                shutil.copy2(found, pre_folder / found.name)
+                print(f"  Original saved: {found.name} (pre-processing)")
+            except Exception:
+                pass
+
+            dest = proj_dir / found.name
+            shutil.copy2(found, dest)
+            wb = openpyxl.load_workbook(dest)
+            ws = wb.active
+            while ws.max_column > 3:
+                ws.delete_cols(ws.max_column)
+            wb.save(dest)
+            xlsx_path = dest
+            print(f"  Copied from Downloads: {found.name}")
+            _log("XLSX_FOUND", detail=str(xlsx_path))
+
+    if xlsx_path is None:
+        _log("XLSX_NOT_FOUND")
+        print(
+            f"WARNING: Could not obtain xlsx/xlf for {project_id}.\n"
+            f"  Place xlsx and xlf in {proj_dir} and re-run."
+        )
+        return False
+
+    _log("JOB_FINISHED_SUCCESSFULLY", detail=project_id)
+    return True
 
 
 def main():
