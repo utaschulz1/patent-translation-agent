@@ -19,6 +19,21 @@ from linter import (
     plurality_not_transferred,
     beide_ambiguous,
     preposition_contraction,
+    betraegt_stative,
+    same_selbe,
+    same_gleich_missing,
+    comprise_umfassen,
+    vielzahl_plurality,
+    folgendes_umfasst,
+    folgendes_konfiguriert,
+    abbreviation_not_in_source,
+    jeweilig_not_respective,
+    german_quotation_marks,
+    patent_number_decimal,
+    acronym_in_compound,
+    hyphen_in_long_compound,
+    durch_verwendung,
+    schritt_zum,
 )
 
 NBSP = " "  # non-breaking space (Alt+0160)
@@ -414,3 +429,464 @@ class TestPrepositionContraction:
         result = preposition_contraction("", "Das ist im Wesentlichen im Gehäuse")
         assert result is not None
         assert '"im"' in result
+
+
+# ── betraegt_stative ──────────────────────────────────────────────────────────
+
+class TestBetraegt:
+    @pytest.mark.parametrize("word", ["beträgt", "Beträgt", "BETRÄGT", "betragen", "Betragen"])
+    def test_forms_flagged(self, word):
+        result = betraegt_stative("", f"der Wert {word} 5 mm")
+        assert result is not None
+        assert word.lower() in result.lower()
+
+    def test_message_contains_hint(self):
+        result = betraegt_stative("", "die Länge beträgt 10 mm")
+        assert "beträgt = ist" in result
+
+    def test_no_match(self):
+        assert betraegt_stative("", "die Länge ist 10 mm") is None
+
+    def test_source_ignored(self):
+        assert betraegt_stative("the length amounts to 10 mm", "die Länge ist 10 mm") is None
+
+
+# ── same_selbe ────────────────────────────────────────────────────────────────
+
+class TestSameSelbe:
+    @pytest.mark.parametrize("selbe_word", [
+        "dieselbe", "dieselben",
+        "derselbe", "derselben",
+        "dasselbe",
+        "demselben", "denselben", "desselben",
+    ])
+    def test_selbe_forms_flagged(self, selbe_word):
+        result = same_selbe("a same polarization", f"{selbe_word} Polarisation")
+        assert result is not None
+        assert selbe_word in result
+
+    def test_real_world_example(self):
+        result = same_selbe(
+            "the first light stream and the second light stream have a same polarization",
+            "der erste Lichtstrom und der zweite Lichtstrom dieselbe Polarisation aufweisen",
+        )
+        assert result is not None
+        assert "gleiche" in result
+        assert "article" in result
+
+    def test_the_same_triggers(self):
+        assert same_selbe("the same method", "dasselbe Verfahren") is not None
+
+    def test_bare_same_triggers(self):
+        assert same_selbe("same direction", "dieselbe Richtung") is not None
+
+    def test_case_insensitive_source(self):
+        assert same_selbe("A Same polarization", "dieselbe Polarisation") is not None
+
+    def test_case_insensitive_target(self):
+        assert same_selbe("a same polarization", "Dieselbe Polarisation") is not None
+
+    def test_correct_translation_not_flagged(self):
+        assert same_selbe(
+            "the first and second streams have a same polarization",
+            "der erste und zweite Strom eine gleiche Polarisation aufweisen",
+        ) is None
+
+    def test_no_same_in_source_not_flagged(self):
+        # "dieselbe" in target but no "same" in source → no flag
+        assert same_selbe("the polarization", "dieselbe Polarisation") is None
+
+    def test_message_contains_hint(self):
+        result = same_selbe("a same polarization", "dieselbe Polarisation")
+        assert result is not None
+        assert "gleiche" in result
+        assert "article" in result
+
+    def test_no_same_in_source_selbe_not_flagged(self):
+        # "dieselbe" in target without "same" in source → no flag (by design)
+        assert same_selbe("the polarization", "dieselbe Polarisation") is None
+
+
+# ── same_gleich_missing ───────────────────────────────────────────────────────
+
+class TestSameGleichMissing:
+    def test_same_in_source_gleich_missing(self):
+        result = same_gleich_missing(
+            "the first and second streams have a same polarization",
+            "der erste und zweite Strom dieselbe Polarisation aufweisen",
+        )
+        assert result is not None
+        assert '"gleich"' in result
+
+    def test_same_in_source_gleich_present(self):
+        assert same_gleich_missing(
+            "the first and second streams have a same polarization",
+            "der erste und zweite Strom eine gleiche Polarisation aufweisen",
+        ) is None
+
+    def test_gleich_inflected_forms_accepted(self):
+        for form in ("gleiche", "gleichen", "gleichem", "gleicher", "gleiches"):
+            assert same_gleich_missing("a same value", f"einen {form} Wert") is None
+
+    def test_no_same_in_source_not_flagged(self):
+        assert same_gleich_missing("the value", "einen gleichen Wert") is None
+
+    def test_case_insensitive_source(self):
+        assert same_gleich_missing("A Same value", "einen anderen Wert") is not None
+
+    def test_both_checks_fire_for_selbe_translation(self):
+        # "same → dieselbe" triggers same_selbe (wrong word) AND same_gleich_missing
+        src = "a same polarization"
+        tgt = "dieselbe Polarisation"
+        assert same_selbe(src, tgt) is not None
+        assert same_gleich_missing(src, tgt) is not None
+
+
+# ── comprise_umfassen ─────────────────────────────────────────────────────────
+
+class TestCompriseUmfassen:
+    @pytest.mark.parametrize("tgt_word", ["umfasst", "umfassen", "umfassend", "umfasse"])
+    def test_target_forms_trigger(self, tgt_word):
+        # umfass* in target but no compris* in source → flag
+        result = comprise_umfassen("eine Vorrichtung", f"eine Vorrichtung, die einen Sensor {tgt_word}")
+        assert result is not None
+        assert '"compris*" not found' in result
+
+    def test_counts_match(self):
+        assert comprise_umfassen(
+            "a device comprising a sensor and comprising a lens",
+            "eine Vorrichtung, die einen Sensor umfasst und eine Linse umfasst",
+        ) is None
+
+    def test_no_umfassen_in_target_no_flag(self):
+        # compris* in source but no umfass* in target → no flag (target is the trigger)
+        assert comprise_umfassen("a device comprising a sensor", "eine Vorrichtung mit einem Sensor") is None
+
+    def test_umfassen_without_comprise_in_source(self):
+        result = comprise_umfassen("a device with a sensor", "eine Vorrichtung, die einen Sensor umfasst")
+        assert result is not None
+        assert '"compris*" not found' in result
+
+    def test_count_mismatch(self):
+        result = comprise_umfassen(
+            "a device comprising a sensor",
+            "eine Vorrichtung, die einen Sensor umfasst und eine Linse umfasst",
+        )
+        assert result is not None
+        assert "2x" in result
+        assert 'only 1x "compris*"' in result
+
+    def test_no_umfassen_no_comprise(self):
+        assert comprise_umfassen("a device with a sensor", "eine Vorrichtung mit einem Sensor") is None
+
+    def test_case_insensitive(self):
+        assert comprise_umfassen("A Device Comprising A Sensor", "eine Vorrichtung, die einen Sensor UMFASST") is None
+
+
+# ── vielzahl_plurality ────────────────────────────────────────────────────────
+
+class TestVielzahlPlurality:
+    def test_vielzahl_without_plurality_flagged(self):
+        result = vielzahl_plurality("a set of elements", "eine Vielzahl von Elementen")
+        assert result is not None
+        assert '"plurality" not found' in result
+
+    def test_counts_match(self):
+        assert vielzahl_plurality(
+            "a plurality of elements", "eine Vielzahl von Elementen"
+        ) is None
+
+    def test_no_vielzahl_no_flag(self):
+        # plurality in source but no Vielzahl in target → no flag (target is the trigger)
+        assert vielzahl_plurality("a plurality of elements", "eine Gruppe von Elementen") is None
+
+    def test_count_mismatch(self):
+        result = vielzahl_plurality(
+            "a plurality of elements",
+            "eine Vielzahl von Elementen und eine Vielzahl von Knoten",
+        )
+        assert result is not None
+        assert "2x" in result
+        assert 'only 1x "plurality"' in result
+
+    def test_no_vielzahl_no_plurality(self):
+        assert vielzahl_plurality("a set of elements", "eine Gruppe von Elementen") is None
+
+    def test_case_insensitive(self):
+        assert vielzahl_plurality("a plurality of elements", "eine VIELZAHL von Elementen") is None
+
+
+# ── folgendes_umfasst ─────────────────────────────────────────────────────────
+
+class TestFolgendesUmfasst:
+    def test_bare_colon_flagged(self):
+        result = folgendes_umfasst("", "wobei die Steuerschaltung (22) umfasst:")
+        assert result is not None
+        assert "Folgendes umfasst" in result
+
+    def test_folgendes_umfasst_ok(self):
+        assert folgendes_umfasst("", "wobei die Steuerschaltung (22) Folgendes umfasst:") is None
+
+    def test_umfassend_not_flagged(self):
+        # participial form (no colon) should not fire
+        assert folgendes_umfasst("", "eine Vorrichtung umfassend einen Sensor") is None
+
+    def test_no_colon_not_flagged(self):
+        assert folgendes_umfasst("", "die Steuerschaltung umfasst einen Sensor") is None
+
+    def test_case_insensitive(self):
+        assert folgendes_umfasst("", "wobei die Schaltung UMFASST:") is not None
+
+
+# ── folgendes_konfiguriert ────────────────────────────────────────────────────
+
+class TestFolgendesKonfiguriert:
+    def test_bare_colon_flagged(self):
+        result = folgendes_konfiguriert("", "die Steuerschaltung (540) dazu konfiguriert ist:")
+        assert result is not None
+        assert "zu Folgendem" in result
+
+    def test_folgendem_ok(self):
+        assert folgendes_konfiguriert(
+            "", "die Steuerschaltung (540) zu Folgendem konfiguriert ist:"
+        ) is None
+
+    def test_konfiguriert_um_not_flagged(self):
+        # "konfiguriert ist, um" — no colon immediately after "ist"
+        assert folgendes_konfiguriert("", "konfiguriert ist, um einen Sensor zu steuern") is None
+
+    def test_case_insensitive(self):
+        assert folgendes_konfiguriert("", "KONFIGURIERT IST:") is not None
+
+
+# ── abbreviation_not_in_source ────────────────────────────────────────────────
+
+class TestAbbreviationNotInSource:
+    def test_d_h_without_ie_flagged(self):
+        result = abbreviation_not_in_source("that is, the device", "d. h. die Vorrichtung")
+        assert result is not None
+        assert "d. h." in result
+
+    def test_d_h_with_ie_ok(self):
+        assert abbreviation_not_in_source("i.e. the device", "d. h. die Vorrichtung") is None
+
+    def test_z_b_without_eg_flagged(self):
+        result = abbreviation_not_in_source("for example a sensor", "z. B. ein Sensor")
+        assert result is not None
+        assert "z. B." in result
+
+    def test_z_b_with_eg_ok(self):
+        assert abbreviation_not_in_source("e.g. a sensor", "z. B. ein Sensor") is None
+
+    def test_bzw_without_resp_flagged(self):
+        result = abbreviation_not_in_source("the first and second", "der erste bzw. zweite")
+        assert result is not None
+        assert "bzw." in result
+
+    def test_bzw_with_respectively_ok(self):
+        assert abbreviation_not_in_source(
+            "the first and second, respectively", "der erste bzw. zweite"
+        ) is None
+
+    def test_no_abbreviation_not_flagged(self):
+        assert abbreviation_not_in_source("that is the device", "das heißt die Vorrichtung") is None
+
+
+# ── jeweilig_not_respective ───────────────────────────────────────────────────
+
+class TestJeweiligNotRespective:
+    @pytest.mark.parametrize("word", ["jeweilige", "jeweiligen", "jeweiliger", "jeweiliges"])
+    def test_forms_flagged_without_respective(self, word):
+        result = jeweilig_not_respective("each of the CDAC units", f"jeder der {word} Einheiten")
+        assert result is not None
+        assert word in result
+
+    def test_respective_in_source_ok(self):
+        assert jeweilig_not_respective(
+            "the respective CDAC units", "die jeweiligen Einheiten"
+        ) is None
+
+    def test_no_jeweilig_not_flagged(self):
+        assert jeweilig_not_respective("each of the units", "jede der Einheiten") is None
+
+    def test_respectively_in_source_ok(self):
+        assert jeweilig_not_respective(
+            "the first and second, respectively", "die jeweilige erste und zweite"
+        ) is None
+
+
+# ── german_quotation_marks ────────────────────────────────────────────────────
+
+class TestGermanQuotationMarks:
+    def test_straight_quotes_flagged(self):
+        result = german_quotation_marks("", 'bezogen auf "m" Atome')
+        assert result is not None
+        assert "„" in result
+
+    def test_german_quotes_ok(self):
+        assert german_quotation_marks("", "bezogen auf „m“ Atome") is None
+
+    def test_no_quotes_not_flagged(self):
+        assert german_quotation_marks("", "eine Vorrichtung zum Messen") is None
+
+    def test_single_quote_not_flagged(self):
+        # unpaired single straight quote should not fire (regex requires a closing quote)
+        assert german_quotation_marks("", 'ein "Sensor') is None
+
+
+# ── patent_number_decimal ─────────────────────────────────────────────────────
+
+class TestPatentNumberDecimal:
+    def test_comma_in_de_flagged(self):
+        result = patent_number_decimal(
+            "Patent Application No. 201711138495.4",
+            "Patentanmeldung Nr. 201711138495,4",
+        )
+        assert result is not None
+        assert "decimal point" in result
+
+    def test_point_in_de_ok(self):
+        assert patent_number_decimal(
+            "Patent Application No. 201711138495.4",
+            "Patentanmeldung Nr. 201711138495.4",
+        ) is None
+
+    def test_no_patent_number_not_flagged(self):
+        assert patent_number_decimal("the device comprises", "die Vorrichtung umfasst") is None
+
+    def test_regular_decimal_not_flagged(self):
+        # short number after Nr. — below the 5-digit threshold
+        assert patent_number_decimal("claim 1.2", "Anspruch 1,2") is None
+
+
+# ── acronym_in_compound ───────────────────────────────────────────────────────
+
+class TestAcronymInCompound:
+    def test_hyphen_inside_parens_flagged(self):
+        # (AKR-) — hyphen must be outside: (AKR)-
+        result = acronym_in_compound("", "Uplink-, UL-, Verkehr und (RO-) Ressourcen")
+        assert result is not None
+
+    def test_hyphen_inside_parens_direct(self):
+        result = acronym_in_compound("", "eine Direktzugriffskanal(RO-)Ressource")
+        assert result is not None
+
+    def test_space_before_hyphen_flagged(self):
+        # (FL) -Gerät — no space between ) and -
+        result = acronym_in_compound("", "Fluides-Plasma (FL) -Gerät")
+        assert result is not None
+
+    def test_space_after_hyphen_flagged(self):
+        # Word- (AKR) — no space between - and (
+        result = acronym_in_compound("", "Eingabe- (E/A-)Steuerlogik")
+        assert result is not None
+
+    def test_correct_form_not_flagged(self):
+        # (AKR)- immediately after paren — correct
+        assert acronym_in_compound("", "Uplink(UL)-Verkehr") is None
+
+    def test_correct_form_no_hyphen_not_flagged(self):
+        # Acronym in parens without a following hyphen — correct for standalone
+        assert acronym_in_compound("", "eine Netzwerkeinheit (NTN)") is None
+
+    def test_regular_parens_not_flagged(self):
+        # Reference numbers in parens — should not fire
+        assert acronym_in_compound("", "die Steuereinheit (22) konfiguriert ist") is None
+
+    def test_lowercase_parens_not_flagged(self):
+        # Lowercase content in parens is not an acronym
+        assert acronym_in_compound("", "eine Methode (siehe oben) -") is None
+
+
+# ── hyphen_in_long_compound ───────────────────────────────────────────────────
+
+class TestHyphenInLongCompound:
+    def test_long_compound_flagged(self):
+        result = hyphen_in_long_compound("", "Einwahlpaket-Verarbeitungsverfahren")
+        assert result is not None
+        assert "Einwahlpaket-Verarbeitungsverfahren" in result
+
+    def test_second_example_flagged(self):
+        result = hyphen_in_long_compound("", "Steuerungsebenen-Netzwerkelement")
+        assert result is not None
+
+    def test_short_loanword_hyphen_not_flagged(self):
+        # Fed-Batch — both parts short, loan word hyphen is legitimate
+        assert hyphen_in_long_compound("", "Fed-Batch-Modus") is None
+
+    def test_lock_in_not_flagged(self):
+        assert hyphen_in_long_compound("", "Lock-in-Verstärker") is None
+
+    def test_number_range_not_flagged(self):
+        # en dash in number range — handled by different check, not relevant here
+        assert hyphen_in_long_compound("", "10–20 mm") is None
+
+    def test_no_hyphen_not_flagged(self):
+        assert hyphen_in_long_compound("", "Einwahlpaketverarbeitungsverfahren") is None
+
+    def test_one_short_side_not_flagged(self):
+        # only one side is long — not a compound hyphen issue
+        assert hyphen_in_long_compound("", "Verarbeitungsverfahren-ID") is None
+
+
+# ── durch_verwendung ──────────────────────────────────────────────────────────
+
+class TestDurchVerwendung:
+    def test_durch_verwendung_flagged(self):
+        result = durch_verwendung("", "durch Verwendung entsprechender Federn")
+        assert result is not None
+        assert "Verwenden" in result
+
+    def test_durch_verwenden_ok(self):
+        assert durch_verwendung("", "durch Verwenden entsprechender Federn") is None
+
+    def test_by_gerund_triggers_broader_check(self):
+        result = durch_verwendung(
+            "connected by using respective ferrules",
+            "durch Verbindung entsprechender Federn",
+        )
+        assert result is not None
+        assert "[Verb-en]" in result
+
+    def test_by_gerund_no_ung_in_target_ok(self):
+        assert durch_verwendung(
+            "connected by using respective ferrules",
+            "durch Verbinden entsprechender Federn",
+        ) is None
+
+    def test_no_gerund_no_ung_not_flagged(self):
+        assert durch_verwendung("the device comprises a sensor", "die Vorrichtung umfasst einen Sensor") is None
+
+    def test_zur_verwendung_not_flagged(self):
+        # "zur Verwendung" is a fixed expression — not caught by this check
+        assert durch_verwendung("", "zur Verwendung geeignet") is None
+
+    def test_case_insensitive_durch_verwendung(self):
+        assert durch_verwendung("", "DURCH VERWENDUNG einer Feder") is not None
+
+
+# ── schritt_zum ───────────────────────────────────────────────────────────────
+
+class TestSchrittZum:
+    def test_schritt_zum_flagged(self):
+        result = schritt_zum("", "einen Schritt zum Erfassen von Daten")
+        assert result is not None
+        assert "Schritt eines" in result
+
+    def test_schritt_zum_erzeugen_flagged(self):
+        result = schritt_zum("", "einen Schritt zum Erzeugen des Bildes")
+        assert result is not None
+
+    def test_schritt_eines_ok(self):
+        assert schritt_zum("", "einen Schritt eines Erfassens von Daten") is None
+
+    def test_schritt_zum_lowercase_not_flagged(self):
+        # "Schritt zum nächsten" — lowercase after "zum", not an infinitive
+        assert schritt_zum("", "ein Schritt zum nächsten Verfahren") is None
+
+    def test_no_schritt_not_flagged(self):
+        assert schritt_zum("", "Erfassen von Nutzungsdaten") is None
+
+    def test_schritte_plural_flagged(self):
+        result = schritt_zum("", "Schritte zum Bestimmen des Wertes")
+        assert result is not None

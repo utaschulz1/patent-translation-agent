@@ -11,6 +11,12 @@ Annotation format in column D:
   EN found, DE absent  → "EN: {term} ({n}), DE: missing, expected: {de_term}"
   EN and DE found,
   counts differ        → "EN: {term} ({en_n}), DE: {de_term} ({de_n})"
+
+Constraint — source-triggered only: checks are initiated by finding a glossary
+term in the EN source. A DE glossary term that appears in the target without a
+corresponding EN term in the source is not detected here. Target-triggered
+checks (e.g. "umfass*" without "compris*", "Vielzahl" without "plurality") are
+handled by the linter instead.
 """
 
 import glob
@@ -39,11 +45,26 @@ with open(HERE / "DE_verb_lemma_lookup.json", encoding="utf-8") as fh:
     de_verb_lookup: dict[str, str] = json.load(fh)
 
 
-def _count_lemmas(text: str, lookup: dict[str, str]) -> dict[str, int]:
-    """Return a dict of {lemma: occurrence_count} for all lookup-matched words in text."""
+_DE_ADJ_SUFFIXES = ("em", "er", "es", "en", "e")
+
+
+def _count_lemmas(text: str, lookup: dict[str, str], strip_de_adj: bool = False) -> dict[str, int]:
+    """Return a dict of {lemma: occurrence_count} for all lookup-matched words in text.
+
+    strip_de_adj: when True, words not found directly are retried after stripping
+    German adjective inflection endings (-e/-en/-er/-em/-es).  Enables Partizip-II
+    adjective forms like "angeordnete" to match the base entry "angeordnet".
+    """
     counts: dict[str, int] = defaultdict(int)
     for m in re.finditer(r"\b\w+\b", text.lower()):
-        lemma = lookup.get(m.group())
+        word = m.group()
+        lemma = lookup.get(word)
+        if lemma is None and strip_de_adj:
+            for suffix in _DE_ADJ_SUFFIXES:
+                if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+                    lemma = lookup.get(word[: -len(suffix)])
+                    if lemma:
+                        break
         if lemma:
             counts[lemma] += 1
     return dict(counts)
@@ -72,12 +93,17 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     text_lower = de_text.lower()
 
     if " " in de_term:
-        search = de_lower[:-2]
-        count, start = 0, 0
-        while (pos := text_lower.find(search, start)) != -1:
-            count += 1
-            start = pos + 1
-        return count
+        # Stem each word by stripping known adj suffixes, then build a regex so
+        # that inflected forms (e.g. "optischen" matching "optische") are found.
+        parts = []
+        for word in de_lower.split():
+            stem = word
+            for suffix in _DE_ADJ_SUFFIXES:
+                if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+                    stem = word[: -len(suffix)]
+                    break
+            parts.append(re.escape(stem) + r"\w*")
+        return len(re.findall(r"\s+".join(parts), text_lower))
 
     # Words longer than de_term drawn from other glossary DE entries (both
     # single-word entries and individual words of multi-word entries).  A token
@@ -103,6 +129,8 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     for token in tokens:
         if len(token) < len(de_lower):
             continue    # token shorter than glossary term → different word, not an inflected form
+        if len(token) > len(de_lower) + 3:
+            continue    # token much longer than glossary term → German compound word, not an inflection
         min_len = min(len(de_lower), len(token))
         if min_len < 5:
             continue
@@ -172,7 +200,7 @@ for en, de in glossary_noun_lookup.items():
 # ── Source xlsx ───────────────────────────────────────────────────────────────
 
 for pattern in [
-    str(proj_dir / "*_translated.xlsx")
+    str(proj_dir / "*_revised_translation_checks.xlsx"), str(proj_dir / "*_translated.xlsx")
 ]:
     src_files = [f for f in glob.glob(pattern) if not Path(f).name.startswith("~$")]
     if src_files:
@@ -222,7 +250,7 @@ for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
         continue
 
     en_counts = _count_lemmas(str(en_text), en_verb_lookup)
-    de_counts = _count_lemmas(str(de_text), de_verb_lookup)
+    de_counts = _count_lemmas(str(de_text), de_verb_lookup, strip_de_adj=True)
 
     notes = []
 
@@ -247,7 +275,8 @@ for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
     en_text_lower = str(en_text).lower()
     all_matches: list[tuple[int, int, str]] = []
     for en_term in glossary_noun_lookup:
-        for m in re.finditer(re.escape(en_term), en_text_lower):
+        pat = r"\b" + re.escape(en_term) + r"\b"
+        for m in re.finditer(pat, en_text_lower):
             all_matches.append((m.start(), m.end(), en_term))
 
     valid_matches = [
@@ -283,9 +312,9 @@ for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 
-out_name = src_path.name.replace("_translated_checks.xlsx", "_revised_translation_checks.xlsx")
+out_name = src_path.name.replace("_translated.xlsx", "_revised_translation_checks.xlsx")
 if out_name == src_path.name:          # fallback if pattern didn't match
-    out_name = src_path.stem + "_revised_translation_checks.xlsx"
+    out_name = src_path.stem + "_re-checked.xlsx"
 out_path = proj_dir / out_name
 try:
     out_wb.save(out_path)

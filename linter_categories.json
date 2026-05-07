@@ -1,0 +1,306 @@
+{
+  "_meta": {
+    "purpose": "Reference taxonomy for classifying EN->DE patent translation errors from scorecard reviews.",
+    "sources": "49 reviewer scorecards (324 corrections), analysed 2026-05.",
+    "consistency": "existing.function maps to linter.py function names."
+  },
+  "existing_linter_checks": {
+    "werden_dynamic": {
+      "function": "werden_dynamic",
+      "description": "Flags wird/wurde*/werden/geworden* -- double-check static state vs dynamic process.",
+      "scorecard_true_positives": 9,
+      "false_positive_risk": "high -- many fires unrelated to stative/eventive issue"
+    },
+    "preposition_contraction": {
+      "function": "preposition_contraction",
+      "test_class": "TestPrepositionContraction",
+      "description": "Flags im/vom/am/beim/zum/zur contractions; should be in dem/von dem etc.",
+      "scorecard_true_positives": 8,
+      "false_positive_risk": "medium",
+      "exceptions_in_linter": [
+        "im Wesentlichen",
+        "zur Verwendung",
+        "zum Beispiel"
+      ]
+    },
+    "regular_space_before_unit": {
+      "function": "regular_space_before_unit",
+      "test_class": "TestRegularSpaceBeforeUnit",
+      "description": "Flags regular space before unit; should be non-breaking space (Alt+0160).",
+      "scorecard_true_positives": 8,
+      "false_positive_risk": "low"
+    },
+    "hyphen_in_number_range": {
+      "function": "hyphen_in_number_range",
+      "test_class": "TestHyphenInNumberRange",
+      "description": "Flags hyphen between digits; number ranges require en dash (Alt+0150).",
+      "scorecard_true_positives": 8,
+      "false_positive_risk": "low"
+    },
+    "welche_relativpronomen": {
+      "function": "welche_relativpronomen",
+      "description": "Flags welche* as relative pronoun; use der/die/das instead.",
+      "scorecard_true_positives": 6,
+      "false_positive_risk": "low"
+    },
+    "plurality_not_transferred": {
+      "function": "plurality_not_transferred",
+      "test_class": "TestPluralityNotTransferred",
+      "description": "Source-triggered: plurality count in EN must match Vielzahl count in DE.",
+      "scorecard_true_positives": 4,
+      "false_positive_risk": "low"
+    },
+    "same_selbe": {
+      "function": "same_selbe",
+      "test_class": "TestSameSelbe",
+      "description": "Flags dieselbe*/derselbe* in DE when EN has same -- should be gleiche.",
+      "scorecard_true_positives": 3,
+      "false_positive_risk": "low"
+    },
+    "comprise_umfassen": {
+      "function": "comprise_umfassen",
+      "test_class": "TestCompriseUmfassen",
+      "description": "Target-triggered: umfass* count in DE must match compris* count in EN.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "german_claim_no_article": {
+      "function": "german_claim_no_article",
+      "test_class": "TestGermanClaimNoArticle",
+      "description": "Flags German article at start of a claim preamble.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "betraegt_stative": {
+      "function": "betraegt_stative",
+      "test_class": "TestBetraegt",
+      "description": "Flags betraegt/betragen in DE -- static values should use ist/sind.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "in_response_to_mistranslated": {
+      "function": "in_response_to_mistranslated",
+      "test_class": "TestInResponseToMistranslated",
+      "description": "Flags in Reaktion in DE when EN has in response to -- correct: als Reaktion auf.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "same_gleich_missing": {
+      "function": "same_gleich_missing",
+      "test_class": "TestSameGleichMissing",
+      "description": "Flags absence of gleich* in DE when EN has same.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "target_punctuation_where_none_in_source": {
+      "function": "target_punctuation_where_none_in_source",
+      "description": "Flags punctuation at end of DE absent from EN.",
+      "scorecard_true_positives": 1,
+      "false_positive_risk": "medium -- abbreviation periods trigger false fires"
+    },
+    "negation_not_transferred": {
+      "function": "negation_not_transferred",
+      "test_class": "TestNegationNotTransferred",
+      "description": "Flags when not/no/none count in EN exceeds nicht/kein count in DE.",
+      "scorecard_true_positives": 1,
+      "false_positive_risk": "medium"
+    },
+    "beide_ambiguous": {
+      "function": "beide_ambiguous",
+      "test_class": "TestBeideAmbiguous",
+      "description": "Flags beide* in DE as ambiguous (zwei / either / both).",
+      "scorecard_true_positives": 1,
+      "false_positive_risk": "low"
+    },
+    "vielzahl_plurality": {
+      "function": "vielzahl_plurality",
+      "test_class": "TestVielzahlPlurality",
+      "description": "Target-triggered: Vielzahl count in DE must match plurality count in EN.",
+      "scorecard_true_positives": 0,
+      "false_positive_risk": "low"
+    },
+    "acronym_in_compound": {
+      "function": "acronym_in_compound",
+      "test_class": "TestAcronymInCompound",
+      "status": "implemented",
+      "description": "Flags wrong acronym/hyphen placement: (AKR-) or space before/after hyphen with acronym in parens. Correct form: (AKR)-Word.",
+      "scorecard_true_positives": 13,
+      "false_positive_risk": "low"
+    },
+    "hyphen_in_long_compound": {
+      "function": "hyphen_in_long_compound",
+      "test_class": "TestHyphenInLongCompound",
+      "status": "implemented",
+      "description": "Flags hyphen between two words of 10+ chars -- likely unnecessary compound hyphen (Style Guide 3.10).",
+      "scorecard_true_positives": 3,
+      "false_positive_risk": "low"
+    },
+    "folgendes_umfasst": {
+      "function": "folgendes_umfasst",
+      "test_class": "TestFolgendesUmfasst",
+      "status": "implemented",
+      "description": "Flags umfasst: before a list without Folgendes. Correct: Folgendes umfasst:.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "folgendes_konfiguriert": {
+      "function": "folgendes_konfiguriert",
+      "test_class": "TestFolgendesKonfiguriert",
+      "status": "implemented",
+      "description": "Flags konfiguriert ist: before a list without zu Folgendem. Correct: zu Folgendem konfiguriert ist:.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "abbreviation_not_in_source": {
+      "function": "abbreviation_not_in_source",
+      "test_class": "TestAbbreviationNotInSource",
+      "status": "implemented",
+      "description": "Flags d. h./z. B./bzw. in DE when EN spells out (that is/for example/respectively).",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "jeweilig_not_respective": {
+      "function": "jeweilig_not_respective",
+      "test_class": "TestJeweiligNotRespective",
+      "status": "implemented",
+      "description": "Flags jeweilig* in DE when EN source has no respective/respectively.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low"
+    },
+    "german_quotation_marks": {
+      "function": "german_quotation_marks",
+      "test_class": "TestGermanQuotationMarks",
+      "status": "implemented",
+      "description": "Flags straight double quotes in DE target -- use German quotation marks (U+201E open, U+201C close, Alt+0132/Alt+0147).",
+      "scorecard_true_positives": 1,
+      "false_positive_risk": "low"
+    },
+    "patent_number_decimal": {
+      "function": "patent_number_decimal",
+      "test_class": "TestPatentNumberDecimal",
+      "status": "implemented",
+      "description": "Flags decimal comma in patent Nr. when EN source has decimal point. Patent numbers are identifiers, not values.",
+      "scorecard_true_positives": 1,
+      "false_positive_risk": "low"
+    },
+    "schritt_zum": {
+      "function": "schritt_zum",
+      "test_class": "TestSchrittZum",
+      "status": "implemented",
+      "description": "Flags Schritt zum [Infinitiv] -- should be Schritt eines [Genitiv-Infinitiv] (method step nominalization).",
+      "scorecard_true_positives": 3,
+      "false_positive_risk": "low"
+    },
+    "durch_verwendung": {
+      "function": "durch_verwendung",
+      "test_class": "TestDurchVerwendung",
+      "status": "implemented",
+      "description": "Flags durch Verwendung (always wrong) and durch [X-ung] when EN has by [verb]ing -- use nominalized verb instead.",
+      "scorecard_true_positives": 2,
+      "false_positive_risk": "low for durch_verwendung; medium for broader durch-ung pattern"
+    }
+  },
+  "proposed_new_linter_checks": {
+    "linter_new:article_first_mention": {
+      "scorecard_occurrences": 18,
+      "description": "Definite article (der/die/das) used on the first mention of a term; should be indefinite or none. Applies especially to nominalized verbs (das Bestimmen -> Bestimmen or ein Bestimmen).",
+      "pattern": "Detect das/die/der before a capitalized infinitive in DE; flag on first occurrence only.",
+      "example_error": "wobei das Bestimmen der Projektionszeit",
+      "example_correction": "wobei Bestimmen der Projektionszeit",
+      "implementation_note": "Requires segment-level state. Approximation: flag das/die/der before capitalized infinitives (-en ending, uppercase) when no prior occurrence in same segment."
+    },
+    "linter_new:nominalization": {
+      "scorecard_occurrences": 13,
+      "description": "Result noun (-ung) where a nominalized verb (-en) is required. Partially implemented via schritt_zum and durch_verwendung.",
+      "pattern": "EN gerund (-ing used as noun) + DE result noun (-ung, -stellung etc.) in corresponding position.",
+      "example_error": "durch Vorbereitung / nach der Identifizierung",
+      "example_correction": "durch Vorbereiten / nach dem Identifizieren",
+      "implementation_note": "Partially implemented: schritt_zum covers Schritt zum [Infinitiv], durch_verwendung covers durch Verwendung and durch [X-ung]. Remaining: general result-noun to nominalized-verb detection requires morphological analysis or lookup table."
+    },
+    "linter_new:genitive_separation": {
+      "scorecard_occurrences": 9,
+      "description": "Genitive object incorrectly separated from governing verb by intervening adverbials. Decision: leave for human reviewers.",
+      "pattern": "[Nominalized-Verb], [durch/von/mit NP], [genitive NP]",
+      "example_error": "Empfangen, durch das UE, einer Praembel",
+      "example_correction": "Empfangen einer Praembel durch das UE",
+      "implementation_note": "Decided not to implement -- recognisable to human reviewers, automation false-positive risk too high."
+    }
+  },
+  "glossary_categories": {
+    "glossary:apparatus_device": {
+      "scorecard_occurrences": 12,
+      "description": "apparatus->Einrichtung, device->Vorrichtung (when both appear in patent).",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:comprise": {
+      "scorecard_occurrences": 11,
+      "description": "comprising->umfassend preferred; comprise->umfassen. Relative clause accepted but participial preferred.",
+      "catchable_by": "linter:comprise_umfassen (partial); glossary_checker"
+    },
+    "glossary:include": {
+      "scorecard_occurrences": 7,
+      "description": "include/including -> aufweisen or beinhalten (NOT umfassen).",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:is_are_value": {
+      "scorecard_occurrences": 5,
+      "description": "is/are for value/state -> ist/sind (NOT betraegt, liegt, steht, befindet sich).",
+      "catchable_by": "linter:betraegt_stative (partial); glossary_checker"
+    },
+    "glossary:configured_to": {
+      "scorecard_occurrences": 5,
+      "description": "configured to -> konfiguriert, um (NOT so/dazu konfiguriert ist, dass).",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:have_having": {
+      "scorecard_occurrences": 4,
+      "description": "have/having -> aufweisen/aufweisend.",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:said": {
+      "scorecard_occurrences": 1,
+      "description": "said -> definite article der/die/das.",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:form": {
+      "scorecard_occurrences": 1,
+      "description": "form (verb) -> bilden or ausbilden (NOT formen, verlaufen).",
+      "catchable_by": "glossary_checker"
+    },
+    "glossary:other": {
+      "scorecard_occurrences": 13,
+      "description": "Other glossary mismatches: process->Vorgang, portion->Abschnitt, surface->Oberflaeche, such as->wie, at least->mindestens.",
+      "catchable_by": "glossary_checker"
+    }
+  },
+  "manual_categories": {
+    "manual:accuracy": {
+      "scorecard_occurrences": 74,
+      "description": "Content accuracy: omissions, additions, wrong meaning. Not automatable."
+    },
+    "manual:consistency": {
+      "scorecard_occurrences": 70,
+      "description": "Term inconsistency within patent. Requires patent-wide context."
+    },
+    "manual:word_order": {
+      "scorecard_occurrences": 12,
+      "description": "Verb/clause position in subordinate clauses. Hard to automate without syntactic parsing."
+    },
+    "manual:article": {
+      "scorecard_occurrences": 11,
+      "description": "Wrong article choice not covered by linter_new:article_first_mention."
+    },
+    "manual:terminology": {
+      "scorecard_occurrences": 11,
+      "description": "Domain-specific term requiring research. Not automatable."
+    },
+    "manual:punctuation": {
+      "scorecard_occurrences": 11,
+      "description": "Comma, colon placement per German grammar."
+    },
+    "manual:other": {
+      "scorecard_occurrences": 11,
+      "description": "Typos, spacing, capitalisation, preferential style choices."
+    }
+  }
+}

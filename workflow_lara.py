@@ -2,6 +2,9 @@
 workflow.py  —  Patent translation workflow runner
 
 Steps
+    1 NOT IN THIS SCRIPT BUT IN A GOOGLE SCRIPT: every 5 minutes, check Gmail for "NEW JOB OFFER" by ComunicaDK, check calendar, if time, accept job, wait for start email, then add calendar entry with deadline, move start email to "TODO" label, move NEW JOB EMAIL to "Process" label
+    2 NOT IN THIS SCRIPT BUT IN A GOOGLE SHEET: in google sheet, run email2sheet script to get all jobs into my accounting format to be pasted into my real accounting.
+    ----------Start of this script:-------------
     3   Read Gmail (ComunicaDK/TODO), pick email with closest deadline
         → XTRF job setup (folders, source files, glossary)
         → XTM Excel download via API (fallback: Downloads folder)
@@ -9,6 +12,16 @@ Steps
     5   Pre-translation with Lara Translate API (requires *_lara.xlsx in project folder)
     6   Consistency checks (verb + noun comparison)
     6b  Merge glossaries (review and clean before next run)
+    ---------End of this script, then manual steps:---------
+    7 After manual glossary cleaning, run lara_glossary_update to load project glossary into lara and to write glossary name into json
+    8 Run lara_translate.py again on to update translation with glossary suggestions
+    9 Run glossary_compare_revised_translation.py on this _translated.xlsx and revise the translation
+    10 Run linter.py and fix issues
+    11 Accept job on XTM (role!) and run xtm_upload.py to upload translation to XTM and check manually on the xTM workbench
+    12 Download from XTM: xbench file and rund xbench check, download report
+    13 Download from XTM:doc target file, biingual pdf preview and xlsx preview
+    14 In XTM: assign job back to user group (role!)
+    15 In XTRF: Upload files and finalize
 
 Usage:
     python workflow_lara.py                     # step 3 (email, closest deadline) → 5 → 6 → 6b

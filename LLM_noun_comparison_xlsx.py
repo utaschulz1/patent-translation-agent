@@ -355,8 +355,6 @@ else:
             "For each flagged entry decide: TRUE inconsistency (wrong or inconsistent translation) "
             "or FALSE POSITIVE (acceptable despite differing from the canonical)?\n\n"
             "Reasons a flag may be a false positive:\n"
-            "  - The two DE phrases are synonyms or stylistic variants acceptable in patent language\n"
-            "  - One is a full compound noun, the other a phrase — both correct\n"
             "  - The context genuinely requires a different form (e.g. plural, genitive construction)\n\n"
             "Return ONLY a JSON array — no markdown, no explanation. Each element:\n"
             '  {"index": <number>, "false_positive": true or false, "reason": "<one sentence>"}\n\n'

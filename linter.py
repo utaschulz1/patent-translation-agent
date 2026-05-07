@@ -18,7 +18,24 @@ Checks:
   in_response_to_mistranslated        — "in Reaktion" in target when source has "in response to" (→ "als Reaktion auf")
   plurality_not_transferred           — "plurality" count in source must match "Vielzahl" count in target
   beide_ambiguous                     — "beide*" in target flagged as ambiguous (zwei / either / both)
+  welche_relativpronomen              — "welche*" in target flagged; use der/die/das instead
+  werden_dynamic                      — "wird/wurde*/werden/geworden*" flagged; double-check static vs. dynamic
   preposition_contraction             — German im/vom/am/beim/zum/zur contractions in target
+  betraegt_stative                    — "beträgt/betragen" in target flagged; use "ist/sind" instead
+  same_selbe                          — "dieselbe*/derselbe*/dasselbe*/demselbe*/denselbe*/desselbe*" in target when source has "same"
+  same_gleich_missing                 — "gleich*" absent from target when source has "same"
+  comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
+  vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
+  folgendes_umfasst                   — "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:")
+  folgendes_konfiguriert              — "konfiguriert ist:" before a list without "zu Folgendem"
+  abbreviation_not_in_source          — d. h./z. B./bzw. in target when EN uses the spelled-out form
+  jeweilig_not_respective             — "jeweilig*" in target when EN source has no "respective"
+  german_quotation_marks              — straight "..." in target; use German „..." (Alt+0132/Alt+0147)
+  patent_number_decimal               — patent Nr. decimal comma in target when source has decimal point
+  acronym_in_compound                 — wrong acronym/hyphen placement in compound: (AKR-) or "(AKR) -Word"
+  hyphen_in_long_compound             — hyphen between two words of 10+ chars — likely unnecessary in German compound
+  durch_verwendung                    — "durch Verwendung" in target; should be "durch Verwenden" (nominalized verb)
+  schritt_zum                         — "Schritt zum [Infinitiv]" in target; should be "Schritt eines [Genitiv-Infinitiv]"
 
 Input / output: same *_revised_translation_checks.xlsx file (in-place,
 collision-safe on PermissionError).
@@ -56,11 +73,43 @@ _PRP_EXCEPTIONS   = ["im Wesentlichen", "zur Verwendung", "zum Beispiel"]
 
 _NEG_SOURCE_RE  = re.compile(r"\b(not|no|none)\b", re.IGNORECASE)
 _BEIDE_RE           = re.compile(r"\bbeid[e]\w*\b", re.IGNORECASE)  # beide/beiden/beides/beider/beidem
+_WELCHE_RE          = re.compile(r"\bwelch[e]\w*\b", re.IGNORECASE)  # welche/welcher/welches/welchem/welchen
+_WERDEN_RE          = re.compile(r"\b(wird|wurde\w*|werden|geworden\w*)\b", re.IGNORECASE)
 _PLURALITY_SRC_RE   = re.compile(r"\bpluralit\w*\b", re.IGNORECASE)
 _PLURALITY_TGT_RE   = re.compile(r"\bVielzahl\b", re.IGNORECASE)
+_COMPRISE_SRC_RE    = re.compile(r"\bcompris\w*\b", re.IGNORECASE)
+_UMFASSEN_TGT_RE    = re.compile(r"\bumfass\w*\b", re.IGNORECASE)
 _IN_RESPONSE_TO_RE  = re.compile(r"\bin response to\b", re.IGNORECASE)
 _IN_REAKTION_RE     = re.compile(r"\bin Reaktion\b", re.IGNORECASE)
 _RANGE_HYPHEN_RE    = re.compile(r"\d\s*-\s*\d")  # digit-hyphen-digit, with optional spaces
+
+_BETRAEGT_RE        = re.compile(r"\b(beträgt|betragen)\b", re.IGNORECASE)
+
+# ── New checks ────────────────────────────────────────────────────────────────
+_FOLGENDES_UMFASST_OK_RE    = re.compile(r"\bFolgendes\s+umfass\w*\s*:", re.IGNORECASE)
+_UMFASST_COLON_RE           = re.compile(r"\bumfass\w*\s*:", re.IGNORECASE)
+_FOLGENDES_KONFIG_OK_RE     = re.compile(r"\bzu\s+Folgendem\s+konfiguriert\s+ist\s*:", re.IGNORECASE)
+_KONFIGURIERT_COLON_RE      = re.compile(r"\bkonfiguriert\s+ist\s*:", re.IGNORECASE)
+_DE_ABBREV_PAIRS = [
+    (re.compile(r"\bd\.\s*h\.", re.IGNORECASE), re.compile(r"\bi\.e\.", re.IGNORECASE), "d. h.", "i.e."),
+    (re.compile(r"\bz\.\s*B\.", re.IGNORECASE), re.compile(r"\be\.g\.", re.IGNORECASE), "z. B.", "e.g."),
+    (re.compile(r"\bbzw\.", re.IGNORECASE),      re.compile(r"\bresp\b|\brespectively\b", re.IGNORECASE), "bzw.", "resp./respectively"),
+]
+_JEWEILIG_RE        = re.compile(r"\bjeweilig\w*", re.IGNORECASE)
+_RESPECTIVE_SRC_RE  = re.compile(r"\brespective\w*", re.IGNORECASE)
+_STRAIGHT_QUOTE_RE  = re.compile(r'"[^"\n]{1,100}"')
+_PATENT_NR_EN_RE    = re.compile(r"\b(?:No|Nr)\.\s*\d{5,}\.\d", re.IGNORECASE)
+_PATENT_NR_DE_RE    = re.compile(r"\bNr\.\s*\d{5,},\d", re.IGNORECASE)
+# hyphen inside parens: (AKR-)  |  space before hyphen: (AKR) -  |  space after hyphen: - (AKR…)
+_ACRONYM_HYPHEN_RE      = re.compile(r"\([A-Z]\w*-\)|\([A-Z]\w*\)\s+-|-\s+\([A-Z]")
+_LONG_COMPOUND_HYPHEN_RE = re.compile(r"\w{10,}-\w{10,}")
+_DURCH_VERWENDUNG_RE    = re.compile(r"\bdurch\s+Verwendung\b", re.IGNORECASE)
+_BY_GERUND_EN_RE        = re.compile(r"\bby\s+\w+ing\b", re.IGNORECASE)
+_DURCH_UNG_TGT_RE       = re.compile(r"\bdurch\s+[A-Z]\w+ung\b")
+_SCHRITT_ZUM_RE         = re.compile(r"\bSchritt\w*\s+zum\s+[A-Z]\w+en\b")
+_SAME_SRC_RE        = re.compile(r"\bsame\b", re.IGNORECASE)
+_SELBE_TGT_RE       = re.compile(r"\b(die|der|das|dem|den|des)selb\w*\b", re.IGNORECASE)
+_GLEICH_TGT_RE      = re.compile(r"\bgleich\w*\b", re.IGNORECASE)
 
 _UNIT_LIST = sorted([
     # Temperature
@@ -259,11 +308,78 @@ def plurality_not_transferred(source: str, target: str) -> str | None:
     return None
 
 
+def vielzahl_plurality(source: str, target: str) -> str | None:
+    """Flag when 'Vielzahl' count in target does not match 'plurality' count in source."""
+    tgt_count = len(_PLURALITY_TGT_RE.findall(target))
+    if tgt_count == 0:
+        return None
+    src_count = len(_PLURALITY_SRC_RE.findall(source))
+    if src_count == tgt_count:
+        return None
+    src_info = f'only {src_count}x "plurality"' if src_count > 0 else '"plurality" not found'
+    return f'error: {tgt_count}x "Vielzahl" in target but {src_info} in source'
+
+
+def comprise_umfassen(source: str, target: str) -> str | None:
+    """Flag when 'umfass*' count in target does not match 'compris*' count in source."""
+    tgt_count = len(_UMFASSEN_TGT_RE.findall(target))
+    if tgt_count == 0:
+        return None
+    src_count = len(_COMPRISE_SRC_RE.findall(source))
+    if src_count == tgt_count:
+        return None
+    src_info = f'only {src_count}x "compris*"' if src_count > 0 else '"compris*" not found'
+    return f'error: {tgt_count}x "umfass*" in target but {src_info} in source'
+
+
+def werden_dynamic(_: str, target: str) -> str | None:
+    """Flag 'wird/wurde*/werden/geworden*' in target; double-check static vs. dynamic phrasing."""
+    m = _WERDEN_RE.search(target)
+    if m:
+        return f'error: double check static state/dynamic process ("{m.group()}" found)'
+    return None
+
+
+def welche_relativpronomen(_: str, target: str) -> str | None:
+    """Flag 'welche*' in target; relative clauses should use der/die/das."""
+    m = _WELCHE_RE.search(target)
+    if m:
+        return f'error: Relativpronomen der, die das (not "{m.group()}")'
+    return None
+
+
 def beide_ambiguous(_: str, target: str) -> str | None:
     """Flag 'beide*' in target as potentially ambiguous."""
     m = _BEIDE_RE.search(target)
     if m:
         return f'error: "{m.group()}" in target — beide = zwei | einer von (either) | sowohl als auch (both the X and Y)'
+    return None
+
+
+def same_selbe(source: str, target: str) -> str | None:
+    """Flag 'dieselbe*/derselbe*/dasselbe*' in target when source contains 'same'."""
+    if not _SAME_SRC_RE.search(source):
+        return None
+    m = _SELBE_TGT_RE.search(target)
+    if m:
+        return f'error: "{m.group()}" in target — same = gleiche, also check article'
+    return None
+
+
+def same_gleich_missing(source: str, target: str) -> str | None:
+    """Flag when source contains 'same' but target contains no 'gleich*'."""
+    if not _SAME_SRC_RE.search(source):
+        return None
+    if not _GLEICH_TGT_RE.search(target):
+        return 'error: source: "same", target: "gleich" missing'
+    return None
+
+
+def betraegt_stative(_: str, target: str) -> str | None:
+    """Flag 'beträgt/betragen' in target; static values should use 'ist/sind'."""
+    m = _BETRAEGT_RE.search(target)
+    if m:
+        return f'error: "{m.group()}" in target — beträgt = ist'
     return None
 
 
@@ -276,6 +392,96 @@ def preposition_contraction(_: str, target: str) -> str | None:
     if found:
         joined = ", ".join(f'"{w}"' for w in found)
         return f"error: Prp + article contraction {joined} used in target"
+    return None
+
+
+def folgendes_umfasst(_: str, target: str) -> str | None:
+    """Flag 'umfasst:' before a list without 'Folgendes' — correct: 'Folgendes umfasst:'."""
+    stripped = _FOLGENDES_UMFASST_OK_RE.sub("", target)
+    if _UMFASST_COLON_RE.search(stripped):
+        return 'error: "umfasst:" before list — use "Folgendes umfasst:"'
+    return None
+
+
+def folgendes_konfiguriert(_: str, target: str) -> str | None:
+    """Flag 'konfiguriert ist:' without 'zu Folgendem' — correct: 'zu Folgendem konfiguriert ist:'."""
+    stripped = _FOLGENDES_KONFIG_OK_RE.sub("", target)
+    if _KONFIGURIERT_COLON_RE.search(stripped):
+        return 'error: "konfiguriert ist:" before list — use "zu Folgendem konfiguriert ist:"'
+    return None
+
+
+def abbreviation_not_in_source(source: str, target: str) -> str | None:
+    """Flag d. h./z. B./bzw. in target when EN source uses the spelled-out form."""
+    for tgt_re, src_re, de_abbr, en_abbr in _DE_ABBREV_PAIRS:
+        if tgt_re.search(target) and not src_re.search(source):
+            return f'error: "{de_abbr}" in target but "{en_abbr}" not in source — spell out in full'
+    return None
+
+
+def jeweilig_not_respective(source: str, target: str) -> str | None:
+    """Flag 'jeweilig*' in target when EN source has no 'respective/respectively'."""
+    m = _JEWEILIG_RE.search(target)
+    if m and not _RESPECTIVE_SRC_RE.search(source):
+        return f'error: "{m.group()}" in target but "respective" not in source'
+    return None
+
+
+def german_quotation_marks(_: str, target: str) -> str | None:
+    """Flag straight double quotes in target; use German „..." (Alt+0132/Alt+0147)."""
+    if _STRAIGHT_QUOTE_RE.search(target):
+        return 'error: use German quotation marks „..." (Alt+0132 open, Alt+0147 close)'
+    return None
+
+
+def durch_verwendung(source: str, target: str) -> str | None:
+    """Flag 'durch Verwendung' (result noun) — should be 'durch Verwenden' (nominalized verb).
+    Also flags 'durch [Capitalized-Noun-ung]' when EN source contains 'by [verb]ing'.
+    """
+    if _DURCH_VERWENDUNG_RE.search(target):
+        return 'error: "durch Verwendung" — use "durch Verwenden" (nominalized verb, not result noun)'
+    if _BY_GERUND_EN_RE.search(source):
+        m = _DURCH_UNG_TGT_RE.search(target)
+        if m:
+            return f'error: "{m.group()}" — use "durch [Verb-en]" (nominalized verb, not result noun)'
+    return None
+
+
+def schritt_zum(_: str, target: str) -> str | None:
+    """Flag 'Schritt zum [Infinitiv]' — should be 'Schritt eines [Genitiv-Infinitiv]'."""
+    m = _SCHRITT_ZUM_RE.search(target)
+    if m:
+        return f'error: "{m.group()}" — use "Schritt eines [Verb-ens]" (genitive of nominalized verb)'
+    return None
+
+
+def hyphen_in_long_compound(_: str, target: str) -> str | None:
+    """Flag a hyphen between two words of 10+ characters — likely an unnecessary compound hyphen (Style Guide §3.10)."""
+    m = _LONG_COMPOUND_HYPHEN_RE.search(target)
+    if m:
+        return f'error: unnecessary hyphen in compound "{m.group()}" — merge into one word (Style Guide §3.10)'
+    return None
+
+
+def acronym_in_compound(_: str, target: str) -> str | None:
+    """Flag wrong acronym/hyphen placement in compound nouns.
+
+    Wrong: (AKR-)  →  hyphen must follow the closing parenthesis: (AKR)-
+    Wrong: (AKR) - or - (AKR)  →  no space between parenthesis and hyphen.
+    """
+    m = _ACRONYM_HYPHEN_RE.search(target)
+    if m:
+        return (
+            f'error: wrong acronym/hyphen placement "{m.group().strip()}" — '
+            'correct form is "(AKR)-Word" (hyphen after closing parenthesis, no spaces)'
+        )
+    return None
+
+
+def patent_number_decimal(source: str, target: str) -> str | None:
+    """Flag decimal comma in a patent application number when source has a decimal point."""
+    if _PATENT_NR_EN_RE.search(source) and _PATENT_NR_DE_RE.search(target):
+        return 'error: patent application number — keep decimal point as in source, not comma'
     return None
 
 
@@ -292,7 +498,24 @@ CHECKS = [
     in_response_to_mistranslated,
     plurality_not_transferred,
     beide_ambiguous,
+    welche_relativpronomen,
+    werden_dynamic,
     preposition_contraction,
+    betraegt_stative,
+    same_selbe,
+    same_gleich_missing,
+    comprise_umfassen,
+    vielzahl_plurality,
+    folgendes_umfasst,
+    folgendes_konfiguriert,
+    abbreviation_not_in_source,
+    jeweilig_not_respective,
+    german_quotation_marks,
+    patent_number_decimal,
+    acronym_in_compound,
+    hyphen_in_long_compound,
+    durch_verwendung,
+    schritt_zum,
 ]
 
 
