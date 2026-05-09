@@ -9,13 +9,16 @@ Steps
         → XTRF job setup (folders, source files, glossary)
         → XTM Excel download via API (fallback: Downloads folder)
     4   Manual mode: paste XTRF job URL instead of reading email
-    5   Pre-translation with Lara Translate API (requires *_lara.xlsx in project folder)
+    5a  Upload standard glossary (filtered to source terms) to Lara (requires .xlsx in project folder)
+    5b  Pre-translation with Lara Translate API (requires *.xlsx in project folder)
     6   Consistency checks (verb + noun comparison)
-    6b  Merge glossaries (review and clean before next run)
+    6b  Merge glossaries
+    6c  LLM glossary cleanup → produces clean_glossary_<id>.csv
+    --- MANUAL REVIEW: check clean_glossary_<id>.csv, edit if needed, press Enter ---
+    7   Upload clean glossary to Lara
+    8   Re-translate with clean glossary
     ---------End of this script, then manual steps:---------
-    7 After manual glossary cleaning, run lara_glossary_update to load project glossary into lara and to write glossary name into json
-    8 Run lara_translate.py again on to update translation with glossary suggestions
-    9 Run glossary_compare_revised_translation.py on this _translated.xlsx and revise the translation
+    9  Run glossary_compare_revised_translation.py on this _translated.xlsx and revise the translation
     10 Run linter.py and fix issues
     11 Accept job on XTM (role!) and run xtm_upload.py to upload translation to XTM and check manually on the xTM workbench
     12 Download from XTM: xbench file and rund xbench check, download report
@@ -24,9 +27,10 @@ Steps
     15 In XTRF: Upload files and finalize
 
 Usage:
-    python workflow_lara.py                     # step 3 (email, closest deadline) → 5 → 6 → 6b
-    python workflow_lara.py SAGI_2604_P0039     # step 3 filtered to that project ID
-    python workflow_lara.py --manual            # step 4 (manual URL) → 5 → 6 → 6b
+    python workflow_lara.py                     # step 3 (email) → 5 → 6 → 6b → 6c → pause → 7 → 8
+    python workflow_lara.py SAGI_2604_P0039     # same, filtered to that project ID
+    python workflow_lara.py --manual            # step 4 (manual URL) → same
+    python workflow_lara.py --from-6c           # resume from step 6c (project already in log)
 """
 
 import subprocess
@@ -66,7 +70,12 @@ def step4() -> str:
     return project_id
 
 
-def step5():
+def step5a():
+    print("Step 5a — Upload standard glossary (filtered to source terms)")
+    _run(HERE / "lara_glossary_upload_standard.py")
+
+
+def step5b():
     print("Step 5 — Pre-translation with Lara")
     ctx = project_log.load_context()
     proj_folder = Path(ctx["project_folder"])
@@ -85,15 +94,54 @@ def step6():
 
 
 def step6b(project_id: str):
-    print("Step 6b — Merge glossaries → review and clean manually before next run")
+    print("Step 6b — Merge glossaries")
     _run(HERE / "merge_glossaries.py", project_id)
 
 
+def step6c():
+    print("Step 6c — LLM glossary cleanup")
+    _run(HERE / "llm_glossary_cleanup.py")
+
+
+def manual_review(project_id: str):
+    proj_dir = Path(project_log.project_dir())
+    clean_path = proj_dir / f"clean_glossary_{project_id}.csv"
+    print(f"\n{'─' * 60}")
+    print(f"MANUAL REVIEW: {clean_path}")
+    print("Edit the clean glossary if needed, then press Enter to upload and re-translate.")
+    print(f"{'─' * 60}")
+    input()
+
+
+def step7():
+    print("Step 7 — Upload clean glossary to Lara")
+    _run(HERE / "lara_glossary_upload.py")
+
+
+def step8():
+    print("Step 8 — Re-translate with clean glossary")
+    _run(HERE / "lara_translate.py")
+
+
 if __name__ == "__main__":
-    manual = "--manual" in sys.argv
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    target = args[0] if args else None
-    project_id = step4() if manual else step3(target_project_id=target)
-    step5()
-    step6()
-    step6b(project_id)
+    manual    = "--manual"  in sys.argv
+    from_6c   = "--from-6c" in sys.argv
+    from_7    = "--from-7"  in sys.argv
+    args      = [a for a in sys.argv[1:] if not a.startswith("--")]
+    target    = args[0] if args else None
+
+    if from_6c or from_7:
+        project_id = project_log.project_dir().name
+        print(f"Resuming from step {'6c' if from_6c else '7'} — project: {project_id}")
+    else:
+        project_id = step4() if manual else step3(target_project_id=target)
+        step5a()
+        step5b()
+        step6()
+        step6b(project_id)
+
+    if not from_7:
+        step6c()
+        manual_review(project_id)
+    step7()
+    step8()

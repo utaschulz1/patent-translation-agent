@@ -79,10 +79,21 @@
 12. Run merge_glossaries.py
     - this consolidates the comparison, project and standard glossary into the project glossary
     - manually clean this glossary
+        - Convey to the LLM teh following rules:
+        - Do not use the same translation for different source terms. EXAMPLE: stop = stoppen, kill = abbrechen, terminate = beenden all more or less the same meaning, but different words have different translations. - - Analyze the instances that conflict if necessary: 
+        - EXAMPLE: assign, map, link, associate, connect: connect = verbinden in standard_glossary, so "link" cannot be "verbinden", but you need "associate = verknüfen" and "map = zuordnen", so you look for instances of connect/connection and see that there is none, so you can use "link = verbinden". But what if all of the terms appear in the text? Then use e.g. "link=verlinken" in order to be consistent. 
+        - ANOTHER EXAMPLE: run, execute, carry out, perform. perform=durchführen, This is very difficult. Analyze if "run" could be translated as "start" if there is no "start" in the source text. If one term has only one or two instances it could be OK to be inconsistent. If you have to choose a not ideal term, choose it for the term that has the fewest instances.
+        - Use terms consistently also in compounds.
+        - Make compounds as long as reasonably possible.
+        - Prefer terms from standard_glossary and only deviate if there is an unresolvable conflict.
+        - My original framing was: consistent terms are fixed, inconsistent terms get resolved. The LLM's job is to pick winners among the inconsistent ones and leave everything else alone. That's wrong.
+        - What your feedback says is: you put all the evidence in front of the LLM — everything that was used in the translation, how consistently, plus the standard glossary as a preferred reference — and ask it to produce a single clean list where no source term appears twice and no target term appears twice. The categories (consistent, inconsistent) are just evidence about how the translation engine behaved. They are not instructions about what may or may not change.
+        - A "consistent" term might have to move if resolving an inconsistent near-synonym forces a conflict. The standard glossary is a preference, not a lock — if following it would create a duplicate on the target side, the LLM has to find another solution. No term is guaranteed to survive unchanged going into the output; the only guarantee is the shape of the output: one EN per DE, one DE per EN, no gaps.
+        - The practical implication for the prompt: the less you instruct the LLM about which category of term it may or may not change, the better it can reason across the whole picture. Over-specifying the rules ("consistent_terms are final", "standard_glossary locks DE values") handcuffs it in exactly the cases where it needs flexibility. The prompt should describe the input, state the goal, and get out of the way.
     12.1 ONLY FOR 1/1 tasks (translation)
         - rerun translation, this time with the cleaned project glossary
     12.2 FOR 1/2 tasks (Revision) and 1/1 tasks after the 2nd translation run
-        - Run LLM_glossary_check_xlsx.py
+        - Run a glossary check
 13. Run linter.
 14. Revision of _translated_checks.xlsx:
     - TODO: consolidate annotated segments in a mobile view (to be programmed), 
