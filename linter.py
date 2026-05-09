@@ -26,8 +26,9 @@ Checks:
   same_gleich_missing                 — "gleich*" absent from target when source has "same"
   comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
   vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
-  folgendes_umfasst                   — "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:")
+  folgendes_umfasst                   — finite "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:"); participial "umfassend:" is correct without "Folgendes"
   folgendes_konfiguriert              — "konfiguriert ist:" before a list without "zu Folgendem"
+  dazu_konfiguriert                   — "konfiguriert" in target without "dazu" (→ "dazu konfiguriert")
   abbreviation_not_in_source          — d. h./z. B./bzw. in target when EN uses the spelled-out form
   jeweilig_not_respective             — "jeweilig*" in target when EN source has no "respective"
   german_quotation_marks              — straight "..." in target; use German „..." (Alt+0132/Alt+0147)
@@ -36,11 +37,16 @@ Checks:
   hyphen_in_long_compound             — hyphen between two words of 10+ chars — likely unnecessary in German compound
   durch_verwendung                    — "durch Verwendung" in target; should be "durch Verwenden" (nominalized verb)
   schritt_zum                         — "Schritt zum [Infinitiv]" in target; should be "Schritt eines [Genitiv-Infinitiv]"
+  mindestens_at_least                 — "mindestens" in target but "at least" absent from source
 
 Input / output: same *_revised_translation_checks.xlsx file (in-place,
 collision-safe on PermissionError).
+
+Usage: python linter.py [--pid <project_id>]
+  --pid   project folder name under projects/; defaults to current project context
 """
 
+import argparse
 import glob
 import re
 from datetime import datetime
@@ -50,6 +56,10 @@ import openpyxl
 from openpyxl.styles import Alignment, PatternFill
 
 import project_log
+
+_args = argparse.ArgumentParser()
+_args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args = _args.parse_known_args()[0]
 
 HEADER_ROWS = 3
 _FILL = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
@@ -87,9 +97,12 @@ _BETRAEGT_RE        = re.compile(r"\b(beträgt|betragen)\b", re.IGNORECASE)
 
 # ── New checks ────────────────────────────────────────────────────────────────
 _FOLGENDES_UMFASST_OK_RE    = re.compile(r"\bFolgendes\s+umfass\w*\s*:", re.IGNORECASE)
-_UMFASST_COLON_RE           = re.compile(r"\bumfass\w*\s*:", re.IGNORECASE)
+_UMFASST_COLON_RE           = re.compile(r"\bumfass(?!end)\w*\s*:", re.IGNORECASE)  # excludes participial umfassend:
 _FOLGENDES_KONFIG_OK_RE     = re.compile(r"\bzu\s+Folgendem\s+konfiguriert\s+ist\s*:", re.IGNORECASE)
 _KONFIGURIERT_COLON_RE      = re.compile(r"\bkonfiguriert\s+ist\s*:", re.IGNORECASE)
+_DAZU_KONFIGURIERT_RE       = re.compile(r"\bdazu\s+konfiguriert\b", re.IGNORECASE)
+_KONFIGURIERT_IST_COMMA_RE  = re.compile(r"\bkonfiguriert\s+ist\s*,", re.IGNORECASE)  # "konfiguriert ist, zu [verb]" — valid relative clause
+_KONFIGURIERT_RE            = re.compile(r"\bkonfiguriert\b", re.IGNORECASE)
 _DE_ABBREV_PAIRS = [
     (re.compile(r"\bd\.\s*h\.", re.IGNORECASE), re.compile(r"\bi\.e\.", re.IGNORECASE), "d. h.", "i.e."),
     (re.compile(r"\bz\.\s*B\.", re.IGNORECASE), re.compile(r"\be\.g\.", re.IGNORECASE), "z. B.", "e.g."),
@@ -106,7 +119,11 @@ _LONG_COMPOUND_HYPHEN_RE = re.compile(r"\w{10,}-\w{10,}")
 _DURCH_VERWENDUNG_RE    = re.compile(r"\bdurch\s+Verwendung\b", re.IGNORECASE)
 _BY_GERUND_EN_RE        = re.compile(r"\bby\s+\w+ing\b", re.IGNORECASE)
 _DURCH_UNG_TGT_RE       = re.compile(r"\bdurch\s+[A-Z]\w+ung\b")
+_USING_EN_RE            = re.compile(r"\busing\b", re.IGNORECASE)
+_UNTER_VERWENDUNG_RE    = re.compile(r"\bunter\s+Verwendung\b", re.IGNORECASE)
 _SCHRITT_ZUM_RE         = re.compile(r"\bSchritt\w*\s+zum\s+[A-Z]\w+en\b")
+_MINDESTENS_TGT_RE      = re.compile(r"\bmindestens\b", re.IGNORECASE)
+_AT_LEAST_SRC_RE        = re.compile(r"\bat least\b", re.IGNORECASE)
 _SAME_SRC_RE        = re.compile(r"\bsame\b", re.IGNORECASE)
 _SELBE_TGT_RE       = re.compile(r"\b(die|der|das|dem|den|des)selb\w*\b", re.IGNORECASE)
 _GLEICH_TGT_RE      = re.compile(r"\bgleich\w*\b", re.IGNORECASE)
@@ -396,7 +413,8 @@ def preposition_contraction(_: str, target: str) -> str | None:
 
 
 def folgendes_umfasst(_: str, target: str) -> str | None:
-    """Flag 'umfasst:' before a list without 'Folgendes' — correct: 'Folgendes umfasst:'."""
+    """Flag finite 'umfasst:' before a list without 'Folgendes' — correct: 'Folgendes umfasst:'.
+    Participial 'umfassend:' (preferred translation of 'comprising') is correct without 'Folgendes'."""
     stripped = _FOLGENDES_UMFASST_OK_RE.sub("", target)
     if _UMFASST_COLON_RE.search(stripped):
         return 'error: "umfasst:" before list — use "Folgendes umfasst:"'
@@ -408,6 +426,16 @@ def folgendes_konfiguriert(_: str, target: str) -> str | None:
     stripped = _FOLGENDES_KONFIG_OK_RE.sub("", target)
     if _KONFIGURIERT_COLON_RE.search(stripped):
         return 'error: "konfiguriert ist:" before list — use "zu Folgendem konfiguriert ist:"'
+    return None
+
+
+def dazu_konfiguriert(_: str, target: str) -> str | None:
+    """Flag 'konfiguriert' in target without 'dazu' — correct: 'dazu konfiguriert'.
+    Excludes 'konfiguriert ist, [zu-infinitive]' (valid relative-clause form)."""
+    stripped = _DAZU_KONFIGURIERT_RE.sub("", target)
+    stripped = _KONFIGURIERT_IST_COMMA_RE.sub("", stripped)
+    if _KONFIGURIERT_RE.search(stripped):
+        return "konfiguriert ohne 'dazu'"
     return None
 
 
@@ -447,11 +475,29 @@ def durch_verwendung(source: str, target: str) -> str | None:
     return None
 
 
+def unter_verwendung(source: str, target: str) -> str | None:
+    """Flag 'unter Verwendung' in target when EN source contains 'using'.
+    Prefer 'verwendend' (present participle) over the result-noun construction.
+    """
+    if _USING_EN_RE.search(source) and _UNTER_VERWENDUNG_RE.search(target):
+        return 'warning: "unter Verwendung" — prefer "verwendend" (present participle)'
+    return None
+
+
 def schritt_zum(_: str, target: str) -> str | None:
     """Flag 'Schritt zum [Infinitiv]' — should be 'Schritt eines [Genitiv-Infinitiv]'."""
     m = _SCHRITT_ZUM_RE.search(target)
     if m:
         return f'error: "{m.group()}" — use "Schritt eines [Verb-ens]" (genitive of nominalized verb)'
+    return None
+
+
+def mindestens_at_least(source: str, target: str) -> str | None:
+    """Flag 'mindestens' in target when source does not contain 'at least'."""
+    if not _MINDESTENS_TGT_RE.search(target):
+        return None
+    if not _AT_LEAST_SRC_RE.search(source):
+        return 'error: "mindestens" in target but "at least" not in source'
     return None
 
 
@@ -508,6 +554,7 @@ CHECKS = [
     vielzahl_plurality,
     folgendes_umfasst,
     folgendes_konfiguriert,
+    dazu_konfiguriert,
     abbreviation_not_in_source,
     jeweilig_not_respective,
     german_quotation_marks,
@@ -515,14 +562,22 @@ CHECKS = [
     acronym_in_compound,
     hyphen_in_long_compound,
     durch_verwendung,
+    unter_verwendung,
     schritt_zum,
+    mindestens_at_least,
 ]
 
 
 if __name__ == "__main__":
     # ── Locate input file ─────────────────────────────────────────────────────
 
-    proj_dir = project_log.project_dir()
+    if _args.pid:
+        proj_dir = Path(__file__).parent / "projects" / _args.pid
+        if not proj_dir.exists():
+            print(f"ERROR: Project folder not found: {proj_dir}")
+            exit()
+    else:
+        proj_dir = project_log.project_dir()
 
     src_files = [
         f for f in glob.glob(str(proj_dir / "*_revised_translation_checks.xlsx"))
@@ -549,7 +604,7 @@ if __name__ == "__main__":
         for row_num in range(HEADER_ROWS + 1, ws.max_row + 1):
             cell = ws.cell(row=row_num, column=4)
             cell.value = None
-            cell.fill = PatternFill()
+            cell.fill = PatternFill(fill_type="none")
     else:
         ws.insert_cols(4)
 
@@ -585,8 +640,18 @@ if __name__ == "__main__":
             annotated += 1
 
     # ── Save ─────────────────────────────────────────────────────────────────
+    # If the file is open in Excel (Windows ~$ lock file exists), writing to it
+    # while Excel has it open causes a "file modified externally" repair prompt
+    # on reload.  Save to a timestamped copy instead.
 
-    out_path = src_path
+    lock_file = src_path.parent / f"~${src_path.name}"
+    if lock_file.exists():
+        stamp = datetime.now().strftime("%H%M%S")
+        out_path = src_path.parent / src_path.name.replace(".xlsx", f"_{stamp}.xlsx")
+        print(f"File is open in Excel — saving to {out_path.name}")
+    else:
+        out_path = src_path
+
     try:
         wb.save(out_path)
     except PermissionError:

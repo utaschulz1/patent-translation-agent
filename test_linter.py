@@ -26,6 +26,7 @@ from linter import (
     vielzahl_plurality,
     folgendes_umfasst,
     folgendes_konfiguriert,
+    dazu_konfiguriert,
     abbreviation_not_in_source,
     jeweilig_not_respective,
     german_quotation_marks,
@@ -33,7 +34,9 @@ from linter import (
     acronym_in_compound,
     hyphen_in_long_compound,
     durch_verwendung,
+    unter_verwendung,
     schritt_zum,
+    mindestens_at_least,
 )
 
 NBSP = " "  # non-breaking space (Alt+0160)
@@ -637,6 +640,13 @@ class TestFolgendesUmfasst:
     def test_case_insensitive(self):
         assert folgendes_umfasst("", "wobei die Schaltung UMFASST:") is not None
 
+    def test_participial_umfassend_colon_not_flagged(self):
+        # "comprising:" → "umfassend:" is the correct participial form — no "Folgendes" needed
+        assert folgendes_umfasst("", "das RMM-System umfassend:") is None
+
+    def test_ferner_umfassend_colon_not_flagged(self):
+        assert folgendes_umfasst("", "Schritt c) ferner umfassend:") is None
+
 
 # ── folgendes_konfiguriert ────────────────────────────────────────────────────
 
@@ -657,6 +667,32 @@ class TestFolgendesKonfiguriert:
 
     def test_case_insensitive(self):
         assert folgendes_konfiguriert("", "KONFIGURIERT IST:") is not None
+
+
+# ── dazu_konfiguriert ─────────────────────────────────────────────────────────
+
+class TestDazuKonfiguriert:
+    def test_konfiguriert_without_dazu_flagged(self):
+        result = dazu_konfiguriert("", "die Schaltung ist konfiguriert, den Sensor zu steuern")
+        assert result is not None
+        assert "dazu" in result
+
+    def test_dazu_konfiguriert_ok(self):
+        assert dazu_konfiguriert("", "die Schaltung ist dazu konfiguriert, den Sensor zu steuern") is None
+
+    def test_multiple_konfiguriert_all_with_dazu_ok(self):
+        assert dazu_konfiguriert("", "A ist dazu konfiguriert und B ist dazu konfiguriert") is None
+
+    def test_mixed_one_missing_dazu_flagged(self):
+        result = dazu_konfiguriert("", "A ist dazu konfiguriert und B ist konfiguriert")
+        assert result is not None
+
+    def test_no_konfiguriert_not_flagged(self):
+        assert dazu_konfiguriert("", "die Schaltung steuert den Sensor") is None
+
+    def test_konfiguriert_ist_comma_not_flagged(self):
+        # relative clause: "…der konfiguriert ist, ein Kühlfluid zu führen" — valid, no "dazu" needed
+        assert dazu_konfiguriert("", "einen Kühlkanal (60), der konfiguriert ist, ein Kühlfluid zu führen") is None
 
 
 # ── abbreviation_not_in_source ────────────────────────────────────────────────
@@ -865,6 +901,45 @@ class TestDurchVerwendung:
         assert durch_verwendung("", "DURCH VERWENDUNG einer Feder") is not None
 
 
+# ── unter_verwendung ──────────────────────────────────────────────────────────
+
+class TestUnterVerwendung:
+    def test_using_mit_unter_verwendung_flagged(self):
+        result = unter_verwendung(
+            "performing a forecast using traffic data",
+            "Durchführen einer Prognose unter Verwendung von Verkehrsdaten",
+        )
+        assert result is not None
+        assert "verwendend" in result
+
+    def test_verwendend_not_flagged(self):
+        assert unter_verwendung(
+            "performing a forecast using traffic data",
+            "Durchführen einer Prognose, Verkehrsdaten verwendend",
+        ) is None
+
+    def test_no_using_in_source_not_flagged(self):
+        # "unter Verwendung" in target but source doesn't say "using"
+        assert unter_verwendung(
+            "performing a forecast with traffic data",
+            "Durchführen einer Prognose unter Verwendung von Verkehrsdaten",
+        ) is None
+
+    def test_case_insensitive_source(self):
+        result = unter_verwendung(
+            "USING traffic data",
+            "unter Verwendung von Verkehrsdaten",
+        )
+        assert result is not None
+
+    def test_case_insensitive_target(self):
+        result = unter_verwendung(
+            "using traffic data",
+            "UNTER VERWENDUNG von Verkehrsdaten",
+        )
+        assert result is not None
+
+
 # ── schritt_zum ───────────────────────────────────────────────────────────────
 
 class TestSchrittZum:
@@ -890,3 +965,29 @@ class TestSchrittZum:
     def test_schritte_plural_flagged(self):
         result = schritt_zum("", "Schritte zum Bestimmen des Wertes")
         assert result is not None
+
+
+# ── mindestens_at_least ───────────────────────────────────────────────────────
+
+class TestMindestensAtLeast:
+    def test_mindestens_without_at_least_flagged(self):
+        result = mindestens_at_least("one sensor", "mindestens einen Sensor")
+        assert result is not None
+        assert '"at least"' in result
+
+    def test_mindestens_with_at_least_ok(self):
+        assert mindestens_at_least("at least one sensor", "mindestens einen Sensor") is None
+
+    def test_no_mindestens_not_flagged(self):
+        assert mindestens_at_least("at least one sensor", "einen Sensor") is None
+
+    def test_case_insensitive_target(self):
+        assert mindestens_at_least("one sensor", "MINDESTENS einen Sensor") is not None
+
+    def test_case_insensitive_source(self):
+        assert mindestens_at_least("AT LEAST one sensor", "mindestens einen Sensor") is None
+
+    def test_message_content(self):
+        result = mindestens_at_least("a sensor", "mindestens einen Sensor")
+        assert "mindestens" in result
+        assert "at least" in result

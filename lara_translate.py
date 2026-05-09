@@ -11,10 +11,14 @@
 #     LARA_GLOSSARY_IDS=gls_abc123,gls_def456   # optional, Pro plan
 #     LARA_MEMORY_IDS=mem_abc123,mem_def456      # optional, Team plan only
 #
+# USAGE   python lara_translate.py [--pid <project_id>]
+#           --pid   project folder name under projects/; defaults to current project context
+#
 # INPUT   projects/<project_id>/<any>.xlsx   — bilingual Excel from XTM
 # OUTPUT  projects/<project_id>/<name>_translated.xlsx
 # ============================================================
 
+import argparse
 import os
 import glob
 import json
@@ -27,6 +31,10 @@ from pathlib import Path
 from lara_sdk import AccessKey, TextBlock, Translator
 
 from project_log import project_dir as _pdir
+
+_args = argparse.ArgumentParser()
+_args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args = _args.parse_args()
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
@@ -74,7 +82,13 @@ if memory_ids:
 # Load Excel
 # ============================================================
 
-proj_dir = _pdir()
+if _args.pid:
+    proj_dir = Path(__file__).parent / "projects" / _args.pid
+    if not proj_dir.exists():
+        print(f"ERROR: Project folder not found: {proj_dir}")
+        exit()
+else:
+    proj_dir = _pdir()
 
 _glossary_key = f"glossary_{proj_dir.name}"
 if _glossary_key in _glossaries_registry:

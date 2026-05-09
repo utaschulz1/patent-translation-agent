@@ -11,10 +11,14 @@
 #   4. Uploads a clean en/de CSV
 #   5. Writes LARA_GLOSSARY_IDS=<id> to lara_glossaries.json for lara_translate.py to use
 #
+# USAGE   python lara_glossary_upload.py [--pid <project_id>]
+#           --pid   project folder name under projects/; defaults to current project context
+#
 # SETUP
 #   LARA_ACCESS_KEY_ID and LARA_ACCESS_KEY_SECRET must be in .env
 # ============================================================
 
+import argparse
 import csv
 import os
 import tempfile
@@ -25,6 +29,10 @@ from dotenv import load_dotenv
 from lara_sdk import AccessKey, Translator
 
 from project_log import project_dir as _pdir
+
+_args = argparse.ArgumentParser()
+_args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args = _args.parse_args()
 
 ENV_PATH = Path(__file__).parent / ".env"
 
@@ -47,14 +55,27 @@ lara = Translator(AccessKey(id=access_key_id, secret=access_key_secret))
 # Find project glossary
 # ============================================================
 
-proj_dir = _pdir()
-ctx_files = list(proj_dir.glob("glossary_*.csv"))
-if not ctx_files:
-    print(f"ERROR: No glossary_*.csv found in '{proj_dir}'.")
+if _args.pid:
+    proj_dir = Path(__file__).parent / "projects" / _args.pid
+    if not proj_dir.exists():
+        print(f"ERROR: Project folder not found: {proj_dir}")
+        exit()
+else:
+    proj_dir = _pdir()
+project_id = proj_dir.name
+
+# Prefer the LLM-cleaned glossary; fall back to the raw project glossary.
+clean_path = proj_dir / f"clean_glossary_{project_id}.csv"
+raw_path   = proj_dir / f"glossary_{project_id}.csv"
+
+if clean_path.exists():
+    glossary_path = clean_path
+elif raw_path.exists():
+    glossary_path = raw_path
+else:
+    print(f"ERROR: No glossary CSV found in '{proj_dir}'.")
     exit()
 
-glossary_path = ctx_files[0]
-project_id = glossary_path.stem.replace("glossary_", "")
 print(f"Project:  {project_id}")
 print(f"Glossary: {glossary_path.name}")
 
@@ -82,6 +103,9 @@ for row in reader:
     en = row.get("EN", "").strip()
     de = row.get("DE", "").strip()
     if not en or not de:
+        skipped += 1
+        continue
+    if en.upper().startswith("EPO EN:") or de.upper().startswith("EPO DE:"):
         skipped += 1
         continue
     terms[en] = de
