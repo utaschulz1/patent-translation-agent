@@ -66,8 +66,11 @@ def main() -> None:
 
     print(f"\nMoved {len(files)} file(s).")
 
-    project_folder.rmdir()
-    print(f"Deleted:  {project_folder}")
+    try:
+        project_folder.rmdir()
+        print(f"Deleted:  {project_folder}")
+    except PermissionError:
+        print(f"Warning:  Could not delete {project_folder} (OneDrive sync lock — delete manually)")
 
 
 if __name__ == "__main__":
