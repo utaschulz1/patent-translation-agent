@@ -1,50 +1,52 @@
 EN,DE
-comprise,umfassen
-comprising,umfassend
-have,aufweisen
-having, aufweisen (nicht mit)
-is,ist
-are,sind
-surface,Oberfläche
-at least,mindestens
-consist of,bestehen aus
-contain,enthalten
-to map,zuordnen
-to associate, verknüpfen,HUAWxtm
-to form,ausbilden
-return,zurückgeben
-transmissive,durchlässig
-type,Art
-portion,Abschnitt
+comprise,umfassen,
+comprising,umfassend,
+include,beinhalten,
+have,aufweisen,
+having, aufweisen,(nicht mit)
+surface,Oberfläche,
+at least,mindestens,
+consist,bestehen,
+contain,enthalten,
+obtain,erhalten,
+connect,verbinden,
+associate,verknüpfen,
+map,zuordnen,
+assign,zuweisen,
+form,ausbilden,
+return,zurückgeben,
+detect,detektieren,
+transmissive,durchlässig,
+type,Art,
+portion,Abschnitt,
 process,Vorgang,HUAWxtm
-prosessing,Verarbeiten
-include,beinhalten
-have,aufweisen
-perform,durchführen
-enable,in die Lage versetzen
-so that,so dass
-is different,ist verschieden
-upstream,stromaufwärts gelegen
-downstream,stromabwärts gelegen
-apparatus,Vorrichtung
+processing,Verarbeiten,
+perform,durchführen,
+enable,in die Lage versetzen,
+so that,so dass,
+different,verschieden,
+upstream,stromaufwärts gelegen,
+downstream,stromabwärts gelegen,
 according to claim,nach Anspruch
-feature,Merkmal
-is located,befindet sich
-subsequent,anschließend
-method for producing,Verfahren zum Herstellen
-is in a correspondence with, steht in einer Korrespondenz mit
-correspond,korrespondieren
-in a case,in einem Fall
-under,unterhalb
-slot,slot(Elektronik)/Schlitz(Mechnik)
-continuous wave,ungedämpfte Welle
-interleaved,verschachtelt
-plurality,Vielzahl
-based on,basierend auf
-such that,derart dass
-such as,wie
-any,beliebig
-given,gegeben
-a same,ein gleiches
-via,über
-desease/disorder,Erkrankung (alt. Störung)
+feature,Merkmal,
+subsequent,anschließend,
+method for producing,Verfahren zum Herstellen,
+correspond,korrespondieren,
+in a case,in einem Fall,
+under,unterhalb,
+slot,slot,(Elektronik)/Schlitz(Mechnik)
+continuous wave,ungedämpfte Welle,
+interleaved,verschachtelt,
+plurality,Vielzahl,
+based on,basierend auf,
+such that,derart dass,
+such as,wie,
+any,beliebig,
+given,gegeben,
+a same,ein gleiches,
+via,über,
+disease,Erkrankung,
+disorder,Störung,
+region,Region,
+threshold,Schwellenwert,
+optionally,optional,
