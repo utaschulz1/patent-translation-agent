@@ -2,6 +2,9 @@
 glossary_compare_revised_translation.py — Verb and noun glossary compliance check.
 No LLM used — only lookup-based lemmatization and truncation matching.
 
+Usage: python glossary_compare_revised_translation.py [--pid <project_id>]
+  --pid   project folder name under projects/; defaults to current project context
+
 Reads the *_translated.xlsx for the active project, copies ID/EN/DE
 into a new revised_translation_checks.xlsx, then annotates column D with
 glossary mismatches found via lookup-based lemmatization (verbs) and
@@ -19,6 +22,7 @@ checks (e.g. "umfass*" without "compris*", "Vielzahl" without "plurality") are
 handled by the linter instead.
 """
 
+import argparse
 import glob
 import json
 import re
@@ -31,6 +35,10 @@ from openpyxl.styles import Alignment
 import pandas as pd
 
 import project_log
+
+_args = argparse.ArgumentParser()
+_args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args = _args.parse_args()
 
 HERE = Path(__file__).parent
 HEADER_ROWS = 3  # rows 1–3 are filename / column-name / language lines in the xlsx
@@ -147,14 +155,20 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
 
 # ── Project glossary ──────────────────────────────────────────────────────────
 
-proj_dir = project_log.project_dir()
+if _args.pid:
+    proj_dir = Path(__file__).parent / "projects" / _args.pid
+    if not proj_dir.exists():
+        print(f"ERROR: Project folder not found: {proj_dir}")
+        exit()
+else:
+    proj_dir = project_log.project_dir()
 
 glossary_files = [
-    f for f in glob.glob(str(proj_dir / "glossary_*.csv"))
+    f for f in glob.glob(str(proj_dir / "clean_glossary_*.csv"))
     if not any(x in f for x in ("results", "flags"))
 ]
 if not glossary_files:
-    raise FileNotFoundError(f"No glossary_*.csv found in {proj_dir}")
+    raise FileNotFoundError(f"No clean_glossary_*.csv found in {proj_dir}")
 
 gloss_df = pd.read_csv(
     glossary_files[0], encoding="utf-8-sig",
@@ -173,7 +187,9 @@ for _, row in gloss_df.iterrows():
     en_lemma = en_verb_lookup.get(en_raw)
     if en_lemma is None:        # not a known verb, skip
         continue
-    de_lemma = de_verb_lookup.get(de_raw, de_raw)
+    de_lemma = de_verb_lookup.get(de_raw)
+    if de_lemma is None:         # DE side is a noun or unknown — not a verb pair, skip
+        continue
     glossary_verb_lookup.setdefault(en_lemma, de_lemma)
 
 print(f"Glossary: {glossary_files[0]}")
