@@ -142,6 +142,15 @@ if START_SEGMENT_ID or END_SEGMENT_ID:
 
 out_path = input_path.replace(".xlsx", "_translated.xlsx")
 
+if os.path.exists(out_path):
+    while True:
+        try:
+            with open(out_path, "a"):
+                pass
+            break
+        except PermissionError:
+            input(f"  {os.path.basename(out_path)} is open in Excel — close it, then press Enter...")
+
 resuming = os.path.exists(out_path) and not FORCE_RETRANSLATE
 if resuming:
     wb = openpyxl.load_workbook(out_path)
@@ -224,6 +233,14 @@ for i, seg in enumerate(segments):
     time.sleep(0.2)
 
 print(f"\nDone. {len(translations)} translated, {len(errors)} errors.")
+
+while True:
+    try:
+        wb.save(out_path)
+        break
+    except PermissionError:
+        input(f"\n  Could not save — close {os.path.basename(out_path)} in Excel, then press Enter to retry...")
+
 print(f'Output: "{out_path}".')
 
 if errors:
