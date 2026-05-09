@@ -32,6 +32,7 @@ Translate the gerund **"comprising"** as **"umfassend"** (participial constructi
 | EN | DE (avoid) | DE (preferred) |
 |---|---|---|
 | A blind spot warning system, comprising a controller comprising… | ~~das eine Steuervorrichtung umfasst, das/die … umfasst~~ | **umfassend eine Steuervorrichtung, umfassend…** |
+| A system comprising X, the system comprising Y | ~~System, das X aufweist, wobei das System Y umfasst~~ | **System, das X aufweist, das System Y umfassend** |
 
 - **"comprise"** (finite verb) → **"umfassen"** (relative clause with correct article is acceptable here).
 - **"(further) comprising"** → **(ferner) umfassend** (preferred); "der/die/das … ferner umfasst" is acceptable as alternative if used consistently throughout the patent.
