@@ -46,9 +46,9 @@ from xtm_initial_download import (
 
 AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
 KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
-RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~15 ops)
-TEST_SEGMENT_LIMIT: int | None = None   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
-START_FROM_SEGMENT_ID: int = 32     # skip segments with ID below this value
+RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~20+ ops), immediate reconnect causes server lock for some seconds.
+TEST_SEGMENT_LIMIT: int | None = 20   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
+START_FROM_SEGMENT_ID: int = 23     # skip segments with ID below this value
 DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
 
 
@@ -90,9 +90,18 @@ def _claim_group_task(
     print(f"  Claim response: {r.status_code} — {r.text[:300]}")
 
     if not r.ok:
+        print("  Warning: claim request returned an error status — actor may still be USERGROUP.")
+        return task
+
+    try:
+        resp_json = r.json()
+    except Exception:
+        resp_json = {}
+
+    if resp_json.get("session-expired"):
         print(
-            "  Warning: claim request failed.  Will attempt to open editor anyway.\n"
-            "  If the next step fails, please claim the task manually in XTM and re-run."
+            "  Session expired during claim — the uust token is no longer valid.\n"
+            "  Automatic claim did not complete."
         )
         return task
 
@@ -172,7 +181,7 @@ def _find_excel(project_id: str) -> Path:
     if not matches:
         raise RuntimeError(
             f"No *_revised_translation_checks*.xlsx found in {pre}\n"
-            f"Run the glossary check step first."
+            f"Run the archive step first."
         )
     if len(matches) > 1:
         print(f"  Warning: multiple Excel files found, using {matches[0].name}")
@@ -517,6 +526,7 @@ def _upload_via_stomp(
         consecutive_errors = 0
         _MAX_CONSECUTIVE_ERRORS = 2  # abort early if server keeps rejecting every save
         _debug_printed = 0
+        _xtm_skipped: set[int] = set()  # uids XTM auto-confirmed (ICE); must not overwrite
 
         for i, (unit_id, text) in enumerate(segments):
             # --- Reconnect (periodic session refresh) ---
@@ -525,6 +535,14 @@ def _upload_via_stomp(
 
             is_last = (i == total - 1)
             next_uid = segments[i + 1][0] if not is_last else None
+
+            # --- Detect segments XTM already auto-confirmed as ICE matches ---
+            if unit_id in _xtm_skipped:
+                _xtm_skipped.discard(unit_id)
+                results[unit_id] = "confirmed (ICE - auto-detected)"
+                print(f"  [{unit_id}/{last_id}] confirmed (ICE - XTM skipped over it, not overwriting)")
+                maybe_keepalive()
+                continue
 
             # --- Skip empty segments ---
             if not text:
@@ -634,6 +652,7 @@ def _upload_via_stomp(
                 # Wait for SAVE_RESPONSE (this segment) and TRANS_UNIT_UPDATED (next segment).
                 save_resp = None
                 next_tu_ready = (next_uid is None)
+                _drain_seen_uids: set[int] = set()
                 deadline = time.time() + 9.0
                 while time.time() < deadline and not (save_resp is not None and next_tu_ready):
                     try:
@@ -656,6 +675,7 @@ def _upload_via_stomp(
                             print(f"    [DRAIN] TU_UPDATED uid={uid} (want {next_uid}){' ←' if uid == next_uid else ''}")
                             if uid is not None:
                                 tu_updates[uid] = p
+                                _drain_seen_uids.add(uid)
                             if uid == next_uid:
                                 next_tu_ready = True
                         elif mtype == "SAVE_RESPONSE":
@@ -666,7 +686,13 @@ def _upload_via_stomp(
                             print(f"    [DRAIN] other: {mtype}")
 
                 if not next_tu_ready:
-                    print(f"  [{unit_id}/{last_id}] Warning: no TRANS_UNIT_UPDATED for segment {next_uid}, tags may be missing")
+                    if next_uid is not None and any(uid > next_uid for uid in _drain_seen_uids):
+                        # XTM advanced past next_uid — it auto-confirmed it as an ICE match.
+                        # Saving Excel text into it would overwrite the correct auto-fill.
+                        _xtm_skipped.add(next_uid)
+                        print(f"  [{unit_id}/{last_id}] XTM auto-confirmed segment {next_uid} (ICE), will skip")
+                    else:
+                        print(f"  [{unit_id}/{last_id}] Warning: no TRANS_UNIT_UPDATED for segment {next_uid}, tags may be missing")
 
                 # --- Record result ---
                 result_type = save_resp.get("result", {}).get("type", "UNKNOWN") if save_resp else "TIMEOUT"
@@ -723,6 +749,9 @@ def _upload_via_stomp(
 
 def run(project_id: str) -> None:
     """Open XTM Workbench in write mode and upload revised translations."""
+    # Fail fast before spending time on XTM login
+    excel_path = _find_excel(project_id)
+
     username, password = _load_creds()
 
     session = requests.Session()
@@ -749,6 +778,13 @@ def run(project_id: str) -> None:
 
     print("Step 3 — Claiming task for INTERNALLINGUIST (if needed)...")
     task = _claim_group_task(session, task, uust, project_id)
+    actor_after = task["additionalData"].get("actorType", "?")
+    if actor_after != "INTERNALLINGUIST":
+        raise RuntimeError(
+            f"Task actor is still '{actor_after}' — automatic claim failed.\n"
+            "  Please accept the task manually in XTM (open the project → accept/claim the step),\n"
+            "  then re-run this script."
+        )
 
     print("Step 4 — Opening workbench editor (write mode)...")
     wb_url, session_token = _open_editor_write(session, task, uust)
@@ -760,7 +796,6 @@ def run(project_id: str) -> None:
     _keepalive(session)
 
     print("Step 5 — Reading translations from Excel...")
-    excel_path = _find_excel(project_id)
     segments = _read_translations(excel_path)
     if START_FROM_SEGMENT_ID > 1:
         segments = [(uid, t) for uid, t in segments if uid >= START_FROM_SEGMENT_ID]
@@ -801,7 +836,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python xtm_upload_translations.py <project_id>")
         raise SystemExit(1)
-    run(sys.argv[1])
+    try:
+        run(sys.argv[1])
+    except (RuntimeError, TimeoutError) as e:
+        print(f"\nError: {e}")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
