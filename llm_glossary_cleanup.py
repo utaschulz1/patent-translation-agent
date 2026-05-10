@@ -4,12 +4,14 @@
 # Resolves glossary inconsistencies using DeepSeek via OpenRouter.
 #
 # INPUT
-#   projects/<id>/verb_segment_pairs.csv       all verb pairs with context
-#   projects/<id>/noun_inconsistency_table.csv noun conflicts with context
-#   projects/<id>/verb_canonical_glossary.csv  consistent/inconsistent verb classification
-#   projects/<id>/noun_canonical_glossary.csv  consistent/inconsistent noun classification
-#   projects/<id>/glossary_<id>.csv            EPO title source
-#   standard_glossary.csv                      locked anchors
+#   projects/<id>/verb_segment_pairs.csv          all verb pairs with context
+#   projects/<id>/noun_inconsistency_table.csv    noun conflicts with context
+#   projects/<id>/verb_canonical_glossary.csv     consistent/inconsistent verb classification
+#   projects/<id>/noun_canonical_glossary.csv     consistent/inconsistent noun classification
+#   projects/<id>/capability_segment_pairs.csv    capability-predicate pairs (optional)
+#   projects/<id>/capability_canonical_glossary.csv  (optional)
+#   projects/<id>/glossary_<id>.csv               EPO title source
+#   standard_glossary.csv                         locked anchors
 #
 # OUTPUT
 #   projects/<id>/glossary_<id>.csv            clean, resolved two-column glossary
@@ -137,6 +139,13 @@ and target sentence. Decide on exactly one DE form per EN phrase.
 Compound nouns are sorted shortest-first so you can resolve base terms before
 the compounds that contain them.
 
+**inconsistent_capabilities**
+Capability predicates ("is configured to", "is adapted for", etc.) where the
+engine used more than one DE infinitive. Same format as inconsistent_verbs.
+IMPORTANT: the majority DE for these is often wrong — translation engines
+render capability predicates inconsistently. Always check standard_glossary
+first; if no entry exists, choose the most natural German patent infinitive.
+
 ---
 
 ## Strategy
@@ -187,6 +196,14 @@ Conflict resolution examples:
       associate → verknüpfen
       map       → zuordnen
       link      → verlinken (or verknüpfen if associate is absent)
+
+### Step 2b — Resolve inconsistent capability predicates
+
+For each entry in inconsistent_capabilities:
+  1. If the EN term has a standard_glossary entry, use that DE — the majority
+     observed translation is unreliable for these constructions.
+  2. Otherwise choose the most natural German patent infinitive.
+  3. Verify no DE duplicate with the rest of the consolidated list.
 
 ### Step 3 — Resolve inconsistent nouns
 
@@ -254,6 +271,7 @@ verb_pairs_path  = proj_dir / "verb_segment_pairs.csv"
 verb_can_path    = proj_dir / "verb_canonical_glossary.csv"
 noun_can_path    = proj_dir / "noun_canonical_glossary.csv"
 noun_incon_path  = proj_dir / "noun_inconsistency_table.csv"
+cap_pairs_path   = proj_dir / "capability_segment_pairs.csv"
 glossary_path       = proj_dir / f"glossary_{project_id}.csv"
 clean_glossary_path = proj_dir / f"clean_glossary_{project_id}.csv"
 
@@ -286,6 +304,14 @@ print(f"Standard glossary: {len(standard)} anchors.")
 def _appears_in(en_term: str, text: str) -> bool:
     term_lower = en_term.lower()
     if re.search(r"\b" + re.escape(term_lower) + r"\b", text):
+        return True
+    # Catch inflected forms: "form" → "formed", "forming", "forms".
+    # Critical for standard_glossary terms that only appear inflected in patent
+    # source text (e.g. "form" never appears bare — only as "formed in the sled").
+    # Without this, _appears_in("form", text) returns False and the term is
+    # silently excluded from the clean glossary even though it is in the source.
+    # Explicit suffix list avoids false matches like "formal" or "former".
+    if re.search(r"\b" + re.escape(term_lower) + r"(?:s|d|ed|ing|en|es)\b", text):
         return True
     if term_lower.startswith("to "):
         bare = term_lower[3:].strip()
@@ -356,6 +382,26 @@ for _, row in vdf.iterrows():
 print(f"Verb pairs: {len(verb_groups)} EN verbs.")
 
 
+# ── Read capability_segment_pairs (optional) ──────────────────────────────────
+# columns: segment_id, en_verb, de_verb, source_text, target_text
+
+cap_groups: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
+
+if cap_pairs_path.exists():
+    cdf = pd.read_csv(cap_pairs_path, encoding="utf-8-sig")
+    for _, row in cdf.iterrows():
+        en  = str(row.get("en_verb",      "")).strip().lower()
+        de  = str(row.get("de_verb",      "")).strip()
+        src = str(row.get("source_text",  "")).strip()
+        tgt = str(row.get("target_text",  "")).strip()
+        if en and de:
+            if len(cap_groups[en][de]) < MAX_INSTANCES:
+                cap_groups[en][de].append({"source": src, "target": tgt})
+    print(f"Capability pairs: {len(cap_groups)} EN capability verbs.")
+else:
+    print("Capability pairs: not found — skipped.")
+
+
 # ── Read noun_canonical_glossary ──────────────────────────────────────────────
 # columns: EN Phrase, DE Phrase, Count, Total EN Occurrences, Canonical
 
@@ -412,6 +458,24 @@ for en_verb, de_dict in sorted(verb_groups.items()):
         inconsistent_verbs.append({"en": en_verb, "instances": instances})
 
 print(f"Verbs  — consistent: {len(consistent_verbs)}, inconsistent: {len(inconsistent_verbs)}.")
+
+
+# ── Classify capability predicates ────────────────────────────────────────────
+
+consistent_capabilities:   dict[str, str] = {}
+inconsistent_capabilities: list[dict]     = []
+
+for en_verb, de_dict in sorted(cap_groups.items()):
+    if len(de_dict) == 1:
+        consistent_capabilities[en_verb] = next(iter(de_dict))
+    else:
+        instances = []
+        for de, examples in de_dict.items():
+            for ex in examples[:MAX_INSTANCES]:
+                instances.append({"de": de, "source": ex["source"], "target": ex["target"]})
+        inconsistent_capabilities.append({"en": en_verb, "instances": instances})
+
+print(f"Capabilities — consistent: {len(consistent_capabilities)}, inconsistent: {len(inconsistent_capabilities)}.")
 
 
 # ── Classify nouns (shortest phrase first for compound consistency) ────────────
@@ -479,10 +543,11 @@ input_data = {
     ],
     "consistent_terms": [
         {"en": en, "de": de}
-        for en, de in {**consistent_verbs, **consistent_nouns}.items()
+        for en, de in {**consistent_verbs, **consistent_nouns, **consistent_capabilities}.items()
     ],
     "inconsistent_verbs": inconsistent_verbs,
     "inconsistent_nouns": inconsistent_nouns,
+    "inconsistent_capabilities": inconsistent_capabilities,
 }
 
 input_json_str = json.dumps(input_data, ensure_ascii=False, indent=2)
@@ -493,8 +558,15 @@ print(f"\nJSON input: ~{estimated_tokens:,} tokens estimated.")
 # ── Helpers: parse and validate LLM response ─────────────────────────────────
 
 def parse_response(raw: str) -> list[dict]:
-    if raw.startswith("```"):
+    # Strip markdown fence wherever it appears (LLM sometimes adds prose before it)
+    fence = raw.find("```")
+    if fence != -1:
+        raw = raw[fence:]
         raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+    # Fallback: find the JSON array start in case there is still leading prose
+    bracket = raw.find("[")
+    if bracket > 0:
+        raw = raw[bracket:]
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError as e:
@@ -629,7 +701,7 @@ def _norm_en(en: str) -> str:
 output_en = {_norm_en(en) for en, _ in clean_rows}
 filled: list[tuple[str, str]] = []
 
-for en, de in {**consistent_verbs, **consistent_nouns}.items():
+for en, de in {**consistent_verbs, **consistent_nouns, **consistent_capabilities}.items():
     if _norm_en(en) not in output_en:
         filled.append((en, de))
         clean_rows.append((en, de))

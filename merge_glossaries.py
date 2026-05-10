@@ -34,6 +34,11 @@ def _sources(proj_dir: Path) -> list[dict]:
             "de_col": "DE Phrase",
         },
         {
+            "path": proj_dir / "capability_canonical_glossary.csv",
+            "en_col": "EN Verb",
+            "de_col": "DE Verb",
+        },
+        {
             "path": HERE / "standard_glossary.csv",
             "en_col": "EN",
             "de_col": "DE",

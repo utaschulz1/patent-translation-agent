@@ -11,7 +11,7 @@ Steps
     4   Manual mode: paste XTRF job URL instead of reading email
     5a  Upload standard glossary (filtered to source terms) to Lara (requires .xlsx in project folder)
     5b  Pre-translation with Lara Translate API (requires *.xlsx in project folder)
-    6   Consistency checks (verb + noun comparison)
+    6   Consistency checks (verb + noun + capability-predicate comparison)
     6b  Merge glossaries
     6c  LLM glossary cleanup → produces clean_glossary_<id>.csv
     --- MANUAL REVIEW: check clean_glossary_<id>.csv, edit if needed, press Enter ---
@@ -30,7 +30,9 @@ Usage:
     python workflow_lara.py                     # step 3 (email) → 5 → 6 → 6b → 6c → pause → 7 → 8
     python workflow_lara.py SAGI_2604_P0039     # same, filtered to that project ID
     python workflow_lara.py --manual            # step 4 (manual URL) → same
+    python workflow_lara.py --from-5a           # resume from step 5a (source doc already in project folder)
     python workflow_lara.py --from-6c           # resume from step 6c (project already in log)
+    python workflow_lara.py --from-7            # resume from step 7 (after manual review)
 """
 
 import subprocess
@@ -91,6 +93,7 @@ def step6():
     print("Step 6 — Consistency checks")
     _run(HERE / "LLM_verb_comparison_xlsx.py")
     _run(HERE / "LLM_noun_comparison_xlsx.py")
+    _run(HERE / "LLM_capability_comparison_xlsx.py")
 
 
 def step6b(project_id: str):
@@ -125,16 +128,20 @@ def step8():
 
 if __name__ == "__main__":
     manual    = "--manual"  in sys.argv
+    from_5a   = "--from-5a" in sys.argv
     from_6c   = "--from-6c" in sys.argv
     from_7    = "--from-7"  in sys.argv
     args      = [a for a in sys.argv[1:] if not a.startswith("--")]
     target    = args[0] if args else None
 
-    if from_6c or from_7:
+    if from_5a or from_6c or from_7:
         project_id = project_log.project_dir().name
-        print(f"Resuming from step {'6c' if from_6c else '7'} — project: {project_id}")
+        label = "5a" if from_5a else "6c" if from_6c else "7"
+        print(f"Resuming from step {label} — project: {project_id}")
     else:
         project_id = step4() if manual else step3(target_project_id=target)
+
+    if not from_6c and not from_7:
         step5a()
         step5b()
         step6()
