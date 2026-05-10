@@ -101,11 +101,17 @@ print(f"Source text: {len(source_text):,} chars, {len(data_df.dropna(subset=['So
 def _appears_in(en_term: str, text: str) -> bool:
     """Return True if en_term (case-insensitive, whole-word) occurs in text.
 
-    For 'to X' entries (infinitive prefix), also tries the bare verb so that
-    'to map' matches text containing 'map', 'maps', 'mapped', 'mapping'.
+    Also matches common inflected forms: "form" matches "formed", "forming",
+    "forms". This is critical for standard_glossary terms that only appear
+    inflected in patent source text — without it, "form" would be silently
+    excluded from the upload filter even though "formed" is in the source.
+    Explicit suffix list avoids false-positives like "formal" or "former".
+    For 'to X' entries, also tries the bare verb with any suffix.
     """
     term_lower = en_term.lower()
     if re.search(r"\b" + re.escape(term_lower) + r"\b", text):
+        return True
+    if re.search(r"\b" + re.escape(term_lower) + r"(?:s|d|ed|ing|en|es)\b", text):
         return True
     if term_lower.startswith("to "):
         bare = term_lower[3:].strip()
