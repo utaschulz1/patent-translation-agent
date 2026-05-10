@@ -477,7 +477,7 @@ def durch_verwendung(source: str, target: str) -> str | None:
 
 def unter_verwendung(source: str, target: str) -> str | None:
     """Flag 'unter Verwendung' in target when EN source contains 'using'.
-    Prefer 'verwendend' (present participle) over the result-noun construction.
+    Prefer 'unter Verwenden/mittels'
     """
     if _USING_EN_RE.search(source) and _UNTER_VERWENDUNG_RE.search(target):
         return 'warning: "unter Verwendung" — prefer "verwendend" (present participle)'
