@@ -76,8 +76,9 @@ def main():
     proj_dir = project_dir()
     glossary_path = proj_dir / f"glossary_{project_id}.csv"
     if not glossary_path.exists():
-        print(f"Project glossary not found: {glossary_path}")
-        raise SystemExit(1)
+        print(f"Project glossary not found — creating empty: {glossary_path.name}")
+        with open(glossary_path, "w", newline="", encoding="utf-8-sig") as f:
+            csv.DictWriter(f, fieldnames=OUT_HEADER).writeheader()
 
     all_rows: list[dict] = []
     for source in _sources(proj_dir):
