@@ -47,8 +47,8 @@ from xtm_initial_download import (
 AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
 KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
 RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~20+ ops), immediate reconnect causes server lock for some seconds.
-TEST_SEGMENT_LIMIT: int | None = 20   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
-START_FROM_SEGMENT_ID: int = 23     # skip segments with ID below this value
+TEST_SEGMENT_LIMIT: int | None = None   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
+START_FROM_SEGMENT_ID: int = 3     # skip segments with ID below this value
 DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
 
 
