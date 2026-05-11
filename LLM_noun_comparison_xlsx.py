@@ -64,7 +64,7 @@ proj_dir = _pdir()
 source_files = [f for f in glob.glob(str(proj_dir / "*_translated.xlsx")) if not os.path.basename(f).startswith("~$")]
 if not source_files:
     print(f"ERROR: No *_translated.xlsx file found in '{proj_dir}'. Run ipappify_translate.py first.")
-    exit()
+    exit(1)
 if len(source_files) > 1:
     print(f"Multiple translated files found, using: {source_files[0]}")
 input_path = source_files[0]
@@ -73,7 +73,7 @@ try:
     raw_df = pd.read_excel(input_path, header=None, engine="openpyxl")
 except Exception as e:
     print(f"ERROR: Could not read Excel file: {e}")
-    exit()
+    exit(1)
 
 print(f"Processing file: {raw_df.iloc[0, 0]}")
 
@@ -124,7 +124,7 @@ def build_batch_prompt(segments):
 api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
     print("ERROR: OPENROUTER_API_KEY not found in .env file.")
-    exit()
+    exit(1)
 
 client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
 
@@ -202,7 +202,7 @@ print(f"\nTotal noun phrase pairs extracted: {len(all_pairs)}")
 
 if not all_pairs:
     print("No noun phrase pairs extracted. Check API connection and model response above.")
-    exit()
+    exit(1)
 
 # ============================================================
 # PHASE 1b — Lemmatize extracted noun phrase forms
