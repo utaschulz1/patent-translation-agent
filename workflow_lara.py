@@ -30,9 +30,12 @@ Usage:
     python workflow_lara.py                     # step 3 (email) → 5 → 6 → 6b → 6c → pause → 7 → 8
     python workflow_lara.py SAGI_2604_P0039     # same, filtered to that project ID
     python workflow_lara.py --manual            # step 4 (manual URL) → same
-    python workflow_lara.py --from-5a           # resume from step 5a (source doc already in project folder)
-    python workflow_lara.py --from-6c           # resume from step 6c (project already in log)
-    python workflow_lara.py --from-7            # resume from step 7 (after manual review)
+    python workflow_lara.py --from-5a                        # resume from step 5a (source doc already in project folder)
+    python workflow_lara.py --from-6                         # resume from step 6 (re-run LLM checks + merge + cleanup)
+    python workflow_lara.py --from-6 --seg-range 421-488    # same, claims only
+    python workflow_lara.py --from-6b                        # resume from step 6b (LLM checks done, merge glossaries)
+    python workflow_lara.py --from-6c                        # resume from step 6c (glossary merged, run LLM cleanup)
+    python workflow_lara.py --from-7                         # resume from step 7 (after manual review)
 """
 
 import subprocess
@@ -77,7 +80,7 @@ def step5a():
     _run(HERE / "lara_glossary_upload_standard.py")
 
 
-def step5b():
+def step5b(seg_range: str | None = None):
     print("Step 5 — Pre-translation with Lara")
     ctx = project_log.load_context()
     proj_folder = Path(ctx["project_folder"])
@@ -86,14 +89,17 @@ def step5b():
         input(f"  Place XTM Excel in {proj_folder}, then press Enter...")
     else:
         print(f"  Found: {existing[0].name}")
-    _run(HERE / "lara_translate.py")
+    range_args = ["--seg-range", seg_range] if seg_range else []
+    _run(HERE / "lara_translate.py", *range_args)
 
 
-def step6():
-    print("Step 6 — Consistency checks")
-    _run(HERE / "LLM_verb_comparison_xlsx.py")
-    _run(HERE / "LLM_noun_comparison_xlsx.py")
-    _run(HERE / "LLM_capability_comparison_xlsx.py")
+def step6(seg_range: str | None = None):
+    range_args = seg_range.replace("-", " ").split() if seg_range else []
+    label = f" (segments {seg_range})" if seg_range else ""
+    print(f"Step 6 — Consistency checks{label}")
+    _run(HERE / "LLM_verb_comparison_xlsx.py",        *range_args)
+    _run(HERE / "LLM_noun_comparison_xlsx.py",        *range_args)
+    _run(HERE / "LLM_capability_comparison_xlsx.py",  *range_args)
 
 
 def step6b(project_id: str):
@@ -121,34 +127,45 @@ def step7():
     _run(HERE / "lara_glossary_upload.py")
 
 
-def step8():
+def step8(seg_range: str | None = None):
     print("Step 8 — Re-translate with clean glossary")
-    _run(HERE / "lara_translate.py")
+    range_args = ["--seg-range", seg_range] if seg_range else []
+    _run(HERE / "lara_translate.py", *range_args)
 
 
 if __name__ == "__main__":
     manual    = "--manual"  in sys.argv
     from_5a   = "--from-5a" in sys.argv
+    from_6    = "--from-6"  in sys.argv
+    from_6b   = "--from-6b" in sys.argv
     from_6c   = "--from-6c" in sys.argv
     from_7    = "--from-7"  in sys.argv
+    seg_range = next(
+        (sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--seg-range" and i + 1 < len(sys.argv)),
+        None,
+    )
     args      = [a for a in sys.argv[1:] if not a.startswith("--")]
     target    = args[0] if args else None
 
-    if from_5a or from_6c or from_7:
+    if from_5a or from_6 or from_6b or from_6c or from_7:
         project_id = project_log.project_dir().name
-        label = "5a" if from_5a else "6c" if from_6c else "7"
+        label = "5a" if from_5a else "6" if from_6 else "6b" if from_6b else "6c" if from_6c else "7"
         print(f"Resuming from step {label} — project: {project_id}")
     else:
         project_id = step4() if manual else step3(target_project_id=target)
 
-    if not from_6c and not from_7:
+    if not from_6 and not from_6b and not from_6c and not from_7:
         step5a()
-        step5b()
-        step6()
+        step5b(seg_range)
+
+    if not from_6b and not from_6c and not from_7:
+        step6(seg_range)
+
+    if not from_6c and not from_7:
         step6b(project_id)
 
     if not from_7:
         step6c()
         manual_review(project_id)
     step7()
-    step8()
+    step8(seg_range)

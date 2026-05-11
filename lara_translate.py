@@ -34,6 +34,8 @@ from project_log import project_dir as _pdir
 
 _args = argparse.ArgumentParser()
 _args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args.add_argument("--seg-range", default=None, metavar="START-END",
+                   help="Translate only this segment range, e.g. 421-488.")
 _args = _args.parse_args()
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
@@ -46,7 +48,12 @@ CONTEXT_AFTER  = 1   # following segments as context; total window max 128
 
 START_SEGMENT_ID  = None   # e.g. "668" — start from this segment; None = first
 END_SEGMENT_ID    = None   # e.g. "700" — stop after this segment; None = last
-FORCE_RETRANSLATE = True  # True = ignore existing output and retranslate everything
+FORCE_RETRANSLATE = True   # True = ignore existing output and retranslate everything
+
+if _args.seg_range:
+    _parts = _args.seg_range.split("-")
+    START_SEGMENT_ID = _parts[0].strip()
+    END_SEGMENT_ID   = _parts[1].strip() if len(_parts) > 1 else _parts[0].strip()
 
 # ============================================================
 # Credentials
