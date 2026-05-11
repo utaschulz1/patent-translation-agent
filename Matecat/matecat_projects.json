@@ -1,0 +1,69 @@
+{
+  "clients": {
+    "LABI": {
+      "template_id": 15714,
+      "tm_key": "15036a169217ad6011f6",
+      "tm_key_2": "a9139183845a903f7860",
+      "projects": [
+        {
+          "project_id": "LABI_2605_P0009",
+          "mc_id": 12757350,
+          "mc_pass": "62f833bb695c",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12757350&password=62f833bb695c"
+        },
+        {
+          "project_id": "LABI_2605_P0009",
+          "mc_id": 12757392,
+          "mc_pass": "8b69561d2f60",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12757392&password=8b69561d2f60"
+        }
+      ]
+    },
+    "CATG": {
+      "template_id": 15715,
+      "tm_key": "4b38b14d63b3439a89df",
+      "tm_key_2": "a9139183845a903f7860",
+      "projects": [
+        {
+          "project_id": "CATG_2605_P0222",
+          "mc_id": 12759390,
+          "mc_pass": "10d84051e3c0",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12759361&password=10d84051e3c0"
+        }
+      ],
+      "glossary_tm_key": "09f0722a233821a5e4dd"
+    },
+    "RTC": {
+      "template_id": 15737,
+      "tm_key": "f749bd2bdb041775fde5",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "RTC_2605_P0826",
+          "mc_id": 12757958,
+          "mc_pass": "25d74c39440a",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12757958&password=25d74c39440a"
+        }
+      ]
+    },
+    "HALA": {
+      "template_id": 15729,
+      "tm_key": "2c5714e93a9c3e20b65a",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "HALA_2605_P0419",
+          "mc_id": 12757618,
+          "mc_pass": "23eea700826a",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12757618&password=23eea700826a"
+        },
+        {
+          "project_id": "HALA_2605_P0419",
+          "mc_id": 12757635,
+          "mc_pass": "5f1560083428",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12757635&password=5f1560083428"
+        }
+      ]
+    }
+  }
+}
