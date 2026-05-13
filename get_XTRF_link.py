@@ -19,11 +19,13 @@ FIRST-TIME SETUP
 
 import base64
 import re
+import sys
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
 import requests as _requests
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -46,7 +48,16 @@ def _get_service():
         creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                print("\nERROR: Gmail token has expired or been revoked.")
+                print("Fix:")
+                print(f"  1. Delete {TOKEN_FILE}")
+                print(f"     (or run:  del \"{TOKEN_FILE}\")")
+                print("  2. Re-run the script — a browser window will open for re-authorisation.")
+                print("  3. Log in with your email and grant access.")
+                sys.exit(1)
         else:
             if not CREDS_FILE.exists():
                 raise FileNotFoundError(
