@@ -59,7 +59,10 @@ def step3(target_project_id: str | None = None) -> str:
     import get_XTRF_link
     extracted = get_XTRF_link.run(target_project_id=target_project_id)
     if not extracted:
-        raise RuntimeError("Step 3: no project found in email intake.")
+        raise RuntimeError(
+            "Step 3: no project found in email intake.\n"
+            "  → Make sure the START email (not the NEW JOB offer) is in the Gmail folder ComunicaDK/TODO."
+        )
     xtrf_url, project_id, msg_id = extracted
     xtrf_job_setup.run(xtrf_url, project_id_override=project_id)
     if not xtm_download.run_workflow(project_id, msg_id=msg_id):
