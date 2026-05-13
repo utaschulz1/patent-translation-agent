@@ -10,10 +10,33 @@ Translation text is extracted from <target> elements, including text inside
 inline tags (<g>, <x/>, etc.).
 
 Usage:
-    - Accept the task in XTM (claim from USERGROUP if needed).
-    - Set START_FROM_SEGMENT_ID and TEST_SEGMENT_LIMIT as needed.
-    - Run:  python matecat_xtm_upload.py <project_id>
-    e.g.    python matecat_xtm_upload.py LABI_2605_P0009
+    python matecat_xtm_upload.py <project_id> [options]
+
+    # Upload all segments
+    python matecat_xtm_upload.py LABI_2605_P0009
+
+    # Select a specific file when the project has multiple tasks (e.g. drawings + claims)
+    python matecat_xtm_upload.py CATG_2605_P0229 --file "Anmeldefassung"
+
+    # Upload a segment range only (replaces setting START_FROM_SEGMENT_ID/TEST_SEGMENT_LIMIT)
+    python matecat_xtm_upload.py CATG_2605_P0229 --seg-range 421-483
+
+    # Re-upload specific segments after matecat_xtm_verify.py found mismatches
+    python matecat_xtm_upload.py CATG_2605_P0229 --segments 421,435,449
+
+    # Combine file selection with a range
+    python matecat_xtm_upload.py CATG_2605_P0229 --file "Anmeldefassung" --seg-range 421-483
+
+Options:
+    --file SUBSTR       Filename substring to select the right XTM task when a project
+                        has multiple files. If omitted and multiple tasks exist, all are
+                        listed so you can identify the right substring.
+    --seg-range S-E     Upload segments S through E inclusive (e.g. 421-483).
+    --segments A,B,C    Upload a specific comma-separated list of segment IDs.
+
+Prerequisites:
+    - Accept the task in XTM (or let the script claim it automatically).
+    - Run matecat_download.py first to get the *_GERMAN.xlf file.
 """
 
 import json
@@ -55,12 +78,13 @@ from xtm_upload_translations import (
 
 AUTO_CONFIRM_MATCHES    = True   # ICE / 100% / repetition segments via XTM pre-fill
 KEEPALIVE_INTERVAL      = 25
-TEST_SEGMENT_LIMIT: int | None = 80
-START_FROM_SEGMENT_ID: int     = 221
+TEST_SEGMENT_LIMIT: int | None = None
+START_FROM_SEGMENT_ID: int     = 1
 UPLOAD_BATCH_SIZE       = 15    # re-open editor every N segments to get a fresh session token
 BATCH_WAIT_SECONDS      = 120   # wait between batches for server to release doc lock
 DEBUG_SOURCE_NODES_LIMIT       = 0
 SEGMENT_ID_FILTER: set[int] | None = None  # set via --segments; overrides range/limit
+FILE_FILTER: str | None = None             # set via --file; selects task by filename substring
 
 _XLF_NS = "urn:oasis:names:tc:xliff:document:1.2"
 
@@ -161,7 +185,7 @@ def run(project_id: str) -> None:
         })
         uu = _login(s, username, password)
         s.headers.update({"uust": uu, "X-Requested-With": "XMLHttpRequest"})
-        tsk = _find_task(_get_tasks(s), project_id)
+        tsk = _find_task(_get_tasks(s), project_id, file_filter=FILE_FILTER)
         tsk = _claim_group_task(s, tsk, uu, project_id)
         if tsk["additionalData"].get("actorType") != "INTERNALLINGUIST":
             raise RuntimeError(
@@ -278,6 +302,14 @@ def main() -> None:
         help="Comma-separated segment IDs to (re-)upload, e.g. 18,22,23,28. "
              "Overrides START_FROM_SEGMENT_ID and TEST_SEGMENT_LIMIT.",
     )
+    ap.add_argument(
+        "--seg-range", default=None, metavar="START-END",
+        help="Inclusive segment ID range to upload, e.g. 421-483.",
+    )
+    ap.add_argument(
+        "--file", default=None,
+        help="Filename substring to select the right task when a project has multiple files, e.g. 'Claims'.",
+    )
     args = ap.parse_args()
 
     if args.segments:
@@ -286,6 +318,21 @@ def main() -> None:
             SEGMENT_ID_FILTER = {int(x.strip()) for x in args.segments.split(",")}
         except ValueError:
             print("ERROR: --segments must be comma-separated integers, e.g. 18,22,23")
+            raise SystemExit(1)
+
+    if args.file:
+        global FILE_FILTER
+        FILE_FILTER = args.file
+
+    if args.seg_range:
+        try:
+            parts = args.seg_range.split("-")
+            start, end = int(parts[0].strip()), int(parts[1].strip())
+            global START_FROM_SEGMENT_ID, TEST_SEGMENT_LIMIT
+            START_FROM_SEGMENT_ID = start
+            TEST_SEGMENT_LIMIT    = end - start + 1
+        except (ValueError, IndexError):
+            print("ERROR: --seg-range must be START-END, e.g. 421-483")
             raise SystemExit(1)
 
     try:
