@@ -44,11 +44,13 @@ from xtm_initial_download import (
     _find_task,
 )
 
-AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
-KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
-TEST_SEGMENT_LIMIT: int | None = None   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
-START_FROM_SEGMENT_ID: int = 3     # skip segments with ID below this value
-DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
+AUTO_CONFIRM_MATCHES    = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
+KEEPALIVE_INTERVAL      = 25     # seconds between /sayHelloToServer.serv calls
+TEST_SEGMENT_LIMIT: int | None = None
+START_FROM_SEGMENT_ID: int     = 3
+DEBUG_SOURCE_NODES_LIMIT       = 0
+UPLOAD_BATCH_SIZE              = 15   # re-open editor every N segments to get a fresh session token
+BATCH_WAIT_SECONDS             = 120  # wait between batches for server to release doc lock
 
 
 # ---------------------------------------------------------------------------
@@ -755,15 +757,6 @@ def run(project_id: str) -> None:
             "  then re-run this script."
         )
 
-    print("Step 4 — Opening workbench editor (write mode)...")
-    wb_url, session_token = _open_editor_write(session, task, uust)
-    print(f"  Session token: {session_token[:12]}...")
-
-    csrf_token = _init_workbench(session, wb_url, session_token)
-
-    time.sleep(3)
-    _keepalive(session)
-
     print("Step 5 — Reading translations from Excel...")
     segments = _read_translations(excel_path)
     if START_FROM_SEGMENT_ID > 1:
@@ -775,8 +768,94 @@ def run(project_id: str) -> None:
     non_empty = sum(1 for _, t in segments if t)
     print(f"  {len(segments)} segments read ({non_empty} non-empty) from {excel_path.name}")
 
-    print("Step 6 — Uploading translations via WebSocket...")
-    results = _upload_via_stomp(session, session_token, csrf_token, segments)
+    def _hard_login():
+        s = requests.Session()
+        s.headers.update({
+            "Accept": "application/json, text/plain, */*",
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) "
+                "Gecko/20100101 Firefox/149.0"
+            ),
+        })
+        uu = _login(s, username, password)
+        s.headers.update({"uust": uu, "X-Requested-With": "XMLHttpRequest"})
+        tsk = _find_task(_get_tasks(s), project_id)
+        tsk = _claim_group_task(s, tsk, uu, project_id)
+        if tsk["additionalData"].get("actorType") != "INTERNALLINGUIST":
+            raise RuntimeError(
+                f"Task actor is still '{tsk['additionalData'].get('actorType')}' — "
+                "accept the task manually in XTM, then re-run."
+            )
+        url, tok = _open_editor_write(s, tsk, uu)
+        csrf = _init_workbench(s, url, tok)
+        time.sleep(3)
+        _keepalive(s)
+        return s, tsk, uu, tok, csrf
+
+    def _reopen_editor(s, tsk, uu):
+        url, tok = _open_editor_write(s, tsk, uu)
+        csrf = _init_workbench(s, url, tok)
+        time.sleep(3)
+        _keepalive(s)
+        return tok, csrf
+
+    print("\nSteps 4 & 6 — Login, claim task, open editor, upload...")
+    session, task, uust, session_token, csrf_token = _hard_login()
+    print(f"  Session token: {session_token[:12]}...")
+
+    todo          = list(segments)
+    results: dict[int, str] = {}
+    retry_counts: dict[int, int] = {}
+    batch_num     = 0
+
+    while todo:
+        batch    = todo[:UPLOAD_BATCH_SIZE]
+        first_id = batch[0][0]
+        last_id  = batch[-1][0]
+        batch_num += 1
+        print(f"\nBatch {batch_num} — segments {first_id}–{last_id} ({len(batch)} segments)...")
+
+        batch_results = _upload_via_stomp(session, session_token, csrf_token, batch)
+
+        retry_ids = {uid for uid, st in batch_results.items()
+                     if st == "not attempted" or st.startswith("failed")}
+        for uid, st in batch_results.items():
+            if uid not in retry_ids:
+                results[uid] = st
+
+        if retry_ids:
+            permanent: set[int] = set()
+            for uid in retry_ids:
+                retry_counts[uid] = retry_counts.get(uid, 0) + 1
+                if retry_counts[uid] >= 2:
+                    permanent.add(uid)
+                    results[uid] = "skipped (permanent server rejection — check manually in XTM)"
+                    print(f"  Segment {uid}: giving up after {retry_counts[uid]} attempts.")
+
+            retry_ids -= permanent
+            if not retry_ids:
+                todo = todo[UPLOAD_BATCH_SIZE:]
+                continue
+
+            print(f"  {len(retry_ids)} segment(s) failed/not-attempted — "
+                  f"hard re-login in {BATCH_WAIT_SECONDS}s, resuming from segment {min(retry_ids)}...")
+            time.sleep(BATCH_WAIT_SECONDS)
+            session, task, uust, session_token, csrf_token = _hard_login()
+            print(f"  New session token: {session_token[:12]}...")
+            retry_map = {uid: txt for uid, txt in segments if uid in retry_ids}
+            todo = [(uid, retry_map[uid]) for uid in sorted(retry_ids)] + todo[UPLOAD_BATCH_SIZE:]
+        else:
+            todo = todo[UPLOAD_BATCH_SIZE:]
+            if todo:
+                print(f"  Batch done — re-opening editor...")
+                try:
+                    session_token, csrf_token = _reopen_editor(session, task, uust)
+                    print(f"  Session token: {session_token[:12]}...")
+                except Exception as exc:
+                    print(f"  Editor re-open failed ({exc}) — hard re-login in {BATCH_WAIT_SECONDS}s...")
+                    time.sleep(BATCH_WAIT_SECONDS)
+                    session, task, uust, session_token, csrf_token = _hard_login()
+                    print(f"  New session token: {session_token[:12]}...")
 
     print("\nStep 7 — Writing results to Excel...")
     _write_results_to_excel(excel_path, results)
