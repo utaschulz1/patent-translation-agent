@@ -79,7 +79,7 @@ _TRAILING_PUNCT_RE        = re.compile(r"[^\w\s]$")  # last non-word, non-space 
 _TRAILING_LETTERDIGIT_RE  = re.compile(r"\w$")        # last letter or digit (no trailing punct)
 
 _PRP_CONTRACTIONS = ["im", "vom", "am", "beim", "zum", "zur"]
-_PRP_EXCEPTIONS   = ["im Wesentlichen", "zur Verwendung", "zum Beispiel"]
+_PRP_EXCEPTIONS   = ["zur Verwendung", "im Wesentlichen", "zur Verwendung", "zum Beispiel", "zum Zwecke", "im Gegensatz", "im Hinblick", "im Rahmen", "im Zusammenhang", "im Vergleich", "im Weiteren", "im Folgenden", "im Allgemeinen", "im Speziellen", "im Einzelnen", "zur Verfügung", "im Allgemeinen", "im Speziellen"]
 
 _NEG_SOURCE_RE  = re.compile(r"\b(not|no|none)\b", re.IGNORECASE)
 _BEIDE_RE           = re.compile(r"\bbeid[e]\w*\b", re.IGNORECASE)  # beide/beiden/beides/beider/beidem
@@ -480,7 +480,7 @@ def unter_verwendung(source: str, target: str) -> str | None:
     Prefer 'unter Verwenden/mittels'
     """
     if _USING_EN_RE.search(source) and _UNTER_VERWENDUNG_RE.search(target):
-        return 'warning: "unter Verwendung" — prefer "verwendend" (present participle)'
+        return 'warning: "unter Verwendung" — prefer "mithilfe" (unter Verwendung is allowed)'
     return None
 
 
