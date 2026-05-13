@@ -12,10 +12,12 @@ Usage:
     e.g.  python matecat_xtm_verify.py CATG_2605_P0222
 """
 
+import glob
 import re
 import sys
 import tempfile
 import unicodedata
+import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -60,22 +62,57 @@ def run(project_id: str) -> None:
 
     # ── Download current XTM XLIFF ────────────────────────────────────────────
 
+    # ── Find or download XTM XLIFF ────────────────────────────────────────────
+
+    XTRF_BASE = Path(r"C:\Users\utasc\OneDrive\ArbeitNEU\Comunica DK")
+    _XLIFF_EXTS = {".xlf", ".xliff", ".sdlxliff", ".mqxliff"}
+
+    def _find_local_xlf() -> Path | None:
+        """Look for an existing xbpkg or xlf in any XTRF job folder for this project."""
+        for folder in XTRF_BASE.glob(f"*_{project_id}"):
+            if not folder.is_dir():
+                continue
+            # Prefer already-extracted XLIFF
+            for ext in _XLIFF_EXTS:
+                hits = list(folder.glob(f"*{ext}"))
+                if hits:
+                    print(f"  Found local XLIFF: {hits[0]}")
+                    return hits[0]
+            # Fall back to xbpkg — unpack it
+            for xbpkg in folder.glob("*.xbpkg"):
+                print(f"  Found local xbpkg: {xbpkg.name} — unpacking...")
+                xliffs = []
+                with zipfile.ZipFile(xbpkg) as z:
+                    for member in z.namelist():
+                        if Path(member).suffix.lower() in _XLIFF_EXTS:
+                            dest = xbpkg.parent / Path(member).name
+                            dest.write_bytes(z.read(member))
+                            xliffs.append(dest)
+                            print(f"  Extracted: {dest.name}")
+                if xliffs:
+                    return xliffs[0]
+        return None
+
     print()
-    session, session_token, csrf_token = _setup_session(project_id)
+    xtm_path = _find_local_xlf()
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_path = Path(tmp)
-        print("Downloading XTM XLIFF (XBENCH_INTERACTIVE)...")
-        xbpkg = _download_preview(
-            session, session_token, csrf_token,
-            "XBENCH_INTERACTIVE", tmp_path, project_id,
-        )
-        xliffs = _unpack_xbpkg(xbpkg)
-        if not xliffs:
-            raise RuntimeError("No XLIFF extracted from XTM xbpkg.")
-
-        xtm_path = xliffs[0]
-        print(f"  Extracted: {xtm_path.name}")
+    if xtm_path is None:
+        print("No local XLIFF found — downloading from XTM...")
+        session, session_token, csrf_token = _setup_session(project_id)
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            xbpkg = _download_preview(
+                session, session_token, csrf_token,
+                "XBENCH_INTERACTIVE", tmp_path, project_id,
+            )
+            xliffs = _unpack_xbpkg(xbpkg)
+            if not xliffs:
+                raise RuntimeError("No XLIFF extracted from XTM xbpkg.")
+            xtm_path = xliffs[0]
+            print(f"  Extracted: {xtm_path.name}")
+            xtm_translations: dict[int, str] = dict(_read_xlf(xtm_path))
+            print(f"  {len(xtm_translations)} segments with translations")
+    else:
         xtm_translations: dict[int, str] = dict(_read_xlf(xtm_path))
         print(f"  {len(xtm_translations)} segments with translations")
 
