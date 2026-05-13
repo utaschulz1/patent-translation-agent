@@ -33,6 +33,20 @@
       ],
       "glossary_tm_key": "09f0722a233821a5e4dd"
     },
+     "CATG": {
+      "template_id": 15715,
+      "tm_key": "4b38b14d63b3439a89df",
+      "tm_key_2": "a9139183845a903f7860",
+      "projects": [
+        {
+          "project_id": "CATG_2605_P0229",
+          "mc_id": 12345987,
+          "mc_pass": "2e20e61d01cd",
+          "url": "https://www.matecat.com/translate/catg2605p0229/en-US-de-DE/12345987-2e20e61d01cd"
+        }
+      ],
+      "glossary_tm_key": "ac2f2e4f71877ff7e86c"
+    },
     "FRKE": {
       "template_id": 15782,
       "tm_key": "610ec8ece4ddbb75c624",
@@ -40,9 +54,9 @@
       "projects": [
         {
           "project_id": "FRKE_2605_P0427",
-          "mc_id": 12759390,
-          "mc_pass": "xxxxxxxx",
-          "url": "https://www.matecat.com/?action=editProject&id_project=12759361&password=10d84051e3c0"
+          "mc_id": 12346069,
+          "mc_pass": "bb62b4ea6ed2",
+          "url": "https://www.matecat.com/translate/frke2605p0427/en-US-de-DE/12346069-bb62b4ea6ed2"
         }
       ],
       "glossary_tm_key": "0301dc1a1a4f5afe9a9a"
