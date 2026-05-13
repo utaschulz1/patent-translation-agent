@@ -113,6 +113,28 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
             parts.append(re.escape(stem) + r"\w*")
         return len(re.findall(r"\s+".join(parts), text_lower))
 
+    # Mask multi-word DE phrases that contain de_term as a component word.
+    # Their tokens must not be counted toward the single-word entry — they
+    # belong to the longer phrase pair (e.g. "visuelle Anzeige" → "visual display"
+    # should not also contribute to the count for standalone "Anzeige" → "display").
+    if other_de_terms:
+        for other in other_de_terms:
+            if " " not in other:
+                continue
+            other_words = other.lower().split()
+            if de_lower not in other_words:
+                continue
+            parts = []
+            for word in other_words:
+                stem = word
+                for suffix in _DE_ADJ_SUFFIXES:
+                    if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+                        stem = word[: -len(suffix)]
+                        break
+                parts.append(re.escape(stem) + r"\w*")
+            phrase_pat = re.compile(r"\s+".join(parts), re.IGNORECASE)
+            text_lower = phrase_pat.sub(lambda m: " " * len(m.group()), text_lower)
+
     # Words longer than de_term drawn from other glossary DE entries (both
     # single-word entries and individual words of multi-word entries).  A token
     # that stem-matches one of these belongs to that glossary pair, not to
