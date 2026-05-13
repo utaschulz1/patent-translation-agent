@@ -46,7 +46,6 @@ from xtm_initial_download import (
 
 AUTO_CONFIRM_MATCHES = True   # save ICE / 100% / internal-repetition segments using XTM pre-fill; fuzzy (<100%) always use Excel
 KEEPALIVE_INTERVAL = 25  # seconds between /sayHelloToServer.serv calls
-RECONNECT_EVERY    = 9999    # refresh session every N segments (server _s token expires after ~20+ ops), immediate reconnect causes server lock for some seconds.
 TEST_SEGMENT_LIMIT: int | None = None   # set to 10 to 15 until the session expire problem is solved;set to None to process all segments
 START_FROM_SEGMENT_ID: int = 3     # skip segments with ID below this value
 DEBUG_SOURCE_NODES_LIMIT = 0       # print source nodes for first N segments; set to 0 to disable
@@ -454,33 +453,6 @@ def _upload_via_stomp(
         ws.recv()  # CONNECTED
         ws.send(json.dumps(["SUBSCRIBE\nid:sub-0\ndestination:/user/queue/main\n\n\x00"]))
 
-    def _reconnect(current_unit_id: int) -> None:
-        nonlocal ws, last_keepalive
-        print(f"  [{current_unit_id}/{segments[-1][0]}] Reconnecting WebSocket...")
-        try:
-            ws.close()
-        except Exception:
-            pass
-        new_server_id  = str(random.randint(0, 999)).zfill(3)
-        new_session_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
-        new_ws_url = (
-            f"wss://word.welocalize.com/workbench/ws/{new_server_id}/{new_session_id}"
-            f"/websocket?_s={session_token}"
-        )
-        ws = _websocket.WebSocket()
-        ws.connect(new_ws_url, cookie=cookie_str)
-        ws.settimeout(5)
-        _stomp_handshake()
-        send("/workbench/readChatInfo", {"requestId": _ts()})
-        send("/workbench/document/init/rendered", {"requestId": _ts()})
-        send("/workbench/trans-unit/activate", {
-            "requestId": _ts(),
-            "activatedTransUnitId": current_unit_id,
-            "forceTransUnitsUpdate": True,
-        })
-        wait_for("TRANS_UNIT_UPDATED", timeout=15, unit_id=current_unit_id)
-        last_keepalive = time.time()
-        print("  Reconnected.")
 
     try:
         _stomp_handshake()
@@ -529,9 +501,6 @@ def _upload_via_stomp(
         _xtm_skipped: set[int] = set()  # uids XTM auto-confirmed (ICE); must not overwrite
 
         for i, (unit_id, text) in enumerate(segments):
-            # --- Reconnect (periodic session refresh) ---
-            if i > 0 and i % RECONNECT_EVERY == 0:
-                _reconnect(unit_id)
 
             is_last = (i == total - 1)
             next_uid = segments[i + 1][0] if not is_last else None
