@@ -127,16 +127,50 @@ def _get_tasks(session: requests.Session) -> list[dict]:
     return tasks
 
 
-def _find_task(tasks: list[dict], project_id: str) -> dict:
-    """Return the first task whose projectName contains project_id, or raise RuntimeError."""
-    for task in tasks:
-        name = task.get("additionalData", {}).get("projectName", "")
-        if project_id in name:
-            return task
-    raise RuntimeError(
-        f"Project '{project_id}' not found in task list "
-        f"({len(tasks)} tasks returned). Check the project ID."
-    )
+def _find_task(tasks: list[dict], project_id: str, file_filter: str | None = None) -> dict:
+    """Return the task whose projectName contains project_id.
+
+    file_filter: optional substring matched against the FILE field name —
+    useful when multiple tasks share the same project name (e.g. drawings vs claims).
+    If omitted and multiple matches exist, warns and returns the first.
+    """
+    matches = [t for t in tasks
+               if project_id in t.get("additionalData", {}).get("projectName", "")]
+    if not matches:
+        raise RuntimeError(
+            f"Project '{project_id}' not found in task list "
+            f"({len(tasks)} tasks returned). Check the project ID."
+        )
+    if file_filter:
+        filtered = [t for t in matches
+                    if file_filter.lower() in _task_filename(t).lower()]
+        if filtered:
+            print(f"  File filter '{file_filter}' → matched: {_task_filename(filtered[0])}")
+            return filtered[0]
+        print(f"  Warning: --file '{file_filter}' matched none of:")
+        for t in matches:
+            print(f"    {_task_filename(t)}")
+        print(f"  Ignoring filter, using first match.")
+    if len(matches) > 1:
+        print(f"  Warning: {len(matches)} tasks found for '{project_id}' — using first.")
+        print(f"  Use --file <substring> to select a specific one:")
+        for i, t in enumerate(matches):
+            fname = _task_filename(t)
+            words = t.get("WORDS", "?")
+            fid   = t.get("additionalData", {}).get("fileId", "?")
+            print(f"    [{i}] fileId={fid}  words={words}  file={fname}")
+    return matches[0]
+
+
+def _task_filename(task: dict) -> str:
+    """Extract a human-readable filename from a task dict."""
+    # FILE field can be a string or a dict with a 'name' key
+    f = task.get("FILE", "")
+    if isinstance(f, dict):
+        return f.get("name", str(f))
+    if f:
+        return str(f)
+    return task.get("additionalData", {}).get("fileName", "?")
 
 
 def _open_editor(session: requests.Session, task: dict) -> tuple[str, str]:
@@ -208,16 +242,23 @@ def _generate_preview(session: requests.Session, session_token: str, csrf_token:
     cookie_str = "; ".join(f"{c.name}={c.value}" for c in session.cookies)
 
     ws = _websocket.WebSocket()
+    ws.settimeout(15)
     ws.connect(ws_url, cookie=cookie_str)
     try:
-        ws.recv()  # SockJS open frame 'o'
+        try:
+            ws.recv()  # SockJS open frame 'o'
+        except (TimeoutError, OSError, _websocket.WebSocketTimeoutException) as e:
+            raise RuntimeError(f"WebSocket handshake timed out (SockJS open frame): {e}") from e
 
         connect_frame = (
             f"CONNECT\nX-CSRF-TOKEN:{csrf_token}\n"
             f"accept-version:1.0,1.1,1.2\nheart-beat:10000,10000\n\n\x00"
         )
         ws.send(json.dumps([connect_frame]))
-        ws.recv()  # CONNECTED
+        try:
+            ws.recv()  # CONNECTED
+        except (TimeoutError, OSError, _websocket.WebSocketTimeoutException) as e:
+            raise RuntimeError(f"WebSocket handshake timed out (STOMP CONNECTED): {e}") from e
 
         ws.send(json.dumps(["SUBSCRIBE\nid:sub-0\ndestination:/user/queue/main\n\n\x00"]))
 
@@ -229,21 +270,47 @@ def _generate_preview(session: requests.Session, session_token: str, csrf_token:
         )
         ws.send(json.dumps([send_frame]))
 
-        ws.settimeout(30)
+        ws.settimeout(5)
+        deadline = time.time() + 30   # 30s cap — normal generation takes ~5s
+        received_types: list[str] = []  # collect message types for debug output on timeout
         try:
-            while True:
-                raw = ws.recv()
+            while time.time() < deadline:
+                try:
+                    raw = ws.recv()
+                except _websocket.WebSocketTimeoutException:
+                    continue  # heartbeat gap — keep waiting until deadline
                 if not raw or raw == "h":
                     continue
                 if raw.startswith("a"):
                     for stomp_msg in json.loads(raw[1:]):
+                        # Extract message type for debug logging
+                        try:
+                            hdr, _, body_part = stomp_msg.partition("\n\n")
+                            msg_type = next(
+                                (l.split(":", 1)[1].strip() for l in hdr.splitlines()
+                                 if l.startswith("type:")), None
+                            ) or (
+                                json.loads(body_part.rstrip("\x00")).get("type", "?")
+                                if body_part.strip().startswith("{") else "?"
+                            )
+                        except Exception:
+                            msg_type = "?"
+                        received_types.append(msg_type)
+                        print(f"    [WS] {msg_type}")
+
                         if "PREVIEW_GENERATION_FINISHED" in stomp_msg:
                             body_str = stomp_msg[stomp_msg.rfind("\n\n") + 2:].rstrip("\x00")
                             payload = json.loads(body_str).get("payload", {})
                             if payload.get("resultType") == "SUCCESS":
                                 return payload["downloadTicket"]
                             raise RuntimeError(f"Preview generation failed: {payload}")
-        except (_websocket.WebSocketConnectionClosedException, _websocket.WebSocketTimeoutException) as e:
+            raise RuntimeError(
+                f"Preview generation timed out after 30 s.\n"
+                f"  Message types received: {received_types}\n"
+                f"  If this list is empty the WebSocket was idle — likely a tag error in XTM blocking generation.\n"
+                f"  Download the xbpkg manually or fix tag errors in XTM first."
+            )
+        except _websocket.WebSocketConnectionClosedException as e:
             raise RuntimeError("WebSocket closed before download ticket was received") from e
     finally:
         ws.close()
