@@ -181,14 +181,18 @@ for row_num in range(4, ws.max_row + 1):
 translations: dict[str, str] = {}
 errors: list[str] = []
 
-# Pre-populate from resumed output
+# Pre-populate from resumed output — only segments marked "lara" in column 4,
+# which is written when Lara successfully translates a segment.  XTM TM pre-fills
+# in column 3 are ignored because they never get the column-4 marker.
 if resuming:
     for seg_id, row_num in row_map.items():
-        val = ws.cell(row=row_num, column=3).value
-        if val and str(val).strip():
-            translations[seg_id] = str(val).strip()
+        marker = ws.cell(row=row_num, column=4).value
+        if str(marker).strip().lower() == "lara":
+            val = ws.cell(row=row_num, column=3).value
+            if val and str(val).strip():
+                translations[seg_id] = str(val).strip()
     if translations:
-        print(f"Resuming: {len(translations)} segments already translated, skipping.")
+        print(f"Resuming: {len(translations)} Lara-translated segments found, skipping.")
 
 print(f"\nTranslating {len(segments)} segments...")
 
@@ -223,6 +227,7 @@ for i, seg in enumerate(segments):
 
         if seg["ID"] in row_map:
             ws.cell(row=row_map[seg["ID"]], column=3).value = translated
+            ws.cell(row=row_map[seg["ID"]], column=4).value = "lara"
             try:
                 wb.save(out_path)
             except PermissionError:
