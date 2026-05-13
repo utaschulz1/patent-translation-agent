@@ -8,6 +8,7 @@ import pytest
 from linter import (
     GermanClaimNoArticle,
     missing_leading_number,
+    numeric_mismatch,
     different_end_punctuation,
     source_punctuation_where_none_in_target,
     target_punctuation_where_none_in_source,
@@ -991,3 +992,42 @@ class TestMindestensAtLeast:
         result = mindestens_at_least("a sensor", "mindestens einen Sensor")
         assert "mindestens" in result
         assert "at least" in result
+
+
+# ── numeric_mismatch ─────────────────────────────────────────────────────────
+
+class TestNumericMismatch:
+    def test_matching_numbers(self):
+        assert numeric_mismatch("from 5 to 10 mm", "von 5 bis 10 mm") is None
+
+    def test_missing_number_in_target(self):
+        assert numeric_mismatch("from 5 to 10 mm", "von 5 mm") is not None
+
+    def test_wrong_number_in_target(self):
+        assert numeric_mismatch("from 5 to 10 mm", "von 5 bis 15 mm") is not None
+
+    def test_decimal_normalisation_en_de(self):
+        # 3.5 (EN) and 3,5 (DE) should be treated as the same
+        assert numeric_mismatch("a value of 3.5 mm", "ein Wert von 3,5 mm") is None
+
+    def test_no_numbers(self):
+        assert numeric_mismatch("the device comprises", "die Vorrichtung umfasst") is None
+
+    def test_added_number_in_target(self):
+        assert numeric_mismatch("one sensor", "einen 2 Sensor") is not None
+
+    def test_message_missing(self):
+        result = numeric_mismatch("value of 10", "Wert von 20")
+        assert result is not None
+        assert "missing" in result
+
+    def test_message_added(self):
+        result = numeric_mismatch("one sensor", "einen 5 Sensor")
+        assert result is not None
+        assert "added" in result
+
+    def test_repeated_number(self):
+        assert numeric_mismatch("10 to 10 mm", "10 bis 10 mm") is None
+
+    def test_repeated_number_mismatch(self):
+        assert numeric_mismatch("10 to 10 mm", "10 bis 20 mm") is not None
