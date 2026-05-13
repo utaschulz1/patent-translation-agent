@@ -33,6 +33,20 @@
       ],
       "glossary_tm_key": "09f0722a233821a5e4dd"
     },
+    "FRKE": {
+      "template_id": 15782,
+      "tm_key": "610ec8ece4ddbb75c624",
+      "tm_key_2": "a9139183845a903f7860",
+      "projects": [
+        {
+          "project_id": "FRKE_2605_P0427",
+          "mc_id": 12759390,
+          "mc_pass": "xxxxxxxx",
+          "url": "https://www.matecat.com/?action=editProject&id_project=12759361&password=10d84051e3c0"
+        }
+      ],
+      "glossary_tm_key": "0301dc1a1a4f5afe9a9a"
+    },
     "RTC": {
       "template_id": 15737,
       "tm_key": "f749bd2bdb041775fde5",
