@@ -179,6 +179,11 @@ os.unlink(tmp.name)
 if r.ok:
     print(f"  {r.status_code} — glossary upload accepted.")
     print(f"  {terms_added} terms will appear as underlines/highlights in the MateCat editor.")
+elif r.status_code == 401:
+    print(f"  ERROR: 401 Unauthorized — session cookie has expired.")
+    print("  Refresh MATECAT_COOKIE in .env:")
+    print("  Browser → DevTools → Application → Cookies → matecat.com → copy all cookie values.")
+    sys.exit(1)
 else:
     print(f"  ERROR: {r.status_code} — {r.text[:300]}")
     sys.exit(1)
