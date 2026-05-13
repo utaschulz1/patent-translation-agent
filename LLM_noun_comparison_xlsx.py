@@ -69,11 +69,15 @@ if len(source_files) > 1:
     print(f"Multiple translated files found, using: {source_files[0]}")
 input_path = source_files[0]
 
-try:
-    raw_df = pd.read_excel(input_path, header=None, engine="openpyxl")
-except Exception as e:
-    print(f"ERROR: Could not read Excel file: {e}")
-    exit(1)
+while True:
+    try:
+        raw_df = pd.read_excel(input_path, header=None, engine="openpyxl")
+        break
+    except PermissionError:
+        input(f"  {os.path.basename(input_path)} is open in Excel — close it, then press Enter...")
+    except Exception as e:
+        print(f"ERROR: Could not read Excel file: {e}")
+        exit(1)
 
 print(f"Processing file: {raw_df.iloc[0, 0]}")
 
