@@ -50,6 +50,7 @@ TEST_SEGMENT_LIMIT: int | None = None
 START_FROM_SEGMENT_ID: int     = 3
 DEBUG_SOURCE_NODES_LIMIT       = 0
 UPLOAD_BATCH_SIZE              = 15   # re-open editor every N segments to get a fresh session token
+FILE_FILTER: str | None        = None  # set via --file; selects task by filename substring
 BATCH_WAIT_SECONDS             = 120  # wait between batches for server to release doc lock
 
 
@@ -109,7 +110,7 @@ def _claim_group_task(
     # Re-fetch the task list so the updated actorType is visible
     time.sleep(4)
     updated_tasks = _get_tasks(session)
-    updated_task = _find_task(updated_tasks, project_id)
+    updated_task = _find_task(updated_tasks, project_id, file_filter=FILE_FILTER)
     new_actor = updated_task["additionalData"].get("actorType", "?")
     print(f"  Updated actor type: {new_actor}")
     return updated_task
@@ -742,7 +743,7 @@ def run(project_id: str) -> None:
     tasks = _get_tasks(session)
     print(f"  {len(tasks)} task(s) in progress")
 
-    task = _find_task(tasks, project_id)
+    task = _find_task(tasks, project_id, file_filter=FILE_FILTER)
     ad = task["additionalData"]
     print(f"  Found: {ad.get('projectName', '?')}  (file {ad.get('fileId', '?')})")
     print(f"  Step: {task.get('STEP', '?')}  type: {task.get('STEP_TYPE', '?')}  role: {task.get('ROLE', '?')}  actorType: {ad.get('actorType', '?')}")
@@ -779,7 +780,7 @@ def run(project_id: str) -> None:
         })
         uu = _login(s, username, password)
         s.headers.update({"uust": uu, "X-Requested-With": "XMLHttpRequest"})
-        tsk = _find_task(_get_tasks(s), project_id)
+        tsk = _find_task(_get_tasks(s), project_id, file_filter=FILE_FILTER)
         tsk = _claim_group_task(s, tsk, uu, project_id)
         if tsk["additionalData"].get("actorType") != "INTERNALLINGUIST":
             raise RuntimeError(
@@ -881,11 +882,19 @@ def run(project_id: str) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python xtm_upload_translations.py <project_id>")
-        raise SystemExit(1)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("project_id")
+    ap.add_argument(
+        "--file", default=None,
+        help="Filename substring to select the right task when a project has multiple files, e.g. 'Anmeldefassung'.",
+    )
+    args = ap.parse_args()
+    if args.file:
+        global FILE_FILTER
+        FILE_FILTER = args.file
     try:
-        run(sys.argv[1])
+        run(args.project_id)
     except (RuntimeError, TimeoutError) as e:
         print(f"\nError: {e}")
         raise SystemExit(1)
