@@ -1,5 +1,7 @@
 # ============================================================
 # matecat_upload.py
+# Issue: projects created via MateCat API don't get the correct parameters, e.g. the threshold for TM matches is ignored and the order of the TM keys is not respected (the "primary" TM key is not tried first).
+# So at the moment I create the project manually and only use the matecat_glossary_upload.py script to get the glossary flags in place. This script is kept for reference and potential future use if the API improves.
 # ============================================================
 # Creates a MateCat project from the current XTM project's XLF:
 #   1. Pre-processes the XLF — clears MT and <93% fuzzy targets
