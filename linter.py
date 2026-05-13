@@ -127,6 +127,8 @@ _AT_LEAST_SRC_RE        = re.compile(r"\bat least\b", re.IGNORECASE)
 _SAME_SRC_RE        = re.compile(r"\bsame\b", re.IGNORECASE)
 _SELBE_TGT_RE       = re.compile(r"\b(die|der|das|dem|den|des)selb\w*\b", re.IGNORECASE)
 _GLEICH_TGT_RE      = re.compile(r"\bgleich\w*\b", re.IGNORECASE)
+_NUM_SPLIT_RE       = re.compile(r"[.,]")   # strip decimal/thousand separators before digit extraction
+_NUM_EXTRACT_RE     = re.compile(r"\b\d+\b")
 
 _UNIT_LIST = sorted([
     # Temperature
@@ -531,6 +533,29 @@ def patent_number_decimal(source: str, target: str) -> str | None:
     return None
 
 
+def _extract_numbers(text: str) -> list[str]:
+    """Return sorted list of digit sequences, normalising decimal/thousand separators."""
+    return sorted(_NUM_EXTRACT_RE.findall(_NUM_SPLIT_RE.sub(" ", text)))
+
+
+def numeric_mismatch(source: str, target: str) -> str | None:
+    """Flag when numbers present in source are absent from target or vice versa."""
+    src_nums = _extract_numbers(source)
+    tgt_nums = _extract_numbers(target)
+    if src_nums == tgt_nums:
+        return None
+    from collections import Counter
+    src_c, tgt_c = Counter(src_nums), Counter(tgt_nums)
+    missing = sorted((src_c - tgt_c).elements())
+    added   = sorted((tgt_c - src_c).elements())
+    parts = []
+    if missing:
+        parts.append(f"missing in target: {missing}")
+    if added:
+        parts.append(f"added in target: {added}")
+    return f'error: numeric mismatch — {"; ".join(parts)}'
+
+
 CHECKS = [
     german_claim_no_article,
     missing_leading_number,
@@ -565,6 +590,7 @@ CHECKS = [
     unter_verwendung,
     schritt_zum,
     mindestens_at_least,
+    numeric_mismatch,
 ]
 
 
