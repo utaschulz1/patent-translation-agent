@@ -1,18 +1,20 @@
 """
-Excel2TMX.py  —  Convert Final_*.xlsx files to a single TMX for Matecat TM upload.
+Excel2TMX.py  —  Convert translated xlsx files to a single TMX for Matecat TM upload.
 
-Input format (same as *_translated.xlsx):
+Input format (same as *_translated.xlsx / *_iptranslated.xlsx):
   Row 0:  filename (metadata)
   Row 1:  blank / metadata
   Row 2:  blank / metadata
   Row 3+: data rows — columns 0=ID, 1=Source, 2=Target
 
 Usage:
-  python Excel2TMX.py                  # processes Final_*.xlsx in current directory
-  python Excel2TMX.py path/to/folder   # processes Final_*.xlsx in given folder
+  python Excel2TMX.py                        # processes Final_*.xlsx in current directory
+  python Excel2TMX.py path/to/folder         # processes Final_*.xlsx in given folder
+  python Excel2TMX.py path/to/file.xlsx      # converts a single xlsx file directly
 
 Output:
-  <folder_name>.tmx  in the same folder (e.g. ComunicaDK.tmx)
+  folder mode: <folder_name>.tmx  in the same folder (e.g. ComunicaDK.tmx)
+  file mode:   <stem>.tmx  next to the input file
 """
 
 import sys
@@ -31,23 +33,27 @@ def xml_escape(text: str) -> str:
     )
 
 
-folder = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
-if not folder.is_dir():
-    print(f"ERROR: not a directory: {folder}")
+arg = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
+
+if arg.is_file():
+    xlsx_files = [arg]
+    folder = arg.parent
+    print(f"Single file: {arg.name}")
+elif arg.is_dir():
+    folder = arg
+    xlsx_files = sorted(
+        f for f in folder.glob("Final_*.xlsx")
+        if not f.name.startswith("~$")
+    )
+    if not xlsx_files:
+        print(f"No Final_*.xlsx files found in {folder}")
+        sys.exit(1)
+    print(f"Found {len(xlsx_files)} file(s) in {folder}:")
+    for f in xlsx_files:
+        print(f"  {f.name}")
+else:
+    print(f"ERROR: not a file or directory: {arg}")
     sys.exit(1)
-
-xlsx_files = sorted(
-    f for f in folder.glob("Final_*.xlsx")
-    if not f.name.startswith("~$")
-)
-
-if not xlsx_files:
-    print(f"No Final_*.xlsx files found in {folder}")
-    sys.exit(1)
-
-print(f"Found {len(xlsx_files)} file(s) in {folder}:")
-for f in xlsx_files:
-    print(f"  {f.name}")
 
 timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
@@ -107,7 +113,8 @@ for xlsx_path in xlsx_files:
 
 tmx += "  </body>\n</tmx>\n"
 
-out_path = folder / f"{folder.name}.tmx"
+stem = xlsx_files[0].stem if len(xlsx_files) == 1 and arg.is_file() else folder.name
+out_path = folder / f"{stem}.tmx"
 with open(out_path, "w", encoding="utf-8") as f:
     f.write(tmx)
 
