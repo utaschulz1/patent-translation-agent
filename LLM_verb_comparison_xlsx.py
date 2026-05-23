@@ -56,14 +56,32 @@ MODEL = "deepseek/deepseek-chat-v3-0324"
 # STEP 0 — Load the Excel file
 # ============================================================
 
-proj_dir = _pdir()
-xlsx_files = [f for f in glob.glob(str(proj_dir / "*_translated.xlsx")) if not os.path.basename(f).startswith("~$")]
-if not xlsx_files:
-    print(f"ERROR: No *_translated.xlsx file found in '{proj_dir}'. Run ipappify_translate.py first.")
-    exit(1)
-if len(xlsx_files) > 1:
-    print(f"Multiple translated files found, using: {xlsx_files[0]}")
-input_path = xlsx_files[0]
+# ── Optional --file / --output-folder flags (used by workflow_review.py) ──────
+# When provided, bypass project_log so this script can run independently of any
+# active workflow project. Remaining argv is left for the seg-range parser below.
+_i, _file_arg, _out_arg = 1, None, None
+while _i < len(sys.argv):
+    if sys.argv[_i] == "--file" and _i + 1 < len(sys.argv):
+        _file_arg = sys.argv.pop(_i + 1); sys.argv.pop(_i)
+    elif sys.argv[_i] == "--output-folder" and _i + 1 < len(sys.argv):
+        _out_arg = sys.argv.pop(_i + 1); sys.argv.pop(_i)
+    else:
+        _i += 1
+
+if _file_arg:
+    from pathlib import Path as _Path
+    input_path = str(_Path(_file_arg).resolve())
+    proj_dir   = _Path(_out_arg).resolve() if _out_arg else _Path(input_path).parent
+    proj_dir.mkdir(parents=True, exist_ok=True)
+else:
+    proj_dir = _pdir()
+    xlsx_files = [f for f in glob.glob(str(proj_dir / "*_translated.xlsx")) if not os.path.basename(f).startswith("~$")]
+    if not xlsx_files:
+        print(f"ERROR: No *_translated.xlsx file found in '{proj_dir}'. Run ipappify_translate.py first.")
+        exit(1)
+    if len(xlsx_files) > 1:
+        print(f"Multiple translated files found, using: {xlsx_files[0]}")
+    input_path = xlsx_files[0]
 
 while True:
     try:
@@ -359,7 +377,7 @@ seg_annotations = defaultdict(list)
 for f in flags:
     seg_annotations[str(f["Segment ID"])].append(f["Note"])
 
-out_path = input_path.replace(".xlsx", "_checks.xlsx")
+out_path = str(proj_dir / (os.path.basename(input_path).replace(".xlsx", "_checks.xlsx")))
 wb = openpyxl.load_workbook(out_path if os.path.exists(out_path) else input_path)
 ws = wb.active
 
@@ -384,6 +402,6 @@ try:
     print(f'\nSaved annotated Excel: "{out_path}".')
 except PermissionError:
     stamp = datetime.now().strftime("%H%M%S")
-    out_path = input_path.replace(".xlsx", f"_checks_{stamp}.xlsx")
+    out_path = str(proj_dir / (os.path.basename(input_path).replace(".xlsx", f"_checks_{stamp}.xlsx")))
     wb.save(out_path)
     print(f'\nFile was open in Excel — saved as "{out_path}" instead.')

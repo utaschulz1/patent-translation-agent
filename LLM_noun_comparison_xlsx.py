@@ -60,14 +60,30 @@ RUN_EVALUATOR = False
 # STEP 0 — Load the Excel file
 # ============================================================
 
-proj_dir = _pdir()
-source_files = [f for f in glob.glob(str(proj_dir / "*_translated.xlsx")) if not os.path.basename(f).startswith("~$")]
-if not source_files:
-    print(f"ERROR: No *_translated.xlsx file found in '{proj_dir}'. Run ipappify_translate.py first.")
-    exit(1)
-if len(source_files) > 1:
-    print(f"Multiple translated files found, using: {source_files[0]}")
-input_path = source_files[0]
+# ── Optional --file / --output-folder flags (used by workflow_review.py) ──────
+_i, _file_arg, _out_arg = 1, None, None
+while _i < len(sys.argv):
+    if sys.argv[_i] == "--file" and _i + 1 < len(sys.argv):
+        _file_arg = sys.argv.pop(_i + 1); sys.argv.pop(_i)
+    elif sys.argv[_i] == "--output-folder" and _i + 1 < len(sys.argv):
+        _out_arg = sys.argv.pop(_i + 1); sys.argv.pop(_i)
+    else:
+        _i += 1
+
+if _file_arg:
+    from pathlib import Path as _Path
+    input_path = str(_Path(_file_arg).resolve())
+    proj_dir   = _Path(_out_arg).resolve() if _out_arg else _Path(input_path).parent
+    proj_dir.mkdir(parents=True, exist_ok=True)
+else:
+    proj_dir = _pdir()
+    source_files = [f for f in glob.glob(str(proj_dir / "*_translated.xlsx")) if not os.path.basename(f).startswith("~$")]
+    if not source_files:
+        print(f"ERROR: No *_translated.xlsx file found in '{proj_dir}'. Run ipappify_translate.py first.")
+        exit(1)
+    if len(source_files) > 1:
+        print(f"Multiple translated files found, using: {source_files[0]}")
+    input_path = source_files[0]
 
 while True:
     try:
@@ -423,7 +439,7 @@ for inc in to_annotate:
     note = f"{inc['EN Phrase']}, canonical: {inc['Expected DE']}, here: {inc['Actual DE']}"
     seg_annotations[seg_id].append(note)
 
-checks_path = input_path.replace(".xlsx", "_checks.xlsx")
+checks_path = str(proj_dir / (os.path.basename(input_path).replace(".xlsx", "_checks.xlsx")))
 wb_path = checks_path if os.path.exists(checks_path) else input_path
 
 wb = openpyxl.load_workbook(wb_path)
@@ -449,6 +465,6 @@ try:
     print(f'\nSaved annotated Excel ({label}): "{checks_path}".')
 except PermissionError:
     stamp = datetime.now().strftime("%H%M%S")
-    fallback = checks_path.replace("_checks.xlsx", f"_checks_{stamp}.xlsx")
+    fallback = str(proj_dir / (os.path.basename(input_path).replace(".xlsx", f"_checks_{stamp}.xlsx")))
     wb.save(fallback)
     print(f'\nCould not overwrite — saved as "{fallback}" instead.')
