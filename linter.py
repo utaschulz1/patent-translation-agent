@@ -1,5 +1,10 @@
 """
+TODO: add check for "sowohl ... als auch" in target, wenn there is no "both" in source; comment "translate 'and' with 'und'"
+add check for number of colons and semicolons matching between source and target
+add check for finding "In einer Ausführung"/ "In Ausführungsformen" in target; comment "Bei einer Ausführungsform"/ "Bei Ausführungsformen" is preferred"
 linter.py — Segment-level lint checks on *_revised_translation_checks.xlsx.
+add check for ", was" in target when source does not contain "which" ; comment "Relativsatz nur mit 'was' einleiten, wenn 'which' in source, otherwise 'wobei'"
+add check for finding "Methode" in target; comment "method = Verfahren"
 
 Reads the active project's *_revised_translation_checks.xlsx, inserts a
 "Linter" column as column D (shifting Glossary Checks to column E), and
@@ -79,7 +84,7 @@ _TRAILING_PUNCT_RE        = re.compile(r"[^\w\s]$")  # last non-word, non-space 
 _TRAILING_LETTERDIGIT_RE  = re.compile(r"\w$")        # last letter or digit (no trailing punct)
 
 _PRP_CONTRACTIONS = ["im", "vom", "am", "beim", "zum", "zur"]
-_PRP_EXCEPTIONS   = ["zur Verwendung", "im Wesentlichen", "zur Verwendung", "zum Beispiel", "zum Zwecke", "im Gegensatz", "im Hinblick", "im Rahmen", "im Zusammenhang", "im Vergleich", "im Weiteren", "im Folgenden", "im Allgemeinen", "im Speziellen", "im Einzelnen", "zur Verfügung", "im Allgemeinen", "im Speziellen"]
+_PRP_EXCEPTIONS   = ["zur Verwendung", "im Wesentlichen", "zur Verwendung", "zum Beispiel", "zum Zwecke", "im Gegensatz", "im Hinblick", "im Rahmen", "im Zusammenhang", "im Vergleich", "im Weiteren", "im Folgenden", "im Allgemeinen", "im Speziellen", "im Einzelnen", "zur Verfügung", "im Allgemeinen", "im Speziellen", "im Laufe der Zeit"]
 
 _NEG_SOURCE_RE  = re.compile(r"\b(not|no|none)\b", re.IGNORECASE)
 _BEIDE_RE           = re.compile(r"\bbeid[e]\w*\b", re.IGNORECASE)  # beide/beiden/beides/beider/beidem
@@ -437,7 +442,7 @@ def dazu_konfiguriert(_: str, target: str) -> str | None:
     stripped = _DAZU_KONFIGURIERT_RE.sub("", target)
     stripped = _KONFIGURIERT_IST_COMMA_RE.sub("", stripped)
     if _KONFIGURIERT_RE.search(stripped):
-        return "konfiguriert ohne 'dazu'"
+        return "'konfiguriert' ohne 'dazu' verwenden. Nur 'dazu konfiguriert' verwenden, wenn auch 'zu Folgendem konfiguriert(ist):' verwendet wird."
     return None
 
 

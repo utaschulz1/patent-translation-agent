@@ -59,10 +59,22 @@ def main() -> None:
     print(f"To:       {pre_folder}")
     print()
 
+    locked: list[str] = []
     for f in sorted(files):
         dest = pre_folder / f.name
-        shutil.move(str(f), str(dest))
-        print(f"  {f.name}")
+        try:
+            shutil.move(str(f), str(dest))
+            print(f"  {f.name}")
+        except PermissionError:
+            print(f"  {f.name}  <-- SKIPPED: close this file first, then re-run")
+            locked.append(f.name)
+
+    if locked:
+        print(f"\nSkipped {len(locked)} locked file(s) — close them in Excel and re-run.")
+        moved = len(files) - len(locked)
+        if moved:
+            print(f"Moved {moved} file(s).")
+        return
 
     print(f"\nMoved {len(files)} file(s).")
 
