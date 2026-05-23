@@ -316,63 +316,162 @@ def _clean_source_nodes(nodes: list[dict]) -> list[dict]:
     return result
 
 
+
+def _anchor_numeric_groups(
+    text: str,
+    groups: list[tuple[str, dict, str, dict]],
+) -> list[dict]:
+    """Insert (open_inline, digit_text, close_inline) triples at anchor positions in *text*.
+
+    Each group carries left_ctx - the last 4 chars of the preceding source TEXT - used to
+    find the right occurrence when the same digit appears multiple times in the sentence
+    (e.g. two <g>3</g> for m³ and ft³).  Falls back to plain left-to-right substring search
+    when the English context string is not present in the German translation.
+    """
+    result: list[dict] = []
+    remaining = text
+    for left_ctx, open_n, digit, close_n in groups:
+        placed = False
+        if left_ctx and left_ctx in remaining:
+            ctx_end = remaining.index(left_ctx) + len(left_ctx)
+            after_ctx = remaining[ctx_end:].lstrip()
+            if after_ctx.startswith(digit):
+                print(f"    [TAGS] anchored {digit!r} via left_ctx {left_ctx!r}")
+                result.append({"type": "TEXT", "decorations": [], "content": remaining[:ctx_end]})
+                result.append(open_n)
+                result.append({"type": "TEXT", "decorations": [], "content": digit})
+                result.append(close_n)
+                remaining = after_ctx[len(digit):]
+                placed = True
+        if not placed and digit in remaining:
+            idx = remaining.index(digit)
+            print(f"    [TAGS] anchored {digit!r} via fallback substring at pos {idx}")
+            result.append({"type": "TEXT", "decorations": [], "content": remaining[:idx]})
+            result.append(open_n)
+            result.append({"type": "TEXT", "decorations": [], "content": digit})
+            result.append(close_n)
+            remaining = remaining[idx + len(digit):]
+            placed = True
+        if not placed:
+            print(f"    [TAGS] WARNING: could not place group digit={digit!r} - not found in text")
+    if remaining:
+        result.append({"type": "TEXT", "decorations": [], "content": remaining})
+    return result
+
+
 def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]:
     """Build target nodes preserving INLINE tags from the source in correct positions.
 
-    Handles two patterns seen in patent documents:
-      X-type (standalone):  [0033]<INLINE/> text
-      G-type (paired):      [0033]<INLINE> text <INLINE>
+    Source nodes are first grouped into chunks: plain TEXT nodes and inline-groups
+    (INLINE_open + TEXT + INLINE_close with the same inlineId).
 
-    Strategy: split INLINEs by their position relative to the last TEXT node in source.
-    INLINEs that appear before the last TEXT = opening tags (go before translation).
-    INLINEs that appear after the last TEXT  = closing tags (go after translation).
-    This correctly places the closing G tag at the end instead of bunching all tags at the start.
+    Inline-groups whose sandwiched TEXT is purely numeric AND that have TEXT chunks
+    on both sides are anchored inside the translation using the tail of the preceding
+    source TEXT as a locator (left_ctx).  All other inline-groups pile before the
+    translation text (boundary pattern, e.g. paragraph numbers).
     """
     if not any(n.get("type") == "INLINE" for n in source_nodes):
         return [{"type": "TEXT", "decorations": [], "content": excel_text}]
 
-    # Source prefix: TEXT content before the first INLINE
+    # --- Pass 1: parse source into chunks ---
+    # chunk: ("text", node) | ("group", open_n, txt_n, close_n) | ("lone", node)
+    chunks: list[tuple] = []
+    i = 0
+    while i < len(source_nodes):
+        node = source_nodes[i]
+        if node.get("type") == "TEXT":
+            chunks.append(("text", node))
+            i += 1
+        elif node.get("type") == "INLINE":
+            if (i + 2 < len(source_nodes)
+                    and source_nodes[i + 1].get("type") == "TEXT"
+                    and source_nodes[i + 2].get("type") == "INLINE"
+                    and source_nodes[i + 2].get("inlineId") == node.get("inlineId")):
+                chunks.append(("group", node, source_nodes[i + 1], source_nodes[i + 2]))
+                i += 3
+            else:
+                chunks.append(("lone", node))
+                i += 1
+        else:
+            i += 1
+
+    # --- Pass 2: classify non-text chunks ---
+    text_chunk_indices = [j for j, c in enumerate(chunks) if c[0] == "text"]
+    last_text_ci = text_chunk_indices[-1] if text_chunk_indices else -1
+
     prefix = ""
-    for node in source_nodes:
-        if node.get("type") != "TEXT":
+    for c in chunks:
+        if c[0] != "text":
             break
-        prefix += node.get("content", "")
+        prefix += c[1].get("content", "")
 
-    # Split INLINEs into opening (before last TEXT) and closing (after last TEXT)
-    last_text_idx = max(
-        (j for j, n in enumerate(source_nodes) if n.get("type") == "TEXT"),
-        default=-1,
-    )
-    opening = [{**n} for j, n in enumerate(source_nodes) if n.get("type") == "INLINE" and j < last_text_idx]
-    closing = [{**n} for j, n in enumerate(source_nodes) if n.get("type") == "INLINE" and j > last_text_idx]
+    numeric_mid: list[tuple[str, dict, str, dict]] = []
+    boundary_pre: list[dict] = []
+    boundary_post: list[dict] = []
 
-    if not opening:
-        # Trailing-only INLINE (e.g. "text <X/>") — no prefix, tag goes after translation
-        return [{"type": "TEXT", "decorations": [], "content": excel_text}, *closing]
+    for j, chunk in enumerate(chunks):
+        if chunk[0] == "text":
+            continue
+        after_last_text = (j > last_text_ci)
 
-    # Strip the paragraph-number prefix from the Excel text (e.g. "[0033]").
+        if chunk[0] == "group":
+            _, open_n, txt_n, close_n = chunk
+            digit = txt_n.get("content", "")
+            has_text_before = any(chunks[k][0] == "text" for k in range(j))
+            has_text_after  = any(chunks[k][0] == "text" for k in range(j + 1, last_text_ci + 1))
+            if has_text_before and has_text_after and digit.strip().isdigit():
+                left_ctx = ""
+                for prev in reversed(chunks[:j]):
+                    if prev[0] == "text":
+                        left_ctx = prev[1].get("content", "").rstrip()[-4:]
+                        break
+                print(f"    [TAGS] numeric group inlineId={open_n.get('inlineId')} digit={digit!r} left_ctx={left_ctx!r}")
+                numeric_mid.append((left_ctx, {**open_n}, digit, {**close_n}))
+            elif after_last_text:
+                boundary_post.extend([{**open_n}, {**txt_n}, {**close_n}])
+            else:
+                boundary_pre.extend([{**open_n}, {**txt_n}, {**close_n}])
+        elif chunk[0] == "lone":
+            lone_n = chunk[1]
+            if after_last_text:
+                boundary_post.append({**lone_n})
+            else:
+                boundary_pre.append({**lone_n})
+
+    if not boundary_pre and not numeric_mid and not boundary_post:
+        return [{"type": "TEXT", "decorations": [], "content": excel_text}]
+
+    # --- Pass 3: strip paragraph-number prefix from the Excel text ---
     # Source nodes may use NBSP ( ) inside the bracket while the Excel text
-    # uses a regular space or no space — build a whitespace-flexible regex so the
+    # uses a regular space or no space - build a whitespace-flexible regex so the
     # comparison succeeds regardless of which Unicode space variant is present.
     text = excel_text
     prefix_stripped = prefix.strip()
     _prefix_matched = False
     if prefix_stripped:
-        _ws_re = re.compile(r"[\s  ]+")
+        _ws_re = re.compile(r'[\s  ]+')
         _parts = [re.escape(p) for p in _ws_re.split(prefix_stripped) if p]
         if _parts:
-            _prefix_pat = re.compile(r"[\s ]*".join(_parts))
+            _prefix_pat = re.compile(r'[\s  ]*'.join(_parts))
             _m = _prefix_pat.match(text)
             if _m:
                 text = text[_m.end():].lstrip()
                 _prefix_matched = True
 
+    # --- Pass 4: build translation body ---
+    body: list[dict] = (
+        _anchor_numeric_groups(text, numeric_mid) if numeric_mid
+        else [{"type": "TEXT", "decorations": [], "content": text}]
+    )
+    if boundary_pre and body and body[0].get("type") == "TEXT":
+        body[0] = {**body[0], "content": " " + body[0]["content"]}
+
     nodes: list[dict] = []
     if prefix_stripped and _prefix_matched:
         nodes.append({"type": "TEXT", "decorations": [], "content": prefix_stripped})
-    nodes.extend(opening)
-    nodes.append({"type": "TEXT", "decorations": [], "content": " " + text})
-    nodes.extend(closing)
+    nodes.extend(boundary_pre)
+    nodes.extend(body)
+    nodes.extend(boundary_post)
     return nodes
 
 
