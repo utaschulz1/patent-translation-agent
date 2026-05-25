@@ -97,6 +97,130 @@ def _target_text(target: ET.Element) -> str:
     return "".join(target.itertext()).strip()
 
 
+def _xlf_inline_seq(elem: ET.Element) -> list[tuple[str, str]]:
+    """Return ordered (kind, xlf_id) for every inline tag in an XLF element.
+
+    kind: 'x' for <x/>, 'g_open' / 'g_close' for <g> open/close.
+    Recurses into nested elements so <x> inside <g> is captured in document order.
+    """
+    result: list[tuple[str, str]] = []
+
+    def walk(e: ET.Element) -> None:
+        for child in e:
+            local = child.tag.split("}")[-1] if "}" in child.tag else child.tag
+            if local == "x":
+                result.append(("x", child.get("id", "")))
+            elif local == "g":
+                result.append(("g_open", child.get("id", "")))
+                walk(child)
+                result.append(("g_close", child.get("id", "")))
+
+    walk(elem)
+    return result
+
+
+def _xlf_target_to_nodes(
+    xlf_src: ET.Element,
+    xlf_tgt: ET.Element,
+    source_nodes: list[dict],
+) -> tuple[list[dict] | None, str | None]:
+    """Build XTM target nodes directly from XLF target tag positions.
+
+    Maps XLF inline tags to XTM INLINE nodes by greedy type-based matching:
+    walks src_seq and xtm_inlines in parallel, skipping XLF entries whose type
+    doesn't match the next available XTM node (those became SP nodes in XTM).
+    Then walks the XLF target element to place the matched nodes at the
+    positions the translator established.
+
+    Returns:
+      (nodes, 'xlf_driven')  — success; use these nodes
+      (None,  'piled')       — XLF src/tgt tag sequences differ; caller falls back
+      (None,  'no_xtm_nodes')— XTM sent no INLINE nodes for this segment
+      (None,  None)          — segment has no inline tags at all; nothing to record
+    """
+    src_seq = _xlf_inline_seq(xlf_src)
+    tgt_seq = _xlf_inline_seq(xlf_tgt)
+
+    if not src_seq and not tgt_seq:
+        return None, None
+
+    xtm_inlines = [n for n in source_nodes if n.get("type") == "INLINE" and "inlineId" in n]
+
+    if not xtm_inlines:
+        return None, "no_xtm_nodes"
+
+    # Build pos_map greedily: walk src_seq in order, matching each entry to the
+    # next compatible XTM INLINE node. XLF tags that became SP nodes in XTM
+    # (no inlineId) are silently skipped because their type won't match.
+    # This handles both leading SP-mapped x-tags AND SP-mapped reference-group
+    # G containers (e.g. <g><x/><x/><x/></g>) anywhere in the sequence.
+    # G open/close pairings are tracked by xlf_id → xtm inlineId.
+    pos_map: dict[tuple[str, str], dict] = {}
+    _xtm_iter = iter(xtm_inlines)
+    _cur = next(_xtm_iter, None)
+    _open_g_ids: dict[str, int] = {}  # xlf g id → xtm inlineId of matched open
+
+    for _kind, _xlf_id in src_seq:
+        if _cur is None:
+            break
+        _xtm_type = _cur.get("inlineType")
+        if _kind == "x" and _xtm_type == "X":
+            pos_map[("x", _xlf_id)] = _cur
+            _cur = next(_xtm_iter, None)
+        elif _kind == "g_open" and _xtm_type == "G":
+            pos_map[("g_open", _xlf_id)] = _cur
+            _open_g_ids[_xlf_id] = _cur["inlineId"]
+            _cur = next(_xtm_iter, None)
+        elif _kind == "g_close" and _xlf_id in _open_g_ids:
+            if _xtm_type == "G" and _cur.get("inlineId") == _open_g_ids[_xlf_id]:
+                pos_map[("g_close", _xlf_id)] = _cur
+                del _open_g_ids[_xlf_id]
+                _cur = next(_xtm_iter, None)
+        # else: XLF tag is SP-mapped in XTM — skip it
+
+    if not pos_map:
+        return None, "piled"
+
+    # Verify the real (non-SP-mapped) tags appear in the same relative order in
+    # both source and target.  SP-mapped tags may legitimately be absent from
+    # tgt_seq (dropped by MT); genuine reorderings in the remaining tags still
+    # return "piled".  This replaces the old strict src_seq == tgt_seq check.
+    real_src = [(k, i) for (k, i) in src_seq if (k, i) in pos_map]
+    real_tgt = [(k, i) for (k, i) in tgt_seq if (k, i) in pos_map]
+    if real_src != real_tgt:
+        return None, "piled"
+
+    nodes: list[dict] = []
+
+    def walk(e: ET.Element) -> None:
+        if e.text and e.text.strip():
+            nodes.append({"type": "TEXT", "decorations": [], "content": e.text})
+        for child in e:
+            local = child.tag.split("}")[-1] if "}" in child.tag else child.tag
+            xlf_id = child.get("id", "")
+            if local == "x":
+                xtm_node = pos_map.get(("x", xlf_id))
+                if xtm_node:
+                    nodes.append(dict(xtm_node))
+            elif local == "g":
+                open_node  = pos_map.get(("g_open",  xlf_id))
+                close_node = pos_map.get(("g_close", xlf_id))
+                if open_node:
+                    nodes.append(dict(open_node))
+                walk(child)
+                if close_node:
+                    nodes.append(dict(close_node))
+            if child.tail and child.tail.strip():
+                nodes.append({"type": "TEXT", "decorations": [], "content": child.tail})
+
+    walk(xlf_tgt)
+
+    if not nodes:
+        return None, "piled"
+
+    return nodes, "xlf_driven"
+
+
 def _segment_id_from_unit_id(unit_id: str) -> int | None:
     """Convert XLF trans-unit id (e.g. 't4') to XTM integer segment ID (4)."""
     if unit_id.startswith("t") and unit_id[1:].isdigit():
@@ -105,16 +229,20 @@ def _segment_id_from_unit_id(unit_id: str) -> int | None:
     return None
 
 
-def _read_xlf(path: Path) -> list[tuple[int, str]]:
-    """Return (unit_id, translation_text) pairs from a *_GERMAN.xlf file.
+def _read_xlf(
+    path: Path,
+) -> tuple[list[tuple[int, str]], dict[int, tuple[ET.Element, ET.Element]]]:
+    """Return (segments, xlf_data) from a *_GERMAN.xlf file.
 
-    Skips segments with no translation (empty <target>).
+    segments:  (unit_id, translation_text) pairs; skips units with no <target>.
+    xlf_data:  unit_id → (source_elem, target_elem) for XLF-driven tag placement.
     """
     for _event, pair in ET.iterparse(str(path), events=["start-ns"]):
         ET.register_namespace(*pair)
 
     tree = ET.parse(path)
     segments: list[tuple[int, str]] = []
+    xlf_data: dict[int, tuple[ET.Element, ET.Element]] = {}
 
     for tu in tree.getroot().iter(_ns("trans-unit")):
         raw_id   = tu.get("id", "")
@@ -135,10 +263,13 @@ def _read_xlf(path: Path) -> list[tuple[int, str]]:
         if target is None:
             continue
 
+        source = tu.find(_ns("source"))
         text = _target_text(target)
         segments.append((seg_id, text))
+        if source is not None:
+            xlf_data[seg_id] = (source, target)
 
-    return segments
+    return segments, xlf_data
 
 
 def run(project_id: str) -> None:
@@ -154,7 +285,7 @@ def run(project_id: str) -> None:
 
     # Fail fast before XTM login
     print(f"Reading translations from {xlf_path.name}...")
-    segments = _read_xlf(xlf_path)
+    segments, xlf_data = _read_xlf(xlf_path)
 
     if SEGMENT_ID_FILTER is not None:
         segments = [(uid, t) for uid, t in segments if uid in SEGMENT_ID_FILTER]
@@ -172,6 +303,35 @@ def run(project_id: str) -> None:
 
     username, password = _load_creds()
     _xtm_up.DEBUG_SOURCE_NODES_LIMIT = DEBUG_SOURCE_NODES_LIMIT
+
+    tag_stats: dict[str, list[int]] = {}
+
+    # KNOWN ISSUE: paragraph-number-only segments of the form X [NNNN] X SP
+    # (no body text after SP) are uploaded with both X tags before [NNNN] instead
+    # of one before and one after.  Root cause not yet identified; needs further
+    # investigation.  Segments WITH body text after SP place tags correctly.
+    def _xlf_node_builder(unit_id: int, source_nodes: list[dict]):
+        if unit_id not in xlf_data:
+            return None, None
+        xlf_src, xlf_tgt = xlf_data[unit_id]
+        nodes, outcome = _xlf_target_to_nodes(xlf_src, xlf_tgt, source_nodes)
+        if outcome == "xlf_driven" and nodes:
+            # Reclassify as 'piled' when INLINEs are piled before the first TEXT node.
+            # Trailing INLINEs (after last TEXT) are legitimate end-of-segment markers
+            # and must NOT be flagged. Only flag when at least one INLINE precedes the
+            # first TEXT and no INLINE sits between two TEXT nodes (mid-text).
+            text_idx    = [i for i, n in enumerate(nodes) if n.get("type") == "TEXT"]
+            inline_idx  = [i for i, n in enumerate(nodes) if n.get("type") == "INLINE"]
+            if text_idx and inline_idx:
+                first_text, last_text = text_idx[0], text_idx[-1]
+                has_pre  = any(i < first_text for i in inline_idx)
+                has_mid  = any(first_text < i < last_text for i in inline_idx)
+                if has_pre and not has_mid:
+                    # Fall through to _build_target_nodes: it extracts the leading
+                    # text prefix correctly (e.g. "[0013]") and places INLINEs after
+                    # it, whereas the XLF-driven nodes have them before.
+                    return None, "piled"
+        return nodes, outcome
 
     def _hard_login():
         """New HTTP session + full login + claim + open editor."""
@@ -226,7 +386,11 @@ def run(project_id: str) -> None:
         batch_num += 1
         print(f"\nBatch {batch_num} — segments {first_id}–{last_id} ({len(batch)} segments)...")
 
-        batch_results = _upload_via_stomp(session, session_token, csrf_token, batch)
+        batch_results = _upload_via_stomp(
+            session, session_token, csrf_token, batch,
+            target_node_builder=_xlf_node_builder,
+            tag_stats=tag_stats,
+        )
 
         # Segments the server rejected or never attempted
         retry_ids = {uid for uid, st in batch_results.items()
@@ -291,6 +455,22 @@ def run(project_id: str) -> None:
         for uid, reason in sorted(failed.items()):
             print(f"    segment {uid}: {reason}")
     print(f"  Total:         {len(results)}")
+
+    xlf_driven = tag_stats.get("xlf_driven", [])
+    piled      = tag_stats.get("piled", [])
+    no_nodes   = tag_stats.get("no_xtm_nodes", [])
+    if xlf_driven or piled or no_nodes:
+        print()
+        print("=== Tag placement summary ===")
+        print(f"  XLF-driven (sequences matched): {len(xlf_driven)}")
+        if xlf_driven:
+            print(f"    Segments: {xlf_driven}")
+        print(f"  Piled at boundary (mismatch):   {len(piled)}")
+        if piled:
+            print(f"    Segments: {piled}")
+        print(f"  Plain text (no XTM INLINE nodes): {len(no_nodes)}")
+        if no_nodes:
+            print(f"    Segments: {no_nodes}")
 
 
 def main() -> None:

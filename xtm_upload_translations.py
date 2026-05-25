@@ -346,7 +346,8 @@ def _anchor_numeric_groups(
         if not placed and digit in remaining:
             idx = remaining.index(digit)
             print(f"    [TAGS] anchored {digit!r} via fallback substring at pos {idx}")
-            result.append({"type": "TEXT", "decorations": [], "content": remaining[:idx]})
+            if remaining[:idx]:
+                result.append({"type": "TEXT", "decorations": [], "content": remaining[:idx]})
             result.append(open_n)
             result.append({"type": "TEXT", "decorations": [], "content": digit})
             result.append(close_n)
@@ -370,6 +371,11 @@ def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]
     source TEXT as a locator (left_ctx).  All other inline-groups pile before the
     translation text (boundary pattern, e.g. paragraph numbers).
     """
+    # Filter XTM-internal SP nodes (inlineType "SP", no inlineId).
+    # They are source-only spacing hints — sending them in target injects extra NBSP
+    # and their None inlineId causes spurious group matches wrapping source TEXT.
+    source_nodes = [n for n in source_nodes if not (n.get("type") == "INLINE" and "inlineId" not in n)]
+
     if not any(n.get("type") == "INLINE" for n in source_nodes):
         return [{"type": "TEXT", "decorations": [], "content": excel_text}]
 
@@ -386,6 +392,7 @@ def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]
             if (i + 2 < len(source_nodes)
                     and source_nodes[i + 1].get("type") == "TEXT"
                     and source_nodes[i + 2].get("type") == "INLINE"
+                    and node.get("inlineId") is not None
                     and source_nodes[i + 2].get("inlineId") == node.get("inlineId")):
                 chunks.append(("group", node, source_nodes[i + 1], source_nodes[i + 2]))
                 i += 3
@@ -419,18 +426,25 @@ def _build_target_nodes(source_nodes: list[dict], excel_text: str) -> list[dict]
             digit = txt_n.get("content", "")
             has_text_before = any(chunks[k][0] == "text" for k in range(j))
             has_text_after  = any(chunks[k][0] == "text" for k in range(j + 1, last_text_ci + 1))
-            if has_text_before and has_text_after and digit.strip().isdigit():
+            _d = digit.strip()
+            _is_para_num = bool(re.fullmatch(r'\[\d+\]', _d))
+            if (has_text_before and has_text_after and _d.isdigit()) or \
+                    (_is_para_num and has_text_after):
                 left_ctx = ""
-                for prev in reversed(chunks[:j]):
-                    if prev[0] == "text":
-                        left_ctx = prev[1].get("content", "").rstrip()[-4:]
-                        break
-                print(f"    [TAGS] numeric group inlineId={open_n.get('inlineId')} digit={digit!r} left_ctx={left_ctx!r}")
-                numeric_mid.append((left_ctx, {**open_n}, digit, {**close_n}))
+                if not _is_para_num:  # para-nums are unique; no left_ctx needed
+                    for prev in reversed(chunks[:j]):
+                        if prev[0] == "text":
+                            left_ctx = prev[1].get("content", "").rstrip()[-4:]
+                            break
+                label = "para-num" if _is_para_num else "numeric"
+                print(f"    [TAGS] {label} group inlineId={open_n.get('inlineId')} digit={_d!r} left_ctx={left_ctx!r}")
+                numeric_mid.append((left_ctx, {**open_n}, _d, {**close_n}))
             elif after_last_text:
-                boundary_post.extend([{**open_n}, {**txt_n}, {**close_n}])
+                # Drop source TEXT — it is source-language content, not translation.
+                # Only the open/close INLINE brackets go to the boundary.
+                boundary_post.extend([{**open_n}, {**close_n}])
             else:
-                boundary_pre.extend([{**open_n}, {**txt_n}, {**close_n}])
+                boundary_pre.extend([{**open_n}, {**close_n}])
         elif chunk[0] == "lone":
             lone_n = chunk[1]
             if after_last_text:
@@ -484,8 +498,19 @@ def _upload_via_stomp(
     session_token: str,
     csrf_token: str,
     segments: list[tuple[int, str]],
+    target_node_builder=None,
+    tag_stats: dict | None = None,
 ) -> dict[int, str]:
-    """Connect to the workbench WebSocket and upload all translations."""
+    """Connect to the workbench WebSocket and upload all translations.
+
+    target_node_builder: optional callable (unit_id, source_nodes) →
+        (list[dict], outcome_str) | (None, outcome_str | None).
+        If provided, called before _build_target_nodes for every non-TM segment.
+        Return (nodes, 'xlf_driven') to use those nodes; return (None, ...) to
+        fall back to _build_target_nodes.  None outcome means nothing is recorded.
+    tag_stats: optional dict populated in-place with outcome → [unit_id, ...] lists.
+        Keys: 'xlf_driven', 'piled', 'no_xtm_nodes'.
+    """
     server_id = str(random.randint(0, 999)).zfill(3)
     session_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
     ws_url = (
@@ -574,7 +599,13 @@ def _upload_via_stomp(
             })
             try:
                 payload = wait_for("TRANS_UNIT_UPDATED", timeout=_INIT_TIMEOUT)
-                tu_updates[segments[0][0]] = payload  # cache init segment
+                xtm_id = payload.get("id", segments[0][0])
+                tu_updates[xtm_id] = payload
+                # XTM's internal segment id may differ from the XLF segment number.
+                # Direct-activation responses have top-level source.nodes; store by
+                # the XLF id too so the main loop's lookup by XLF segment number works.
+                if xtm_id != segments[0][0] and payload.get("source", {}).get("nodes"):
+                    tu_updates[segments[0][0]] = payload
                 break
             except TimeoutError:
                 if attempt == _MAX_INIT_ATTEMPTS:
@@ -686,7 +717,17 @@ def _upload_via_stomp(
                                 _matches[0].get("source", {}).get("nodes", [])
                             )
                     have_source = bool(source_nodes)
-                    target_nodes = _build_target_nodes(source_nodes, text)
+                    if target_node_builder is not None:
+                        _xlf_nodes, _tag_outcome = target_node_builder(unit_id, source_nodes)
+                        if _xlf_nodes is not None:
+                            target_nodes = _xlf_nodes
+                        else:
+                            target_nodes = _build_target_nodes(source_nodes, text)
+                    else:
+                        _xlf_nodes, _tag_outcome = None, None
+                        target_nodes = _build_target_nodes(source_nodes, text)
+                    if tag_stats is not None and _tag_outcome is not None:
+                        tag_stats.setdefault(_tag_outcome, []).append(unit_id)
 
                 # --- Debug dump (controlled by DEBUG_SOURCE_NODES_LIMIT) ---
                 if DEBUG_SOURCE_NODES_LIMIT and _debug_printed < DEBUG_SOURCE_NODES_LIMIT:
