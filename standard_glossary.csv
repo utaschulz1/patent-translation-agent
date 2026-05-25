@@ -3,9 +3,12 @@ e.g.,zum Beispiel
 comprise,umfassen,
 comprising,umfassend,
 configure,konfigurieren,
-include,beinhalten,
+include,einschließen,involve/incorporate/encompass
+including,einschließlich
 have,aufweisen,
 having,aufweisen,(nicht mit)
+use,verwenden
+using,mithilfe
 surface,Oberfläche,
 at least,mindestens,
 consist,bestehen,
@@ -14,10 +17,10 @@ obtain,erhalten,
 connect,verbinden,
 operatively connected,wirkverbunden,
 attach,befestigen,
+produce,erzeugen
 associate,verknüpfen,
 map,zuordnen,
 assign,zuweisen,
-carry out,durchführen,
 form,ausbilden,
 return,zurückgeben,
 detect,detektieren,
@@ -26,7 +29,7 @@ type,Art,
 portion,Abschnitt,
 process,Vorgang,HUAWxtm
 processing,Verarbeiten,
-perform,durchführen,
+perform,durchführen,carry out/(action) taken/umsetzen/vornehmen
 enable,in die Lage versetzen,
 so that,so dass,
 different,verschieden,
@@ -50,8 +53,23 @@ any,beliebig,
 given,gegeben,
 a same,ein gleiches,
 via,über,
+multiple,multiple,
 disease,Erkrankung,
 disorder,Störung,
 region,Region,
 threshold,Schwellenwert,
 optionally,optional,
+score,Punktzahl,
+evaluation,Evaluierung,assessment/rating/score/review
+range,Bereich,
+domain,Raum,Domäne
+distance,Distanz,range/Abstand/Entfernung
+grant,erteilen
+composition,Zusammensetzung
+FIG.,FIG.
+% by weight,Gew.-%
+component,Komponente
+component,Bauteil
+by,durch
+independent claim,Hauptanspruch,XTM
+dependent claim,Nebenanspruch
