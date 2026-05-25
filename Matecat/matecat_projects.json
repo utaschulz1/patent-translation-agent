@@ -86,12 +86,75 @@
           "url": "https://www.matecat.com/?action=editProject&id_project=12757618&password=23eea700826a"
         },
         {
-          "project_id": "HALA_2605_P0419",
-          "mc_id": 12757635,
-          "mc_pass": "5f1560083428",
-          "url": "https://www.matecat.com/?action=editProject&id_project=12757635&password=5f1560083428"
+          "project_id": "HALA_2605_P0432",
+          "mc_id": 12362875,
+          "mc_pass": "e5142d63ff16",
+          "url": "https://www.matecat.com/translate/hala2605p0432/en-US-de-DE/12362875-e5142d63ff16"
         }
-      ]
+      ],
+      "glossary_tm_key": "5282af13a76292994665"
+    },
+    "HUAW": {
+      "template_id": 15902,
+      "tm_key": "22d0d748b98dbfaaf56b",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "HUAW_2605_P0951",
+          "mc_id": 12363398,
+          "mc_pass": "37f20b4f8136",
+          "url": "https://www.matecat.com/translate/huaw2605p0951/en-US-de-DE/12363398-37f20b4f8136"
+        },
+        {
+          "project_id": "HUAW_2605_P0962",
+          "mc_id": 12367080,
+          "mc_pass": "545ff9691fd0",
+          "url": "https://www.matecat.com/translate/huaw2605p0962/en-US-de-DE/12367080-545ff9691fd0"
+        }
+      ],
+      "glossary_tm_key": "0b69745f15d85d8619f2"
+    },
+    "SIEMENS": {
+      "template_id": 15912,
+      "tm_key": "0ba99d34614607aff3aa",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "SIEMENS_2605_P1889",
+          "mc_id": 12363398,
+          "mc_pass": "12365338",
+          "url": "https://www.matecat.com/translate/siemens26051889/en-US-de-DE/12365338-4e637aa39845"
+        }
+      ],
+      "glossary_tm_key": "0b00fa69a3cf18512a95"
+    },
+    "AMIP": {
+      "template_id": 15931,
+      "tm_key": "d8a18ee26522935e3e1d",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "AMP_2605_P0031",
+          "mc_id": 12789711,
+          "mc_pass": "39341ebf046a",
+          "url": "https://www.matecat.com/analyze/amip2605p0031/12789711-39341ebf046a"
+        }
+      ],
+      "glossary_tm_key": "c94af2d43c67f917c3d5"
+    },
+    "MTMA": {
+      "template_id": 15955,
+      "tm_key": "b13462d0317a5840056d",
+      "tm_key_2": null,
+      "projects": [
+        {
+          "project_id": "MTMA_2605_P0082",
+          "mc_id": 12370910,
+          "mc_pass": "3b02181d4d48",
+          "url": "https://www.matecat.com/translate/mtma2605p0082/en-US-de-DE/12370910-3b02181d4d48#4920163001"
+        }
+      ],
+      "glossary_tm_key": "8749cff11c4224c96250"
     }
   }
 }
