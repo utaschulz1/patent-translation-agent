@@ -7,7 +7,9 @@ from Excel into the XTM Workbench via its STOMP-over-SockJS WebSocket API.
 
 Before answering, read:
 1. The script itself: `xtm_upload_translations.py`
-2. The memory file at `C:\Users\utasc\.claude\projects\c--Users-utasc-OneDrive-Dokumente-Code-Python-patent-translation-agent\memory\xtm_websocket_protocol.md`
+2. `Matecat/matecat_xtm_upload.py` if the question relates to the MateCat→XTM path
+3. The memory file at `C:\Users\utasc\.claude\projects\c--Users-utasc-OneDrive-Dokumente-Code-Python-patent-translation-agent\memory\xtm_websocket_protocol.md`
+4. The memory file at `C:\Users\utasc\.claude\projects\c--Users-utasc-OneDrive-Dokumente-Code-Python-patent-translation-agent\memory\xtm_upload_script.md`
 
 ## Step 2 — Domain knowledge (authoritative, apply without re-deriving)
 
@@ -98,13 +100,34 @@ Waiting for SAVE_RESPONSE BEFORE sending activate causes an infinite deadlock.
 
 ---
 
-### Tag placement in `_build_target_nodes`
+### Tag placement — two paths
+
+#### Path 1: XLF-driven (matecat_xtm_upload.py only)
+
+Used when the XLF `<target>` element has the same inline tag sequence as `<source>`.
+
+`_xlf_inline_seq(elem)` extracts an ordered list of `(kind, xlf_id)` tuples — `'x'`, `'g_open'`, `'g_close'` — by walking the element recursively.
+
+`_xlf_target_to_nodes(xlf_src, xlf_tgt, source_nodes)`:
+1. Compares `_xlf_inline_seq(xlf_src)` with `_xlf_inline_seq(xlf_tgt)` — must be equal.
+2. Verifies `len(src_seq) == len(xtm_inlines)` (count of XTM INLINE nodes).
+3. Builds positional map: n-th XLF tag → n-th XTM INLINE node (same document order, different ID systems).
+4. Walks `xlf_tgt` element emitting TEXT and INLINE nodes at the exact positions the translator placed them.
+
+Returns `(nodes, 'xlf_driven')` | `(None, 'piled')` | `(None, 'no_xtm_nodes')` | `(None, None)`.
+
+Injected into `_upload_via_stomp` via the `target_node_builder` callable parameter. `tag_stats` dict accumulates outcomes by segment ID across all batches; printed as "Tag placement summary" at run end.
+
+**Falls back to Path 2** when sequences mismatch. `_anchor_numeric_groups` in Path 2 still handles the case where only numeric-wrapping `<g>` tags need anchoring after a reorder.
+
+#### Path 2: `_build_target_nodes` (both scripts, always available as fallback)
 
 - No INLINE in source → `[TEXT(excel_text)]`
 - INLINEs present — split by position of last TEXT node in source:
   - opening INLINEs (index < last TEXT): `[TEXT(prefix), INLINE, TEXT(" " + translation)]`
   - closing INLINEs (index > last TEXT): `[TEXT(translation), INLINE]`
   - space goes AFTER the tag, not before it
+- Numeric `<g>` groups (INLINE_open + digit + INLINE_close flanked by text) anchored by `_anchor_numeric_groups` using the last 4 chars of the preceding source TEXT as left-context hint.
 
 ---
 
