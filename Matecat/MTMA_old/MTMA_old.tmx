@@ -1,0 +1,1670 @@
+<?xml version="1.0" ?>
+<!DOCTYPE tmx SYSTEM "https://uri.etsi.org/lis/002/v1.4.2/tmx14.dtd">
+<tmx version="1.4">
+  <header creationtool="MyMemory - mymemory.translated.net"
+          creationtoolversion="1.3.25"
+          creationid="Translated"
+          datatype="PlainText"
+          segtype="sentence"
+          o-tmf="MyMemory"
+          adminlang="en-US"
+          srclang="en-US"/>
+  <body>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t1"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>1</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t2"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t3"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>1. A catalytic composition comprising a complex of metal oxides wherein the relative ratios of the listed elements in said catalyst are represented by the following formula:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Katalytische Zusammensetzung, umfassend einen Komplex von Metalloxiden, wobei die relativen Verhältnisse der aufgeführten Elemente in dem Katalysator durch die folgende Formel dargestellt werden:</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t4"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>Mom Bia Feb Ac Dd Ee Ff Gg Ceh Crn Qq Ox</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Mom Bia Feb Ac Dd Ee Ff Gg Ceh Crn Qq Ox</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t5"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>wherein A is at least one element selected from the group consisting of lithium, sodium, potassium, rubidium and cesium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei A mindestens ein Element ist, das aus der Gruppe bestehend aus Lithium, Natrium, Kalium, Rubidium und Cäsium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t6"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>D is at least one element selected from the group consisting of nickel, cobalt, manganese, zinc, magnesium, calcium, strontium, cadmium and barium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>D mindestens ein Element ist, das aus der Gruppe bestehend aus Nickel, Kobalt, Mangan, Zink, Magnesium, Calcium, Strontium, Cadmium und Barium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t7"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>E is at least one element selected from the group consisting of tungsten, boron, aluminum, gallium, indium, phosphorus, arsenic, antimony, vanadium and tellurium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>E mindestens ein Element ist, das aus der Gruppe bestehend aus Wolfram, Bor, Aluminium, Gallium, Indium, Phosphor, Arsen, Antimon, Vanadium und Tellur ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t8"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>F is at least one element selected from the group consisting of lanthanum, europium, gadolinium, terbium, dysprosium, holmium, erbium, thulium, ytterbium, lutetium, scandium, yttrium, titanium, zirconium, hafnium, niobium, tantalum, aluminum, gallium, indium, thallium, silicon, lead and germanium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>F mindestens ein Element ist, das aus der Gruppe bestehend aus Lanthan, Europium, Gadolinium, Terbium, Dysprosium, Holmium, Erbium, Thulium, Ytterbium, Lutetium, Scandium, Yttrium, Titan, Zirconium, Hafnium, Niob, Tantal, Aluminium, Gallium, Indium, Thallium, Silicium, Blei und Germanium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t9"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>G is at least one element selected from the group consisting of silver, gold, ruthenium, rhodium, palladium, osmium, iridium, platinum and mercury;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>G mindestens ein Element ist, das aus der Gruppe bestehend aus Silber, Gold, Ruthenium, Rhodium, Palladium, Osmium, Iridium, Platin und Quecksilber ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t10"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>Q is at least one of samarium, praseodymium and neodymium; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Q mindestens eines von Samarium, Praseodym und Neodym ist; und</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t11"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>a, b, c, d, e, f, g, h, n, m and x are, respectively, the atomic ratios of bismuth (Bi), iron (Fe), A, D, E, F, G, cerium (Ce), chromium (Cr), molybdenum (Mo) and oxygen (O), relative to “m” atoms of molybdenum (Mo),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>a, b, c, d, e, f, g, h, n, m und x jeweils die Atomverhältnisse von Bismut (Bi), Eisen (Fe), A, D, E, F, G, Cer (Ce), Chrom (Cr), Molybdän (Mo) und Sauerstoff (O), bezogen auf &quot;m&quot; Atome von Molybdän (Mo), sind,</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t12"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>wherein a is 0.05 to 7,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei a zwischen 0,05 und 7 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t13"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>b is 0.1 to 7,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>b zwischen 0,1 und 7 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t14"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>c is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>c 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t15"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>d is 0.1 to 12,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>d 0,1 bis 12 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t16"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>e is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t17"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>f is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t18"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>g is 0 to 0.2,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>g 0 bis 0,2 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t19"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>h is 0.01 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>h 0,01 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t20"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>m is 10 to15,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>m 10 bis 15 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t21"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>n is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>n 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t22"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>q is 0 to 2.476, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>q 0 und 2,476 ist und</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t23"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>x is the number of oxygen atoms required to satisfy the valence requirements of the other component elements present; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>x die Anzahl von Sauerstoffatomen ist, die erforderlich ist, um die Valenzanforderungen der anderen vorhandenen Komponentenelemente zu erfüllen; und</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t24"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>wherein 0.4&lt; b/(a+h) and 0.3 ≤ (a+h)/d; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei 0,4 &lt; b/(a+h) und 0,3 ≤ (a+h)/d; und</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t25"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>wherein 0 ≤ m – (3a+2b+c+2d+3h+3n)/2 ≤ 1.0.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei 0 ≤ m - (3a+2b+c+2d+3h+3n)/2 ≤ 1,0.</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t26"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>2. The catalyst composition of claim 1, wherein 0.3 ≤ (a+h)/d ≤ 1.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Katalysatorzusammensetzung nach Anspruch 1, wobei 0,3 ≤ (a+h)/d ≤ 1.</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t27"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>3. The catalyst composition of claim 1, wherein 0.45 ≤ (a+h)/d ≤ 1.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Katalysatorzusammensetzung nach Anspruch 1, wobei 0,45 ≤ (a+h)/d ≤ 1.</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t28"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>4. The catalyst composition of claim 1 wherein D is nickel.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Katalysatorzusammensetzung nach Anspruch 1, wobei D Nickel ist.</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t29"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>5. The catalyst composition of claim 1, additionally comprising at least one alkali molybdate compound represented by the formula:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Katalysatorzusammensetzung nach Anspruch 1, zusätzlich umfassend mindestens eine Alkalimolybdatverbindung, dargestellt durch die Formel:</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t30"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>A2MozO4+3(z-1)</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>A2MozO4+3(z-1)</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t31"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>wherein A is Rb, Li, Na, K, Cs, or a mixture thereof.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei A Rb, Li, Na, K, Cs oder eine Mischung davon ist.</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t32"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>z is from 1 to about 8.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>z von 1 bis etwa 8 ist.</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t33"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>6. The catalyst composition of claim 5, wherein the alkali molybdate compound comprises a support selected from the group consiting of silica, alumina, zirconia, titania, or mixtures therof, and wherein the support comprises between 1 wt% to 99 wt% of the molybdate and support combination.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Katalysatorzusammensetzung nach Anspruch 5, wobei die Alkalimolybdatverbindung einen Träger umfasst, der aus der Gruppe bestehend aus Siliciumdioxid, Aluminiumoxid, Zirconiumdioxid, Titandioxid oder Mischungen davon ausgewählt ist, und wobei der Träger zwischen 1 Gew.-% bis 99 Gew.-% der Molybdat- und Trägerkombination umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t34"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>7. The catalyst composition of claim 5, wherein the catalyst composition comprises between of 0.01 wt% to about 10 wt% of the alkali molybdate compound relative to the total weight of said catalyst composition.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Katalysatorzusammensetzung nach Anspruch 5, wobei die Katalysatorzusammensetzung zwischen 0,01 Gew.-% bis etwa 10 Gew.-% der Alkalimolybdatverbindung, bezogen auf das Gesamtgewicht der Katalysatorzusammensetzung, umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t35"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>8. A process for the conversion of an olefin selected from the group consisting of propylene, isobutylene and mixtures thereof, to acrylonitrile, methacrylonitrile, and mixtures thereof, with hydrogen cyanide produced as a co-product, by reacting in the vapor phase at an elevated temperature and pressure said olefin with a molecular oxygen containing gas and ammonia in the presence of a catalyst wherein the relative ratios of the listed elements in said catalyst are represented by the following formula:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Verfahren zur Umwandlung eines Olefins, ausgewählt aus der Gruppe, bestehend aus Propylen, Isobutylen und Mischungen davon, in Acrylnitril, Methacrylnitril und Mischungen davon, mit Cyanwasserstoff, hergestellt als ein Co-Produkt, durch Umsetzen des Olefins in der Dampfphase bei erhöhter Temperatur und erhöhtem Druck mit einem molekularen Sauerstoff enthaltenden Gas und Ammoniak in Gegenwart eines Katalysators, wobei die relativen Verhältnisse der aufgelisteten Elemente in dem Katalysator durch die folgende Formel dargestellt werden:</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t36"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>Mom Bia Feb Ac Dd Ee Ff Gg Ceh Crn Qq Ox</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Mom Bia Feb Ac Dd Ee Ff Gg Ceh Crn Qq Ox</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t37"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>wherein A is at least one element selected from the group consisting of lithium, sodium, potassium, rubidium and cesium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei A mindestens ein Element ist, das aus der Gruppe bestehend aus Lithium, Natrium, Kalium, Rubidium und Cäsium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t38"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>D is at least one element selected from the group consisting of nickel, cobalt, manganese, zinc, magnesium, calcium, strontium, cadmium and barium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>D mindestens ein Element ist, das aus der Gruppe bestehend aus Nickel, Kobalt, Mangan, Zink, Magnesium, Calcium, Strontium, Cadmium und Barium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t39"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>E is at least one element selected from the group consisting of tungsten, boron, aluminum, gallium, indium, phosphorus, arsenic, antimony, vanadium and tellurium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>E mindestens ein Element ist, das aus der Gruppe bestehend aus Wolfram, Bor, Aluminium, Gallium, Indium, Phosphor, Arsen, Antimon, Vanadium und Tellur ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t40"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>F is at least one element selected from the group consisting of lanthanum, europium, gadolinium, terbium, dysprosium, holmium, erbium, thulium, ytterbium, lutetium, scandium, yttrium, titanium, zirconium, hafnium, niobium, tantalum, aluminum, gallium, indium, thallium, silicon, lead and germanium;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>F mindestens ein Element ist, das aus der Gruppe bestehend aus Lanthan, Europium, Gadolinium, Terbium, Dysprosium, Holmium, Erbium, Thulium, Ytterbium, Lutetium, Scandium, Yttrium, Titan, Zirconium, Hafnium, Niob, Tantal, Aluminium, Gallium, Indium, Thallium, Silicium, Blei und Germanium ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t41"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>G is at least one element selected from the group consisting of silver, gold, ruthenium, rhodium, palladium, osmium, iridium, platinum and mercury;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>G mindestens ein Element ist, das aus der Gruppe bestehend aus Silber, Gold, Ruthenium, Rhodium, Palladium, Osmium, Iridium, Platin und Quecksilber ausgewählt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t42"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>Q is at least one of samarium, praseodymium and neodymium and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Q mindestens eines von Samarium, Praseodym und Neodym ist und</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t43"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>a, b, c, d, e, f, g, h, n, m and x are, respectively, the atomic ratios of bismuth (Bi), iron (Fe), A, D, E, F, G, cerium (Ce), chromium (Cr), molybdenum (Mo) and oxygen (O), relative to “m” atoms of molybdenum (Mo),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>a, b, c, d, e, f, g, h, n, m und x jeweils die Atomverhältnisse von Bismut (Bi), Eisen (Fe), A, D, E, F, G, Cer (Ce), Chrom (Cr), Molybdän (Mo) und Sauerstoff (O), bezogen auf &quot;m&quot; Atome von Molybdän (Mo), sind,</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t44"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>wherein a is 0.05 to 7,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei a zwischen 0,05 und 7 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t45"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t45"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t45">
+      <tuv xml:lang="en-US"><seg>b is 0.1 to 7,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>b zwischen 0,1 und 7 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t46"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t46"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t46">
+      <tuv xml:lang="en-US"><seg>c is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>c 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t47"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t47"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t47">
+      <tuv xml:lang="en-US"><seg>d is 0.1 to 12,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>d 0,1 bis 12 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t48"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t48"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t48">
+      <tuv xml:lang="en-US"><seg>e is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t49"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t49"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t49">
+      <tuv xml:lang="en-US"><seg>f is 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t50"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t50"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t50">
+      <tuv xml:lang="en-US"><seg>g is 0 to 0.2,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>g 0 bis 0,2 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t51"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t51"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t51">
+      <tuv xml:lang="en-US"><seg>h is 0.01 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>h 0,01 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t52"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t52"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t52">
+      <tuv xml:lang="en-US"><seg>m is 10 to 15,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>m 10 bis 15 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t53"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t53"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t53">
+      <tuv xml:lang="en-US"><seg>n is from 0 to 5,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>n 0 bis 5 ist,</seg></tuv>
+    </tu>
+    <tu tuid="t54"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t54"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t54">
+      <tuv xml:lang="en-US"><seg>q is 0 to 2.476 and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>q 0 bis 2,476 ist und</seg></tuv>
+    </tu>
+    <tu tuid="t55"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t55"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t55">
+      <tuv xml:lang="en-US"><seg>x is the number of oxygen atoms required to satisfy the valence requirements of the other component elements present; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>x die Anzahl von Sauerstoffatomen ist, die erforderlich ist, um die Valenzanforderungen der anderen vorhandenen Komponentenelemente zu erfüllen; und</seg></tuv>
+    </tu>
+    <tu tuid="t56"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t56"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t56">
+      <tuv xml:lang="en-US"><seg>wherein 0.4&lt; b/(a+h) and 0.3 ≤ (a+h)/d; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei 0,4 &lt; b/(a+h) und 0,3 ≤ (a+h)/d; und</seg></tuv>
+    </tu>
+    <tu tuid="t57"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t57"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t57">
+      <tuv xml:lang="en-US"><seg>wherein 0 ≤ m – (3a+2b+c+2d+3h+3n)/2 ≤ 1.0.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei 0 ≤ m - (3a+2b+c+2d+3h+3n)/2 ≤ 1,0.</seg></tuv>
+    </tu>
+    <tu tuid="t58"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t58"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t58">
+      <tuv xml:lang="en-US"><seg>9. The process of claim 8, wherein the yield of hydrogen cyanide is increased relative to the amount of acrylonitrile and methacrylonitrile produced in the process by the addition to the catalyst of at least one alkali molybdate compound represented by the formula:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Verfahren nach Anspruch 8, wobei die Ausbeute an Cyanwasserstoff im Verhältnis zur Menge an Acrylnitril und Methacrylnitril, die im Verfahren hergestellt wird, durch Zugabe von mindestens einer Alkalimolybdatverbindung der folgenden Formel zum Katalysator erhöht wird:</seg></tuv>
+    </tu>
+    <tu tuid="t59"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t59"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t59">
+      <tuv xml:lang="en-US"><seg>A2MozO4+3(z-1)</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>A2MozO4+3(z-1)</seg></tuv>
+    </tu>
+    <tu tuid="t60"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t60"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t60">
+      <tuv xml:lang="en-US"><seg>wherein A is Rb, Li, Na, K, Cs, or a mixture thereof, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei A Rb, Li, Na, K, Cs oder eine Mischung davon ist, und</seg></tuv>
+    </tu>
+    <tu tuid="t61"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t61"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t61">
+      <tuv xml:lang="en-US"><seg>z is from 1 to about 8.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>z von 1 bis etwa 8 ist.</seg></tuv>
+    </tu>
+    <tu tuid="t62"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t62"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t62">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t63"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t63"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t63">
+      <tuv xml:lang="en-US"><seg>The process of claim 9 wherein the catalyst composition comprises between of 0.01 wt% to about 10 wt% of the alkali molybdate compound relative to the total weight of said catalyst composition.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9, wobei die Katalysatorzusammensetzung zwischen 0,01 Gew.-% bis etwa 10 Gew.-% der Alkalimolybdatverbindung, bezogen auf das Gesamtgewicht der Katalysatorzusammensetzung, umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t64"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t64"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t64">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t65"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t65"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t65">
+      <tuv xml:lang="en-US"><seg>The process of claim 8, wherein the yield of acrylonitrile and methacrylonitrile is increased relative to the amount of hydrogen cyanide produced in the process by the addition to the catalyst of a molybdenum oxide compound selected from the group consisting of MoO3, ammonium molybdate, ammonium heptamolybdate, ammonium dimolybdate and mixtures thereof.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 8, dadurch gekennzeichnet, dass die Ausbeute an Acrylnitril und Methacrylnitril gegenüber der Menge an Cyanwasserstoff erhöht wird, die bei dem Verfahren durch Zugabe einer Molybdänoxidverbindung, ausgewählt aus der Gruppe bestehend aus MoO3, Ammoniummolybdat, Ammoniumheptamolybdat, Ammoniumdimolybdat und Mischungen davon, zu dem Katalysator hergestellt wird.</seg></tuv>
+    </tu>
+    <tu tuid="t66"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t66"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t66">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t67"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t67"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t67">
+      <tuv xml:lang="en-US"><seg>The process of claim 11, wherein the amount of said molybdenum oxide compound added to the catalyst is in the range of 0.01 wt% to about 10 wt%, relative to the weight of said catalyst.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 11, wobei die Menge der Molybdänoxidverbindung, die dem Katalysator zugegeben wird, im Bereich von 0,01 Gew.-% bis etwa 10 Gew.-%, bezogen auf das Gewicht des Katalysators, liegt.</seg></tuv>
+    </tu>
+    <tu tuid="t68"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t68"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t68">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t69"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t69"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t69">
+      <tuv xml:lang="en-US"><seg>The process of claim 8, wherein 0.3 ≤ (a+h)/d ≤ 1 in the catalyst.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 8, wobei 0,3 ≤ (a+h)/d ≤ 1 im Katalysator.</seg></tuv>
+    </tu>
+    <tu tuid="t70"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t70"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t70">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t71"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t71"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t71">
+      <tuv xml:lang="en-US"><seg>The process of claim 8, wherein 0.45 ≤ (a+h)/d ≤ 1 in the catalyst.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 8, wobei 0,45 ≤ (a+h)/d ≤ 1 im Katalysator.</seg></tuv>
+    </tu>
+    <tu tuid="t72"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t72"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t72">
+      <tuv xml:lang="en-US"><seg>15.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>15.</seg></tuv>
+    </tu>
+    <tu tuid="t73"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t73"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t73">
+      <tuv xml:lang="en-US"><seg>The process of claim 8, wherein said process is defined by the following:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 8, wobei das Verfahren durch das Folgende definiert ist:</seg></tuv>
+    </tu>
+    <tu tuid="t74"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t74"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t74">
+      <tuv xml:lang="en-US"><seg>α = [(%AN + (3 × %HCN) + (1.5 × %ACN)) ÷ %PC] × 100</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>α = [(%AN + (3 × %HCN) + (1,5 × %ACN)) ÷ %PC] × 100</seg></tuv>
+    </tu>
+    <tu tuid="t75"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t75"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t75">
+      <tuv xml:lang="en-US"><seg>wherein %AN is the Acrylonitrile Yield and %AN ≥ 82,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei %AN die Acrylnitrilausbeute ist und %AN ≥ 82,</seg></tuv>
+    </tu>
+    <tu tuid="t76"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t76"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t76">
+      <tuv xml:lang="en-US"><seg>%HCN is the Hydrogen Cyanide Yield and %HCN ≥ 5</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>%HCN die Cyanwasserstoffausbeute ist und %HCN ≥ 5,</seg></tuv>
+    </tu>
+    <tu tuid="t77"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t77"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t77">
+      <tuv xml:lang="en-US"><seg>%ACN is the Acetonitrile Yield,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>%ACN die Acetonitrilausbeute ist,</seg></tuv>
+    </tu>
+    <tu tuid="t78"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t78"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t78">
+      <tuv xml:lang="en-US"><seg>%PC is the Propylene Conversion, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>%PC der Propylenumsatz ist und</seg></tuv>
+    </tu>
+    <tu tuid="t79"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t79"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t79">
+      <tuv xml:lang="en-US"><seg>α is greater than 102.5.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>α ist größer als 102,5.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t1"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t2"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. Composition obtained from the pyrolysis of waste rubber including natural rubber and subsequent separation of the resulting oil, which has:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Zusammensetzung, die durch Pyrolyse von Gummiabfall, einschließlich Naturkautschuk, und anschließende Abtrennung des dabei entstehenden Öls erlangt wird, mit folgenden Eigenschaften:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t3"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>a flash point of at least 40°C but no higher than 55°C determined according to ASTM D93 procedure B,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Flammpunkt von mindestens 40 °C, jedoch nicht mehr als 55 °C, bestimmt gemäß dem ASTM D93 Verfahren B,</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t4"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>a boiling point range starting at 100°C or higher under atmospheric pressure determined according to ASTM D86,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Siedebereich, der bei 100 °C oder höher unter atmosphärischem Druck beginnt, bestimmt gemäß ASTM D86,</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t5"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>a density at 15°C of less than 990 kg/m3 determined according to ASTM D4052,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Dichte bei 15 °C von weniger als 990 kg/m3, bestimmt gemäß ASTM D4052,</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t6"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>a total acid number (TAN) of up to 12 determined according to ASTM D664,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Gesamtsäurezahl (TAN) von bis zu 12, bestimmt gemäß ASTM D664,</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t7"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a styrene content of less than 7000ppm determined according to gas chromatography, and an organic halogen, as Cl, content of less than 50 mg/kg determined according to IP510, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Styrolgehalt von weniger als 7.000 ppm, bestimmt gemäß Gaschromatographie, und ein organisches Halogen, wie Cl, mit einem Gehalt von weniger als 50 mg/kg, bestimmt gemäß IP510, und</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t8"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>which contains biogenic carbon in an amount of at least 15%, as determined according to ASTM D6866 Method B(AMS), and aromatic hydrocarbons with a total aromatic hydrocarbon content of at least 20%m/m. as measured according to IP391.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das biogenen Kohlenstoff in einer Menge von mindestens 15 %, bestimmt gemäß ASTM D6866 Verfahren B(AMS), und aromatische Kohlenwasserstoffe mit einem Gesamtgehalt an aromatischen Kohlenwasserstoffen von mindestens 20 % m/m, gemessen gemäß IP391, enthält.</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t9"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>2. Composition according to claim 1, which has a flash point of at least 40°C, preferably at least 45°C, but less than 55°C, and more preferably which has a flash point ranging from 40°C, preferably 45°C, to 54°C, and most preferably from 40°C preferably 45°C, to 53°C.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Zusammensetzung nach Anspruch 1, die einen Flammpunkt von mindestens 40 °C, vorzugsweise mindestens 45 °C, aber weniger als 55 °C aufweist, und noch bevorzugter einen Flammpunkt im Bereich von 40 °C, vorzugsweise 45 °C, bis 54 °C, und am meisten bevorzugt von 40 °C, vorzugsweise 45 °C, bis 53 °C aufweist.</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t10"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>3. Composition according to claim 1 or 2 having a biogenic carbon content of at least 20%, preferably at least 30%, and more preferably at least 40%, as determined according to ASTM D6866 Method B (AMS).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Zusammensetzung nach Anspruch 1 oder 2 mit einem biogenen Kohlenstoffgehalt von mindestens 20 %, vorzugsweise mindestens 30 % und noch bevorzugter mindestens 40 %, bestimmt gemäß ASTM D6866 Verfahren B (AMS).</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t11"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>4. Composition according to any preceding claim having a total aromatic hydrocarbon content of at least 35%m/m and preferably at least 50%m/m, as measured according to IP391.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Zusammensetzung nach einem der vorhergehenden Ansprüche mit einem Gesamtgehalt an aromatischen Kohlenwasserstoffen von mindestens 35 % m/m und vorzugsweise mindestens 50 % m/m, gemessen gemäß IP391.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t12"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>5. Composition according to any preceding claim, having a boiling point range starting at 110°C or higher, preferably 120°C or higher, more preferably 130°C or higher and most preferably 140°C or higher.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Zusammensetzung nach einem der vorhergehenden Ansprüche mit einem Siedepunktbereich, der bei 110 °C oder höher, vorzugsweise bei 120 °C oder höher, noch bevorzugter bei 130 °C oder höher und am meisten bevorzugt bei 140 °C oder höher beginnt.</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t13"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>6. Composition according to any preceding claim, having a boiling point range starting no higher than 220°C, preferably no higher than 210°C, more preferably no higher than 200°C and most preferably no higher than 190°C.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Zusammensetzung nach einem der vorhergehenden Ansprüche, mit einem Siedebereich, der nicht höher als 220 °C, vorzugsweise nicht höher als 210 °C, noch bevorzugter nicht höher als 200 °C und am meisten bevorzugt nicht höher als 190 °C beginnt.</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t14"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>7. Composition according to any preceding claim, having a flash point ranging from 40°C, preferably 45°C, to less than 55°C, preferably ranging from 40°C, preferably 45°C, to 54°C, and more preferably ranging from 40°C, preferably 45°C, to 53°C.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Zusammensetzung nach einem der vorhergehenden Ansprüche mit einem Flammpunkt im Bereich von 40 °C, vorzugsweise 45 °C, bis weniger als 55 °C, vorzugsweise im Bereich von 40 °C, vorzugsweise 45 °C, bis 54 °C und noch bevorzugter im Bereich von 40 °C, vorzugsweise 45 °C, bis 53 °C.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t15"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>8. Composition according to any preceding claim, wherein the waste rubber from which the composition is derived comprises waste tyres.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Zusammensetzung nach einem der vorhergehenden Ansprüche, wobei der Gummiabfall, aus dem die Zusammensetzung gewonnen wird, Altreifen umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t16"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>9. Marine fuel, preferably a residual marine fuel, comprising from 0.1 to 10% of a composition as defined in any preceding claim.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Schiffskraftstoff, vorzugsweise ein Restschiffskraftstoff, umfassend von 0,1 bis 10 % einer Zusammensetzung, wie nach einem der vorhergehenden Ansprüche definiert.</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t17"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t18"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>Use of a composition as defined in any of claims 1 to 8 as a component in a fuel product, preferably as a marine fuel component and more preferably as a component in a residual marine fuel.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verwendung einer Zusammensetzung nach einem der Ansprüche 1 bis 8 als Bestandteil eines Kraftstoffprodukts, vorzugsweise als Bestandteil eines Schiffskraftstoffs und noch bevorzugter als Bestandteil eines Restschiffskraftstoffs.</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t19"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t20"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>Process for extracting fuel products from waste rubber, comprising the steps of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren zur Gewinnung von Kraftstoffprodukten aus Gummiabfall, umfassend die folgenden Schritte:</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t21"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>(a) subjecting waste rubber including natural rubber to pyrolysis to produce a pyrolysis vapour, wherein the waste rubber preferably contains at least 10wt%, more preferably at least 20wt% and most preferably at least 30wt% of natural rubber;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>(a) Unterziehen von Gummiabfall, einschließlich Naturkautschuk, einer Pyrolyse, um einen Pyrolysedampf zu produzieren, wobei der Gummiabfall vorzugsweise mindestens 10 Gew.-%, noch bevorzugter mindestens 20 Gew.-% und am meisten bevorzugt mindestens 30 Gew.-% Naturkautschuk enthält;</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t22"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>(b) subjecting the pyrolysis vapour to a condensation step to produce a pyrolytic oil having a boiling point range of 45-400°C and a flash point below 25°C, preferably below 18°C;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>(b) Unterziehen des Pyrolysedampfes einem Kondensationsschritt, um ein Pyrolyseöl mit einem Siedebereich von 45 bis 400 °C und einem Flammpunkt unter 25 °C, vorzugsweise unter 18 °C, zu produzieren;</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t23"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>(c) passing the pyrolytic oil through a centrifuge to reduce the solids level to below 1.5 wt%, preferably below 0.5 wt%, and then subjecting the resultant stream to a further solids removal step to reduce the solids level to no more than 0.5wt%, preferably no more than 0.2wt%, then subjecting the pyrolytic oil to a vacuum steam stripping step at a pressure of less than 0.85 bar a and with a temperature of less than 120°C at the top of the column, and recovering a first component having an initial boiling point not exceeding 75°C under atmospheric pressure and a second component which has a boiling point range starting from 100°C under atmospheric pressure or higher and which possesses the properties defined in any of claims 1 to 7.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>(c) Durchleiten des pyrolytischen Öls durch eine Zentrifuge, um den Feststoffgehalt auf unter 1,5 Gew.-%, vorzugsweise unter 0,5 Gew.-%, zu reduzieren, und dann Unterziehen des resultierenden Stroms einem weiteren Schritt zur Entfernung von Feststoffen, um den Feststoffgehalt auf nicht mehr als 0,5 Gew.-%, vorzugsweise nicht mehr als 0,2 Gew.-%, zu reduzieren, dann Unterziehen des pyrolytischen Öls einem Vakuum-Dampfabstreifschritt bei einem Druck von weniger als 0,85 bar und einer Temperatur von weniger als 120 °C an dem Kopf der Säule, und Gewinnen einer ersten Komponente mit einem Anfangssiedepunkt von nicht mehr als 75 °C unter Atmosphärendruck und einer zweiten Komponente, die einen Siedebereich ab 100 °C unter Atmosphärendruck oder höher aufweist und die Eigenschaften besitzt, die in einem der Ansprüche 1 bis 7 definiert sind.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t24"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t25"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>Process according to claim 11, wherein said first and second components together comprise at least 98vol%, preferably at least 99vol% of the total product obtained from this vacuum steam stripping step (c).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 11, wobei die erste und zweite Komponente zusammen mindestens 98 Vol.-%, vorzugsweise mindestens 99 Vol.-% des Gesamtprodukts umfassen, das aus diesem Vakuum-Dampfabstreifschritt (c) erlangt wird.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t1"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>1</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t2"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t3"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>1. A RMM, Remote Monitoring and Management, system operatively associated with monitoring and managing a plurality of devices, including ransomware detection, the RMM system comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. RMM(Remote Monitoring and Management)-System, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen, einschließlich Ransomware-Detektion, verbunden ist, das RMM-System umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t4"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>a RMM agent module locally installed on each device and operatively communicating with an OS, operating system, installed on each device;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein RMM-Agentenmodul, das auf jeder Vorrichtung lokal installiert ist und operativ mit einem auf jeder Vorrichtung installierten Betriebssystem (OS) kommuniziert;</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t5"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>a cloud-based RMM platform hosted by a cloud-based infrastructure service and operatively communicating with each device RMM agent module, the cloud-based RMM Platform configured to monitor and manage each of the plurality of devices; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine cloudbasierte RMM-Plattform, die von einem cloudbasierten Infrastrukturdienst gehostet ist und operativ mit dem RMM-Agentenmodul jeder Vorrichtung kommuniziert, wobei die cloudbasierte RMM-Plattform konfiguriert ist, jede der Vielzahl von Vorrichtungen zu überwachen und zu verwalten; und</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t6"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>a RD, Ransomware Detection, module locally installed on each device and operatively communicating with each respective device RMM agent module, the RD module configured to perform a method of detecting a ransomware-encryption in a plurality of files received by the device, the method including:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein RD(Ransomware-Detektions)-Modul, das auf jeder Vorrichtung lokal installiert ist und operativ mit dem jeweiligen RMM-Agentenmodul jeder Vorrichtung kommuniziert, wobei das RD-Modul konfiguriert ist, ein Verfahren eines Detektierens einer Ransomware-Verschlüsselung in einer Vielzahl von von der Vorrichtung empfangenen Dateien durchzuführen, wobei das Verfahren Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t7"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a) receiving from the cloud-based RMM platform ransomware monitor configuration data, the ransomware monitor configuration data including one or more watch-items including a list of one or more files, drives, and volumes to monitor for ransomware detection;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>a) Empfangen von Ransomware-Überwachungskonfigurationsdaten von der cloudbasierten RMM-Plattform, wobei die Ransomware-Überwachungskonfigurationsdaten ein oder mehrere Wächterelemente beinhalten, einschließlich einer Liste von einer oder mehreren Dateien, Laufwerken und Datenträgern, um auf Ransomware-Detektion zu überwachen;</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t8"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>b) initiating a filewatcher and filewatcher handler to monitor and receive callbacks for create, delete, update, and rename file-events associated with the watch-items, the filewatcher adding each create, delete, update and rename file-event to a metadata watch-item file-event queue, the metadata watch-item file-event queue including raw watch-item file-event data associated with each create, delete, update, and rename file-event associated with the watch-items received from the cloud-based RMM platform, the raw-data including one or more of fileobjects and parent folders identified in the watch-item file-event;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>b) Initiieren eines Dateiwächters und eines Dateiwächter-Handlers, um Rückrufe zu überwachen und zu empfangen für Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignisse, die mit den Wächterelementen verbunden sind, wobei der Dateiwächter jedes Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignis einer Metadaten-Wächterelement-Dateiereignis-Warteschlange hinzufügt, wobei die Metadaten-Wächterelement-Dateiereignis-Warteschlange Wächterelement-Dateiereignisrohdaten beinhaltet, die mit jedem mit den von der cloudbasierten RMM-Plattform empfangenen Wächterelementen verbundenen Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignis verbunden sind, wobei die Rohdaten eines oder mehrere von Dateiobjekten und übergeordneten Ordnern beinhalten, die in dem Wächterelement-Dateiereignis identifiziert sind;</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t9"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>c) a scheduler processing the metadata watch-item file-event queue according to a preset time-based schedule provided by the cloud-based RMM platform, the scheduler processing any watch-item file-event data included in the metadata watch-item file-event queue to determine a RW-alert state of the RD module, the scheduler operatively associated with an entropy-analysis-based ransomware detection process to detect potential ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue and generate the RW-alert state which is representative of a positive or negative detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>c) Verarbeiten der Metadaten-Wächterelement-Dateiereignis-Warteschlange gemäß einem von der cloudbasierten RMM-Plattform bereitgestellten, voreingestellten, zeitbasierten Zeitplan durch einen Scheduler, wobei der Scheduler beliebige in der Metadaten-Wächterelement-Dateiereignis-Warteschlange enthaltene Wächterelement-Dateiereignisdaten verarbeitet, um einen RW-Warnungszustand des RD-Moduls zu bestimmen, wobei der Scheduler operativ mit einem auf Entropieanalyse basierenden Ransomware-Detektionsvorgang verbunden ist, um eine mögliche Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente zu detektieren und den RW-Warnungszustand zu erzeugen, der für eine positive oder negative Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente repräsentativ ist; und</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t10"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>d) d) receiving, at the device, a command from the cloud-based RMM platform in response to the generated RW-alert state and the device running an isolation script that maintains communication of the device with the cloud-based RMM platform and disables all communications of the device with other internal and external network locations.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>d) Empfangen eines Befehls von der cloudbasierten RMM-Plattform an der Vorrichtung als Reaktion auf den erzeugten RW-Warnungszustand und Ausführen eines Isolationsskripts durch die Vorrichtung, das die Kommunikation der Vorrichtung mit der cloudbasierten RMM-Plattform aufrechterhält und jegliche Kommunikation der Vorrichtung mit anderen internen und externen Netzwerkstandorten deaktiviert.</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t11"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>2. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, wherein:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, wobei:</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t12"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>the plurality of devices include one or more of a PC, Personal Computer, desktop computer, tablet PC, a set-top box, STB, a Personal Digital Assistant,PDA, a cellular telephone, a web appliance, a server, a network router, a switch or bridge, or any machine capable of executing a set of instructions – sequential or otherwise – that specify actions to be taken by that machine;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Vielzahl von Vorrichtungen einen oder mehrere von Folgenden beinhaltet: einen Personal-Computer (PC), einen Desktop-Computer, einen Tablet-PC, eine Set-Top-Box (STB), einen Persönlichen Digitalen Assistenten (PDA), ein Mobiltelefon, eine Web-Appliance, einen Server, einen Netzwerk-Router, einen Netzwerk-Switch, eine Netzwerk-Brücke oder eine beliebige Maschine, die in der Lage ist, einen Satz von Anweisungen – sequentiell oder anderweitig – auszuführen, die Aktionen angeben, die von dieser Maschine zu unternehmen sind;</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t13"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>the OS is one of Windows, macOS, UNIX, and Linux or;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das Betriebssystem eines von Windows, macOS, UNIX oder Linux ist oder;</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t14"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>the RD module is implemented as a dll, dynamic link library, call function.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das RD-Modul als DLL(Dynamic-Link-Library)-Aufruffunktion implementiert ist.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t15"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>3. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, wherein the preset time-based schedule includes the scheduler generating timer events at a time interval of t, and t equals 1-20 seconds.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, wobei der voreingestellte zeitbasierte Zeitplan beinhaltet, dass der Scheduler Timer-Ereignisse in einem Zeitintervall von t erzeugt, und t 1–20 Sekunden gleichkommt.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t16"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>4. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist,</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t17"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>step a) further comprising receiving from the cloud-based RMM platform ransomware monitor configuration data including an exclusion list of one or more files, drives, and volumes to exclude from monitoring for ransomware detection; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt a) ferner umfassend Empfangen von Ransomware-Überwachungskonfigurationsdaten von der cloudbasierten RMM-Plattform, die eine Ausschlussliste mit einer oder mehreren Dateien, Laufwerken und Datenträgern beinhalten, die von einem Überwachen auf Ransomware-Detektion auszuschließen sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t18"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>step b) further comprising the filewatcher handler ignoring each create, delete, update and rename file-event included in the exclusion list.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt b) ferner umfassend Ignorieren jedes in der Ausschlussliste beinhalteten Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignisses durch den Dateiwächter-Handler.</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t19"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>5. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, step b) further comprising collapsing the raw watch-item file-event data; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, Schritt b) ferner umfassend Zusammenfassen der Wächterelement-Dateiereignisrohdaten; oder</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t20"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>step c) further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt c) ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t21"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>the scheduler generating timer events according to the preset time-based schedule; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Erzeugen von Timer-Ereignissen gemäß dem voreingestellten zeitbasierten Zeitplan durch den Scheduler; und</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t22"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>at each timer event, the scheduler determining if the metadata watch-item file-event queue includes any watch-item file-event data,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>bei jedem Timer-Ereignis Bestimmen, ob die Metadaten-Wächterelement-Dateiereignis-Warteschlange beliebige Wächterelement-Dateiereignisdaten beinhaltet, durch den Scheduler,</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t23"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>if the metadata watch-item file-event queue does not include any watch-item file-event data, the scheduler terminates until the next timer event is generated, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>falls die Metadaten-Wächterelement-Dateiereignis-Warteschlange keine Wächterelement-Dateiereignisdaten beinhaltet, Beenden des Schedulers bis das nächste Timer-Ereignis erzeugt wird und</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t24"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>if the metadata watch-item file-event queue includes any watch-item file-event data, the scheduler extracts the watch-item file-event data, clears the metadata watch-item file-event queue, and processes the extracted watch-item file-event data to determine a RD-module state, the RD-module state including one of abort, continue and RW-alert, the abort state indicating a negative detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue, the continue state indicating an inconclusive determination of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue, and the RW-alert state indicating a detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>falls die Metadaten-Wächterelement-Dateiereignis-Warteschlange beliebige Wächterelement-Dateiereignisdaten beinhaltet, Extrahieren der Wächterelement-Dateiereignisdaten, Leeren der Metadaten-Wächterelement-Dateiereignis-Warteschlange und Verarbeiten der extrahierten Wächterelement-Dateiereignisdaten durch den Scheduler, um einen RD-Modulzustand zu bestimmen, wobei der RD-Modulzustand einen von Abbruchzustand, Fortsetzungszustand oder RW-Warnungszustand beinhaltet, wobei der Abbruchzustand eine negative Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt, der Fortsetzungszustand eine nicht schlüssige Bestimmung einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt und der RW-Warnungszustand eine Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t25"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>6. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, wherein an abort state determination clears the RD-module state, a continue state carries over a previously determined RD-module state and the RW-alert state generates a notification to the cloud-based RMM platform, the notification including information about one or more suspected ransomware-encryption files.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, wobei eine Abbruchzustandsbestimmung den RD-Modulzustand leert, ein Fortsetzungszustand einen zuvor bestimmten RD-Modulzustand überträgt und der RW-Warnungszustand eine Benachrichtigung an die cloudbasierte RMM-Plattform erzeugt, wobei die Benachrichtigung Informationen über eine oder mehrere verdächtige Ransomware-Verschlüsselungsdateien beinhaltet.</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t26"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>7. The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, step c) further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, Schritt c) ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t27"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>if the metadata watch-item file-event queue includes any watch-item file-event data, the scheduler extracts the watch-item file-event data and performs one or more of the following:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>falls die Metadaten-Wächterelement-Dateiereignis-Warteschlange beliebige Wächterelement-Dateiereignisdaten beinhaltet, Extrahieren der Wächterelement-Dateiereignisdaten und Durchführen eines oder mehrerer der folgenden Schritte durch den Scheduler:</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t28"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>collapsing file-events associated with the watch-item file-event data into one or more other create, delete, update, and rename file file-events;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Zusammenfassen von mit den Wächterelement-Dateiereignisdaten verbundenen Dateiereignissen zu einem oder mehreren anderen Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignis;</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t29"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>analyzing the watch-item file-event data to determine if the associated file events are consistent with one or more predetermined file update patterns representative of a potential ransomware-encryption; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Analysieren der Wächterelement-Dateiereignisdaten, um zu bestimmen, ob die verbundenen Dateiereignisse mit einem oder mehreren vorbestimmten Dateiaktualisierungsmustern übereinstimmen, die für eine mögliche Ransomware-Verschlüsselung repräsentativ sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t30"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>analyzing the watch-item file-event data to determine if the associated file events include one or more of an encryption of a minimum number of files, an encryption of a minimum percentage of files, a low frequency encryption of the files, and a high frequency encryption of the files.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Analysieren der Wächterelement-Dateiereignisdaten, um zu bestimmen, ob die verbundenen Dateiereignisse eines oder mehrere von Folgenden beinhalten: eine Verschlüsselung einer Mindestanzahl von Dateien, eine Verschlüsselung eines Mindestprozentsatzes von Dateien, eine niedrigfrequente Verschlüsselung der Dateien und eine hochfrequente Verschlüsselung der Dateien.</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t31"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>8. A Ransomware Detection, RD, and Isolation module operatively associated with a cloud-based RMM, Remote Monitoring and Management, platform hosted by a cloud-based infrastructure service and configured to monitor and manage a plurality of devices, the RD and Isolation module comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Ransomware-Detektions(RD)- und Isolierungsmodul, das operativ mit einer von einem cloudbasierten Infrastrukturdienst gehosteten cloudbasierten RMM(Remote Monitoring and Management)-Plattform verbunden ist und konfiguriert ist, eine Vielzahl von Vorrichtungen zu überwachen und zu verwalten, das RD- und Isolierungsmodul umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t32"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>a dynamic link library file and API, Application Programming Interface, configured to perform a method of detecting a ransomware-encryption in a plurality of files received by the device, the method including:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Dynamic-Link-Library-Datei und eine API (Application Programming Interface), die konfiguriert sind, ein Verfahren eines Detektierens einer Ransomware-Verschlüsselung in einer Vielzahl von von der Vorrichtung empfangenen Dateien durchzuführen, wobei das Verfahren Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t33"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>a) the RD module receiving from the cloud-based RMM platform ransomware monitor configuration data, the ransomware monitor configuration data including one or more watch-items including a list of one or more files, drives, and volumes to monitor for ransomware detection;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>a) Empfangen von Ransomware-Überwachungskonfigurationsdaten von der cloudbasierten RMM-Plattform durch das RD-Modul, wobei die Ransomware-Überwachungskonfigurationsdaten ein oder mehrere Wächterelemente beinhalten, die eine Liste einer oder mehrerer Dateien, Laufwerke und Datenträger beinhalten, um auf Ransomware-Detektion zu überwachen;</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t34"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>b) the RD module initiating a filewatcher and filewatcher handler to monitor and receive callbacks for create, delete, update, and rename file-events associated with the watch-items, the filewatcher adding each create, delete, update and rename file-event to a metadata watch-item file-event queue, the metadata watch-item file-event queue including raw watch-item file-event data associated with each create, delete, update, and rename file-event associated with the watch-items received from the cloud-based RMM platform, the raw-data including one or more of fileobjects and parent folders identified in the watch-item file-event;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>b) Initiieren eines Dateiwächters und eines Dateiwächter-Handlers durch das RD-Modul, um Rückrufe für mit den Wächterelementen verbundene Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignisse zu überwachen und zu empfangen, wobei der Dateiwächter jedes Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignis einer Metadaten-Wächterelement-Dateiereignis-Warteschlange hinzufügt, wobei die Metadaten-Wächterelement-Dateiereignis-Warteschlange Wächterelement-Dateiereignisrohdaten beinhaltet, die mit jedem mit den von der cloudbasierten RMM-Plattform empfangenen Wächterelementen verbundenen Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignis verbunden sind, wobei die Rohdaten eines oder mehrere von Dateiobjekten und übergeordneten Ordnern beinhalten, die in dem Wächterelement-Dateiereignis identifiziert sind;</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t35"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>c) a RD module scheduler processing the metadata watch-item file-event queue according to a preset time-based schedule provided by the cloud-based RMM platform, the scheduler processing any watch-item file-event data included in the metadata watch-item file-event queue to determine a RW-alert state of the RD module, the scheduler operatively associated with an entropy-analysis-based ransomware detection process to detect potential ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue and generate the RW-alert state which is representative of a positive or negative detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>c) Verarbeiten der Metadaten-Wächterelement-Dateiereignis-Warteschlange gemäß einem von der cloudbasierten RMM-Plattform bereitgestellten, voreingestellten, zeitbasierten Zeitplan durch einen RD-Modul-Scheduler, wobei der Scheduler beliebige in der Metadaten-Wächterelement-Dateiereignis-Warteschlange beinhaltete Wächterelement-Dateiereignisdaten verarbeitet, um einen RW-Warnungszustand des RD-Moduls zu bestimmen, wobei der Scheduler operativ mit einem auf Entropieanalyse basierenden Ransomware-Detektionsvorgang verbunden ist, um eine mögliche Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente zu detektieren und den RW-Warnungszustand zu erzeugen, der für eine positive oder negative Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente repräsentativ ist;</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t36"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>d) in response to a positive RW-alert state detected on a ransomware affected device, the cloud-based RMM platform transmitting isolation script to the ransomware affected device; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>d) als Reaktion auf einen positiven auf einer von Ransomware betroffenen Vorrichtung detektierten RW-Warnungszustand, Übermitteln eines Isolationsskripts an die von Ransomware betroffene Vorrichtung durch die cloudbasierte RMM-Plattform; und</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t37"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>e) the ransomware affected device running the isolation script, the isolation script maintaining the device communication with the cloud-based RMM platform and disabling the ransomware affected device communication to all other internal and external network locations, the isolation script including:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e) Ausführen des Isolationsskripts durch die von Ransomware betroffene Vorrichtung, wobei das Isolationsskript die Kommunikation der Vorrichtung mit der cloudbasierten RMM-Plattform aufrechterhält und die Kommunikation der von Ransomware betroffenen Vorrichtung zu allen anderen internen und externen Netzwerkstandorten deaktiviert, wobei das Isolationsskript Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t38"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>e1) changing the ransomware affected device network information pertinent to the ransomware affected device network connection to the cloud-based RMM platform from a temporary DHCP, Dynamic Host Configuration Protocol, IP address assignment to a static IP address assignment, the network information including one or more of an internal IP, Internet Protocol, address of one or more active network adapters, inactive network adapters, a subnet mask of the one or more network adapters, a default gateway assignment of the one or more network adapters;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e1) Ändern der Netzwerkinformationen der von Ransomware betroffenen Vorrichtung, die für die Netzwerkverbindung der von Ransomware betroffenen Vorrichtung zu der cloudbasierten RMM-Plattform relevant sind, von einer temporären DHCP(Dynamic Host Configuration Protocol)-IP-Adresszuweisung zu einer statischen IP-Adresszuweisung, wobei die Netzwerkinformationen eines oder mehrere von Folgenden beinhalten: eine interne IP(Internet Protocol)-Adresse, eine Adresse eines oder mehrerer aktiver Netzwerkadapter, inaktive Netzwerkadapter, eine Subnetzmaske des einen oder der mehreren Netzwerkadapter, eine Standard-Gateway-Zuweisung des einen oder der mehreren Netzwerkadapter;</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t39"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>e2) nullifying local network and external network information on the ransomware affected device rendering the ransomware affected device unable to access any internal and external network, the nullified local and external network information including one or more of DNS, Domain Name System, server assignments for associated network adapters, default gateways of the associated network adapters, routing table of the ransomware affected device, routing information base of the ransomware affected device, ARP, Address Resolution Protocol, cache and NetBIOS cache; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e2) Ungültigmachen von lokalen Netzwerkinformationen und externen Netzwerkinformationen auf der von Ransomware betroffenen Vorrichtung, wodurch die von Ransomware betroffene Vorrichtung nicht mehr auf ein internes oder externes Netzwerk zugreifen kann, wobei die ungültig gemachten lokalen und externen Netzwerkinformationen eines oder mehrere von Folgenden beinhalten: DNS(Domain Name System)- Serverzuweisungen für verbundene Netzwerkadapter, Standard-Gateways der verbundenen Netzwerkadapter, Routingtabelle der von Ransomware betroffenen Vorrichtung, Routing-Informationsbasis der von Ransomware betroffenen Vorrichtung, ARP(Address Resolution Protocol)-Cache und NetBIOS-Cache; und</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t40"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>e3) re-adding to the ransomware affected device routing table the pertinent network information changed to an unchanging DHCP configuration in step e1) directly linking the default gateway IP stored in step e1) to reestablish a network connection from the ransomware affected device to the cloud-based RMM platform, the re-added network information including one or more of IP addresses for a partner RMM geographical platform, DNS servers, and the ransomware affected devices' HOSTS file; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e3) erneutes Hinzufügen der in Schritt e1) auf eine unveränderliche DHCP-Konfiguration geänderten relevanten Netzwerkinformationen zu der Routing-Tabelle der von Ransomware betroffenen Vorrichtung, wobei die in Schritt e1) gespeicherte IP-Adresse des Standard-Gateways direkt verknüpft wird, um eine Netzwerkverbindung von der von Ransomware betroffenen Vorrichtung zu der cloudbasierten RMM-Plattform wiederherzustellen, wobei die erneut hinzugefügten Netzwerkinformationen eine oder mehrere von IP-Adressen für eine geografische Partner-RMM-Plattform, DNS-Server und die HOSTS-Datei der von Ransomware betroffenen Vorrichtung beinhalten; und</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t41"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>f) the ransomware affected device communicating to the cloud-based RMM platform over the RMM platform network connection isolation status information of the ransomware affected device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f) Kommunizieren von Isolierungsstatusinformationen der von Ransomware betroffenen Vorrichtung an die cloudbasierte RMM-Plattform über die Netzwerkverbindung der RMM-Plattform durch die von Ransomware betroffene Vorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t42"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>9. The Ransomware Detection and Isolation module operatively associated with a cloud-based RMM platform according to claim 8, wherein the method further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Ransomware-Detektions- und Isolierungsmodul nach Anspruch 8, das operativ mit einer cloudbasierten RMM-Plattform verbunden ist, wobei das Verfahren ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t43"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>step e) adding each IP address from the routing list to a device local routing table with a link directly to an IP address of the device default gateway setting with a subnet mask of a fixed value, thereby ensuring a direct link between the cloud-based RMM platform servers and the gateway while removing the default gateway assignment which nullifies all connectivity between the device and any other network internal and external services.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt e) Hinzufügen jeder IP-Adresse aus der Routing-Liste zu einer lokalen Routing-Tabelle der Vorrichtung mit einer direkten Verknüpfung zu einer IP-Adresse der Standard-Gateway-Einstellung der Vorrichtung mit einer Subnetzmaske mit fixem Wert, wodurch eine direkte Verknüpfung zwischen den cloudbasierten RMM-Plattform-Servern und dem Gateway sichergestellt ist, während die Standard-Gateway-Zuweisung entfernt wird, was jegliche Konnektivität zwischen der Vorrichtung und beliebigen anderen internen und externen Netzwerkdiensten ungültig macht.</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t44"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t45"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t45"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t45">
+      <tuv xml:lang="en-US"><seg>The Ransomware Detection and Isolation module operatively associated with a cloud-based RMM platform according to claim 8,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Ransomware-Detektions- und Isolierungsmodul nach Anspruch 8, das operativ mit einer cloudbasierten RMM-Plattform verbunden ist,</seg></tuv>
+    </tu>
+    <tu tuid="t46"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t46"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t46">
+      <tuv xml:lang="en-US"><seg>wherein:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei:</seg></tuv>
+    </tu>
+    <tu tuid="t47"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t47"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t47">
+      <tuv xml:lang="en-US"><seg>the device is running a Windows OS, operating system, and the isolation script includes:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Vorrichtung ein Windows-Betriebssystem ausführt und das Isolationsskript Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t48"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t48"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t48">
+      <tuv xml:lang="en-US"><seg>using an OS registry to disable APIPA, Automatic Private IP Addressing, service to force the device to use the script provided information;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verwenden einer Betriebssystemregistrierung, um einen APIPA(Automatic Private IP Addressing)-Dienst zu deaktivieren, um die Vorrichtung zu zwingen, die von dem Skript bereitgestellten Informationen zu verwenden;</seg></tuv>
+    </tu>
+    <tu tuid="t49"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t49"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t49">
+      <tuv xml:lang="en-US"><seg>disabling and stopping the OS LanManWorkstation service to disable the device from accessing mapped network drives;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Deaktivieren und Stoppen des Betriebssystemdienstes LanManWorkstation, um ein Zugreifen der Vorrichtung auf zugeordnete Netzwerklaufwerke zu deaktivieren;</seg></tuv>
+    </tu>
+    <tu tuid="t50"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t50"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t50">
+      <tuv xml:lang="en-US"><seg>using OS NetSH and NBTStat tools, clearing the ARP and NetBIOS caches from the device; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Leeren der ARP- und NetBIOS-Caches der Vorrichtung unter Verwenden der Betriebssystemwerkzeuge NetSH und NBTStat; und</seg></tuv>
+    </tu>
+    <tu tuid="t51"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t51"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t51">
+      <tuv xml:lang="en-US"><seg>using NSPBind tool to disable IPv6 connectivity; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verwenden des NSPBind-Werkzeugs, um die IPv6-Konnektivität zu deaktivieren; oder</seg></tuv>
+    </tu>
+    <tu tuid="t52"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t52"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t52">
+      <tuv xml:lang="en-US"><seg>wherein the isolation script includes disabling IPv6 connectivity on the device and maintaining IPv4 connectivity; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Isolationsskript Deaktivieren der IPv6-Konnektivität auf der Vorrichtung und Aufrechterhalten der IPv4-Konnektivität beinhaltet; oder</seg></tuv>
+    </tu>
+    <tu tuid="t53"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t53"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t53">
+      <tuv xml:lang="en-US"><seg>wherein the isolation script includes storing configuration associated with one or more of the device's active and inactive internet adapters in the OS registry to reestablish normal connectivity at a later time.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Isolationsskript Speichern einer Konfiguration, die mit einem oder mehreren der aktiven und inaktiven Internetadapter der Vorrichtung verbunden ist, in der Betriebssystemregistrierung beinhaltet, um zu einem späteren Zeitpunkt die normale Konnektivität wiederherzustellen.</seg></tuv>
+    </tu>
+    <tu tuid="t54"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t54"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t54">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t55"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t55"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t55">
+      <tuv xml:lang="en-US"><seg>The Ransomware Detection and Isolation module operatively associated with a cloud-based RMM platform according to claim 8, wherein:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Ransomware-Detektions- und Isolierungsmodul nach Anspruch 8, das operativ mit einer cloudbasierten RMM-Plattform verbunden ist, wobei:</seg></tuv>
+    </tu>
+    <tu tuid="t56"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t56"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t56">
+      <tuv xml:lang="en-US"><seg>the plurality of devices include one or more of a PC, Personal Computer, desktop computer, tablet PC, a set-top box, STB, a Personal Digital Assistant, PDA, a cellular telephone, a web appliance, a server, a network router, a switch or bridge, or any machine capable of executing a set of instructions sequential or otherwise – that specify actions to be taken by that machine; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Vielzahl von Vorrichtungen einen oder mehrere von Folgenden beinhaltet: einen Personal-Computer (PC), Desktop-Computer, Tablet-PC, eine Set-Top-Box (STB), einen Persönlichen Digitalen Assistenten (PDA), ein Mobiltelefon, eine Web-Appliance, einen Server, einen Netzwerk-Router, einen -Switch, eine -Brücke oder eine beliebige Maschine, die in der Lage ist, einen Satz von Anweisungen – sequentiell oder anderweitig – auszuführen, die Aktionen angeben, die von dieser Maschine zu unternehmen sind; oder</seg></tuv>
+    </tu>
+    <tu tuid="t57"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t57"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t57">
+      <tuv xml:lang="en-US"><seg>wherein the preset time-based schedule includes the scheduler generating timer events at a time interval of t, and t equals 1-20 seconds; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der voreingestellte zeitbasierte Zeitplan beinhaltet, dass der Scheduler Timer-Ereignisse in einem Zeitintervall von t erzeugt, wobei t 1–20 Sekunden gleichkommt; oder</seg></tuv>
+    </tu>
+    <tu tuid="t58"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t58"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t58">
+      <tuv xml:lang="en-US"><seg>wherein the RD module is implemented as a dll, dynamic link library, call function.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das RD-Modul als DLL(Dynamic-Link-Library)-Aufruffunktion implementiert ist.</seg></tuv>
+    </tu>
+    <tu tuid="t59"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t59"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t59">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t60"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t60"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t60">
+      <tuv xml:lang="en-US"><seg>The Ransomware Detection Isolation module operatively associated with a cloud-based RMM platform according to claim 8,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Ransomware-Detektions-Isolierungsmodul nach Anspruch 8, das operativ mit einer cloudbasierten RMM-Plattform verbunden ist,</seg></tuv>
+    </tu>
+    <tu tuid="t61"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t61"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t61">
+      <tuv xml:lang="en-US"><seg>step a) further comprising receiving from the cloud-based RMM platform ransomware monitor configuration data including an exclusion list of one or more files, drives, and volumes to exclude from monitoring for ransomware detection; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt a) ferner umfassend Empfangen von Ransomware-Überwachungskonfigurationsdaten von der cloudbasierten RMM-Plattform, die eine Ausschlussliste mit einer oder mehreren Dateien, Laufwerken und Datenträgern beinhalten, die von einem Überwachen auf Ransomware-Detektion auszuschließen sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t62"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t62"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t62">
+      <tuv xml:lang="en-US"><seg>step b) further comprising the filewatcher handler ignoring each create, delete, update, and rename file-event included in the exclusion list.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Schritt b) ferner umfassend Ignorieren jedes in der Ausschlussliste aufgelisteten Erstell-, Lösch-, Aktualisierungs- und Umbenennungs-Dateiereignisses durch den Dateiwächter-Handler.</seg></tuv>
+    </tu>
+    <tu tuid="t63"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t63"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t63">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t64"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t64"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t64">
+      <tuv xml:lang="en-US"><seg>The Ransomware Detection and Isolation module operatively associated with a cloud-based RMM platform according to claim 8,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Ransomware-Detektions- und Isolierungsmodul nach Anspruch 8, das operativ mit einer cloudbasierten RMM-Plattform verbunden ist,</seg></tuv>
+    </tu>
+    <tu tuid="t65"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t65"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t65">
+      <tuv xml:lang="en-US"><seg>the scheduler generating timer events according to the preset time-based schedule; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Erzeugen von Timer-Ereignissen gemäß dem voreingestellten zeitbasierten Zeitplan durch den Scheduler; und</seg></tuv>
+    </tu>
+    <tu tuid="t66"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t66"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t66">
+      <tuv xml:lang="en-US"><seg>at each timer event, the scheduler determining if the metadata watch-item file-event queue includes any watch-item file-event data,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>bei jedem Timer-Ereignis Bestimmen, ob die Metadaten-Wächterelement-Dateiereignis-Warteschlange beliebige Wächterelement-Dateiereignisdaten beinhaltet, durch den Scheduler,</seg></tuv>
+    </tu>
+    <tu tuid="t67"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t67"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t67">
+      <tuv xml:lang="en-US"><seg>if the metadata watch-item file-event queue does not include any watch-item file-event data, the scheduler terminates until the next timer event is generated, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>falls die Metadaten-Wächterelement-Dateiereignis-Warteschlange keine Wächterelement-Dateiereignisdaten beinhaltet, Beenden des Schedulers bis das nächste Timer-Ereignis erzeugt wird und</seg></tuv>
+    </tu>
+    <tu tuid="t68"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t68"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t68">
+      <tuv xml:lang="en-US"><seg>if the metadata watch-item file-event queue includes any watch-item file-event data, the scheduler extracts the watch-item file-event data, clears the metadata watch-item file-event queue, and processes the extracted watch-item file-event data to determine a RD-module state, the RD-module state including one of abort, continue and RW-alert, the abort state indicating a negative detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue, the continue state indicating an inconclusive determination of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue, and the RW-alert state indicating a detection of ransomware-encryption of one or more of the watch-items listed in the watch-item file-event queue.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>falls die Metadaten-Wächterelement-Dateiereignis-Warteschlange beliebige Wächterelement-Dateiereignisdaten beinhaltet, Extrahieren der Wächterelement-Dateiereignisdaten, Leeren der Metadaten-Wächterelement-Dateiereignis-Warteschlange und Verarbeiten der extrahierten Wächterelement-Dateiereignisdaten durch den Scheduler, um einen RD-Modulzustand zu bestimmen, wobei der RD-Modulzustand einen von Abbruchzustand, Fortsetzungszustand oder RW-Warnungszustand beinhaltet, wobei der Abbruchzustand eine negative Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt, der Fortsetzungszustand eine nicht schlüssige Bestimmung einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt und der RW-Warnungszustand eine Detektion einer Ransomware-Verschlüsselung eines oder mehrerer der in der Wächterelement-Dateiereignis-Warteschlange aufgelisteten Wächterelemente anzeigt.</seg></tuv>
+    </tu>
+    <tu tuid="t69"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t69"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t69">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t70"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t70"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t70">
+      <tuv xml:lang="en-US"><seg>The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 1, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>RMM-System nach Anspruch 1, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t71"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t71"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t71">
+      <tuv xml:lang="en-US"><seg>e) if a RW-alert state is positive, the RD module performing a first remediation method to identify and kill a ransomware process associated with the RW-alert, the first remediation method including:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e) wenn ein RW-Warnungszustand positiv ist, Durchführen eines ersten Sanierungsverfahrens durch das RD-Modul, um einen mit der RW-Warnung verbundenen Ransomware-Vorgang zu identifizieren und abzubrechen, wobei das erste Sanierungsverfahren Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t72"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t72"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t72">
+      <tuv xml:lang="en-US"><seg>e1) determining all running processes that were started prior to the detection time of a first encrypted file, and started less than a predetermined time before the detection time;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e1) Bestimmen aller laufenden Vorgänge, die vor dem Detektionszeitpunkt einer ersten verschlüsselten Datei gestartet wurden und weniger als einen vorbestimmten Zeitraum vor dem Detektionszeitpunkt gestartet wurden;</seg></tuv>
+    </tu>
+    <tu tuid="t73"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t73"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t73">
+      <tuv xml:lang="en-US"><seg>e2) of the determined running processes in step e1), determine the currently running process, not included in an exclusion process list, with a highest average accumulated kernel-CPU time and associated with a number of OS handles above a predetermined threshold; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e2) Bestimmen des derzeit laufenden Vorgangs von den in Schritt e1) bestimmten laufenden Vorgängen, der nicht in einer Ausschlussvorgangsliste aufgelistet ist, mit der höchsten durchschnittlichen kumulierten Kernel-CPU-Zeit und mit dem eine Anzahl von Betriebssystem-Handles oberhalb eines vorbestimmten Schwellenwerts verbunden ist; und</seg></tuv>
+    </tu>
+    <tu tuid="t74"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t74"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t74">
+      <tuv xml:lang="en-US"><seg>e3) if step e2) and e3) result in an identification of a ransomware process, killing the ransomware process.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>e3) Abbrechen des Ransomware-Vorgangs, falls die Schritte e2) und e3) in einer Identifizierung eines Ransomware-Vorgangs resultieren.</seg></tuv>
+    </tu>
+    <tu tuid="t75"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t75"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t75">
+      <tuv xml:lang="en-US"><seg>15.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>15.</seg></tuv>
+    </tu>
+    <tu tuid="t76"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t76"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t76">
+      <tuv xml:lang="en-US"><seg>The RMM system operatively associated with monitoring and managing a plurality of devices according to claim 14, wherein, if a RW-alert state is positive, the RMM agent module performs a second remediation method to identify and kill a ransomware process associated with the RW-alert, the second remediation method including:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>RMM-System nach Anspruch 14, das operativ mit Überwachen und Verwalten einer Vielzahl von Vorrichtungen verbunden ist, wobei das RMM-Agentenmodul, falls ein RW-Warnungszustand positiv ist, ein zweites Sanierungsverfahren durchführt, um einen mit der RW-Warnung verbundenen Ransomware-Vorgang zu identifizieren und abzubrechen, wobei das zweite Sanierungsverfahren Folgendes beinhaltet:</seg></tuv>
+    </tu>
+    <tu tuid="t77"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t77"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t77">
+      <tuv xml:lang="en-US"><seg>f1) determining all running processes on the local device which are not included in an exclusion process list;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f1) Bestimmen aller laufenden Vorgänge auf der lokalen Vorrichtung, die nicht in einer Ausschlussvorgangsliste beinhaltet sind;</seg></tuv>
+    </tu>
+    <tu tuid="t78"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t78"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t78">
+      <tuv xml:lang="en-US"><seg>f2) of the determined running processes in step f1), create a process performance counter for each determined running process, the process performance counters tracking I/O, Input/Output, write bytes per second for each process;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f2) Erstellen eines Vorgangsleistungszählers für jeden bestimmten laufenden Vorgang von den in Schritt f1) bestimmten laufenden Vorgängen, wobei die Vorgangsleistungszähler für jeden Vorgang die pro Sekunde geschriebenen I/O(Input/Output)-Bytes nachverfolgen;</seg></tuv>
+    </tu>
+    <tu tuid="t79"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t79"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t79">
+      <tuv xml:lang="en-US"><seg>f3) identifying one or more processes in step f2) with the highest relative counter values, indicating these processes include the most I/O intensive processes and are potential ransomware processes; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f3) Identifizieren eines oder mehrerer Vorgänge in Schritt f2) mit den höchsten verhältnismäßigen Zählerwerten, wobei angezeigt wird, dass diese Vorgänge die I/O-intensivsten Vorgänge beinhalten und mögliche Ransomware-Vorgänge sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t80"
+        srclang="en-US"
+        creationdate="20260521T101326Z"
+        creationid="MyMemory_t80"
+        changedate="20260521T101326Z"
+        changeid="MyMemory_t80">
+      <tuv xml:lang="en-US"><seg>f4) killing one or more of the processes identified in step f3).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>f4) Abbrechen eines oder mehrerer der in Schritt f3) identifizierten Vorgänge.</seg></tuv>
+    </tu>
+  </body>
+</tmx>

@@ -1,0 +1,851 @@
+<?xml version="1.0" ?>
+<!DOCTYPE tmx SYSTEM "https://uri.etsi.org/lis/002/v1.4.2/tmx14.dtd">
+<tmx version="1.4">
+  <header creationtool="MyMemory - mymemory.translated.net"
+          creationtoolversion="1.3.25"
+          creationid="Translated"
+          datatype="PlainText"
+          segtype="sentence"
+          o-tmf="MyMemory"
+          adminlang="en-US"
+          srclang="en-US"/>
+  <body>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t1"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>1</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t2"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t3"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>1. A radar signal processing method performed by a radar signal processing apparatus, wherein the method comprises the steps of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Radarsignalverarbeitungsverfahren, das durch eine Radarsignalverarbeitungsvorrichtung durchgeführt wird, wobei das Verfahren die folgenden Schritte umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t4"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>transmitting (S 101) a first radar signal on a first frequency band,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Übertragen (S101) eines ersten Radarsignals auf einem ersten Frequenzband,</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t5"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>○ wherein the first radar signal has a waveform of a first frequency modulated continuous wave, and the first frequency modulated continuous wave is a triangular wave having a rising edge and a falling edge, wherein the rising edge is sent in a first time unit and the falling edge is sent in a second time unit subsequent to the first time unit, the second time unit having a same duration as the first time unit,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>○ wobei das erste Radarsignal eine Wellenform einer ersten frequenzmodulierten kontinuierlichen Welle aufweist und die erste frequenzmodulierte kontinuierliche Welle eine Dreieckswelle mit einer steigenden Flanke und einer fallenden Flanke ist, wobei die steigende Flanke in einer ersten Zeiteinheit gesendet wird und die fallende Flanke in einer zweiten Zeiteinheit anschließend an die erste Zeiteinheit gesendet wird, wobei die zweite Zeiteinheit dieselbe Dauer wie die erste Zeiteinheit aufweist,</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t6"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>so that the sending of the rising edge of the first frequency modulated continuous wave has a same duration as the sending of the falling edge of the first frequency modulated continuous wave;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>so dass das Senden der steigenden Flanke der ersten frequenzmodulierten kontinuierlichen Welle dieselbe Dauer wie das Senden der fallenden Flanke der ersten frequenzmodulierten kontinuierlichen Welle aufweist;</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t7"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>transmitting (S 102) a second radar signal on a second frequency band,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Übertragen (S 102) eines zweiten Radarsignals auf einem zweiten Frequenzband,</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t8"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>○ wherein the second frequency band is non-overlapping with the first frequency band and distanced from the first frequency band,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>○ wobei das zweite Frequenzband nicht mit dem ersten Frequenzband überlappt und von dem ersten Frequenzband beabstandet ist,</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t9"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>○ wherein the second radar signal has a waveform of a second frequency modulated continuous wave, and the second frequency modulated continuous wave is a triangular wave having a falling edge and a rising edge, wherein the falling edge is sent in the first time unit and the rising edge is sent in the second time unit subsequent to the first time unit,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>○ wobei das zweite Radarsignal eine Wellenform einer zweiten frequenzmodulierten kontinuierlichen Welle aufweist und die zweite frequenzmodulierte kontinuierliche Welle eine Dreieckswelle mit einer fallenden Flanke und einer steigenden Flanke ist, wobei die fallende Flanke in der ersten Zeiteinheit gesendet wird und die steigende Flanke in der zweiten Zeiteinheit anschließend an die erste Zeiteinheit gesendet wird,</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t10"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>so that the sending of the rising edge of the second frequency modulated continuous wave has a same duration as the sending of the falling edge of the second frequency modulated continuous wave,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>so dass das Senden der steigenden Flanke der zweiten frequenzmodulierten kontinuierlichen Welle dieselbe Dauer wie das Senden der fallenden Flanke der zweiten frequenzmodulierten kontinuierlichen Welle aufweist,</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t11"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>○ wherein a starting moment of sending the first frequency modulated continuous wave is the same as a starting moment of sending the second frequency modulated continuous wave, and the starting moment is a beginning of the first time unit,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>○ wobei ein Startmoment des Sendens der ersten frequenzmodulierten kontinuierlichen Welle derselbe wie ein Startmoment des Sendens der zweiten frequenzmodulierten kontinuierlichen Welle ist und der Startmoment ein Beginn der ersten Zeiteinheit ist,</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t12"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>○ wherein a slope of frequency of the first radar signal and a slope of frequency of the second radar signal have a same absolute value but different signs in each time point during the sending of the first and second frequency modulated continuous waves in the first and second time units,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>○ wobei eine Steigung der Frequenz des ersten Radarsignals und eine Steigung der Frequenz des zweiten Radarsignals zu jedem Zeitpunkt während des Sendens der ersten und zweiten frequenzmodulierten kontinuierlichen Welle in der ersten und zweiten Zeiteinheit einen gleichen absoluten Wert, aber unterschiedliche Vorzeichen aufweisen,</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t13"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>wherein a slope is a variation of frequency of a linear frequency modulated continuous wave in a unit time;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei eine Steigung eine Variation der Frequenz einer linearen frequenzmodulierten kontinuierlichen Welle in einer Zeiteinheit ist;</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t14"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>receiving(S 103) a first reflected signal and a second reflected signal, wherein the first reflected signal is an electromagnetic wave obtained after the first radar signal is reflected by a target object, and the second reflected signal is an electromagnetic wave obtained after the second radar signal is reflected by the target object; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen (S 103) eines ersten reflektierten Signals und eines zweiten reflektierten Signals, wobei das erste reflektierte Signal eine elektromagnetische Welle ist, die erhalten wird, nachdem das erste Radarsignal von einem Zielobjekt reflektiert wird, und das zweite reflektierte Signal eine elektromagnetische Welle ist, die erhalten wird, nachdem das zweite Radarsignal von dem Zielobjekt reflektiert wird; und</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t15"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>obtaining (S 104) at least one of distance information, velocity information, and angle information of the target object based on the first radar signal, the first reflected signal, the second radar signal, and the second reflected signal.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Erhalten (S 104) von mindestens einem von Abstandsinformationen, Geschwindigkeitsinformationen und Winkelinformationen des Zielobjekts basierend auf dem ersten Radarsignal, dem ersten reflektierten Signal, dem zweiten Radarsignal und dem zweiten reflektierten Signal.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t16"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>2. A storage medium, wherein the storage medium stores a computer program; and when the computer program is executed by a processor of a radar signal processing apparatus, the radar signal processing method according to claim 1 is performed.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Speichermedium, wobei das Speichermedium ein Computerprogramm speichert; und wenn das Computerprogramm durch einen Prozessor einer Radarsignalverarbeitungsvorrichtung ausgeführt wird, das Radarsignalverarbeitungsverfahren nach Anspruch 1 durchgeführt wird.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t1"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t2"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. An information transmission method, comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Informationsübertragungsverfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t3"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>receiving (S110,S340) from a first apparatus (600), by a first detection apparatus (500, 700), indication information, wherein the indication information is used to indicate the first detection apparatus to determine a first transmit power used for transmitting a radar signal;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen (S110, S340), von einer ersten Vorrichtung (600) durch eine erste Erfassungsvorrichtung (500, 700), von Angabeinformationen, wobei die Angabeinformationen verwendet werden, um der ersten Erfassungsvorrichtung anzugeben, eine erste Übertragungsleistung zu bestimmen, die zum Übertragen eines Radarsignals verwendet wird;</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t4"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>determining (S120, S350), by the first detection apparatus, the first transmit power based on the indication information; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen (S120, S350) der ersten Übertragungsleistung durch die erste Erfassungsvorrichtung basierend auf den Angabeinformationen; und</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t5"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>sending, by the first detection apparatus (500, 700), time-frequency resource information and at least one of power information and the indication information, wherein the power information is used to indicate the first transmit power, and the time-frequency resource information is used to indicate a time-frequency resource used for the radar signal.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden, durch die erste Erfassungsvorrichtung (500, 700), von Zeit-Frequenz-Ressourceninformationen und von Leistungsinformationen und/oder der Angabeinformationen, wobei die Leistungsinformationen verwendet werden, um die erste Übertragungsleistung anzugeben, und die Zeit-Frequenz-Ressourceninformationen verwendet werden, um eine Zeit-Frequenz-Ressource anzugeben, die für das Radarsignal verwendet wird.</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t6"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>2. The method according to claim 1, wherein the method further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Verfahren nach Anspruch 1, wobei das Verfahren ferner umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t7"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>transmitting (S360), by the first detection apparatus (500, 700), the radar signal by using the first transmit power.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Übertragen (S360) des Radarsignals durch die erste Erfassungsvorrichtung (500, 700) mit der ersten Übertragungsleistung.</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t8"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>3. The method according to claim 2, wherein the sending, by the first detection apparatus (500, 700), time-frequency resource information and at least one of power information and the indication information comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Verfahren nach Anspruch 2, wobei das Senden von Zeit-Frequenz-Ressourceninformationen und der Leistungsinformationen und/oder der Angabeinformationen durch die erste Erfassungsvorrichtung (500, 700) umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t9"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>sending, by the first detection apparatus, the time-frequency resource information and the at least one of the power information and the indication information to a communications apparatus, a processing apparatus, or a second detection apparatus.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden der Zeit-Frequenz-Ressourceninformationen und der Leistungsinformationen und/oder der Angabeinformationen durch die erste Erfassungsvorrichtung an eine Kommunikationsvorrichtung, eine Verarbeitungsvorrichtung oder eine zweite Erfassungsvorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t10"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>4. The method according to any one of claims 1 to 3, wherein the determining (S120, S350), by the first detection apparatus (500, 700), the first transmit power based on the indication information comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Verfahren nach einem der Ansprüche 1 bis 3, wobei das Bestimmen (S120, S350) der ersten Übertragungsleistung durch die erste Erfassungsvorrichtung (500, 700) basierend auf den Anzeigeinformationen umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t11"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>determining, by the first detection apparatus based on the indication information, to adjust a currently used second transmit power to the first transmit power.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen, durch die erste Erfassungsvorrichtung basierend auf den Angabeinformationen, um die aktuell verwendete zweite Übertragungsleistung an die erste Übertragungsleitung anzupassen.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t12"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>5. The method according to claim 4, wherein the indication information indicates a status of a traffic light that is closest to a terminal in a current driving direction in which the first detection apparatus (500, 700) is located, and the status of the traffic light comprises a red light, a yellow light, or a green light.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Verfahren nach Anspruch 4, wobei die Angabeinformationen einen Status einer Ampel angeben, die einem Endgerät in einer aktuellen Fahrtrichtung, in der sich die erste Erfassungsvorrichtung (500, 700) befindet, am nächsten ist, und der Status der Ampel ein rotes Licht, ein gelbes Licht oder ein grünes Licht umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t13"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>6. The method according to claim 5, wherein the determining, by the first detection apparatus (500, 700) based on the indication information, to adjust a second transmit power to the first transmit power comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Verfahren nach Anspruch 5, wobei das Bestimmen, durch die erste Erfassungsvorrichtung (500, 700) basierend auf den Anzeigeinformationen, um eine zweite Übertragungsleistung an eine erste Übertragungsleistung anzupassen, umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t14"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>when the status of the traffic light is the red light, determining, by the first detection apparatus, to adjust the second transmit power to the first transmit power, wherein the first transmit power is less than or equal to the second transmit power; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wenn der Status der Ampel das rote Licht ist, Bestimmen, durch die erste Erfassungsvorrichtung, um die zweite Übertragungsleistung an die erste Übertragungsleistung anzupassen, wobei die erste Übertragungsleistung kleiner oder gleich der zweiten Übertragungsleistung ist; oder</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t15"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>when the status of the traffic light is the green light, determining, by the first detection apparatus, to adjust the second transmit power to the first transmit power, wherein the first transmit power is greater than or equal to the second transmit power.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wenn der Status der Ampel das grüne Licht ist, Bestimmen, durch die erste Erfassungsvorrichtung, um die zweite Übertragungsleistung an die erste Übertragungsleistung anzupassen, wobei die erste Übertragungsleistung größer oder gleich der zweiten Übertragungsleistung ist.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t16"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>7. The method according to claim 4, wherein the indication information indicates a congestion status of a road in a current driving direction of a terminal in which the first detection apparatus (500, 700) is located, and the congestion status of the road comprises a congested state, a normal state, or a clear state.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Verfahren nach Anspruch 4, wobei die Angabeinformationen einen Stauzustand einer Straße in einer aktuellen Fahrtrichtung eines Endgeräts angeben, in dem sich die erste Erfassungsvorrichtung (500, 700) befindet, und der Stauzustand der Straße einen gestauten Zustand, einen normalen Zustand oder einen freien Zustand umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t17"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>8. The method according to claim 7, wherein the determining, by the first detection apparatus (500, 700) based on the indication information, to adjust a second transmit power to the first transmit power comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Verfahren nach Anspruch 7, wobei das Bestimmen, durch die erste Erfassungsvorrichtung (500, 700) basierend auf den Anzeigeinformationen, um eine zweite Übertragungsleistung an eine erste Übertragungsleistung anzupassen, umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t18"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>when the congestion status of the road is the congested state, determining, by the first detection apparatus, to adjust the second transmit power to the first transmit power, wherein the first transmit power is less than or equal to the second transmit power; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wenn der Stauzustand der Straße der gestaute Zustand ist, Bestimmen, durch die erste Erfassungsvorrichtung, um die zweite Übertragungsleistung an die erste Übertragungsleistung anzupassen, wobei die erste Übertragungsleistung kleiner oder gleich der zweiten Übertragungsleistung ist; oder</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t19"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>when the congestion status of the road is the clear state, determining, by the first detection apparatus, to adjust the second transmit power to the first transmit power, wherein the first transmit power is greater than or equal to the second transmit power.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wenn der Stauzustand der Straße der freie Zustand ist, Bestimmen, durch die erste Erfassungsvorrichtung, um die zweite Übertragungsleistung an die erste Übertragungsleistung anzupassen, wobei die erste Übertragungsleistung größer oder gleich der zweiten Übertragungsleistung ist.</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t20"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>9. An information transmission method, comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Informationsübertragungsverfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t21"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>determining (S210, S330), by a first apparatus (600), indication information, wherein the indication information is used to indicate a first detection apparatus (500, 700) to determine (S120, S350) a first transmit power used for transmitting a radar signal;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen (S210, S330) durch eine erste Vorrichtung (600) von Angabeinformationen, wobei die Angabeinformationen verwendet werden, um einer erste Erfassungsvorrichtung (500, 700) anzugeben, eine erste Übertragungsleistung zu bestimmen (S120, S350), die zum Übertragen eines Radarsignals verwendet wird;</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t22"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>sending (S220, S340), by the first apparatus, the indication information to the first detection apparatus; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden (S220, S340) durch die erste Vorrichtung der Angabeinformationen an die erste Erfassungsvorrichtung; und</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t23"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>sending, by the first apparatus (600), time-frequency resource information and at least one of the power information and the indication information, wherein the time-frequency resource information is used to indicate a time-frequency resource used for the radar signal.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden, durch die erste Vorrichtung (600), von Zeit-Frequenz-Ressourceninformationen und der Leistungsinformationen und/oder der Angabeinformationen, wobei die Zeit-Frequenz-Ressourceninformationen verwendet werden, um eine Zeit-Frequenz-Ressource anzugeben, die für das Radarsignal verwendet wird.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t24"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t25"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>The method according to claim 9, wherein the determining (S210, S330), by a first apparatus (600), indication information comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9, wobei das Bestimmen (S210, S330) von Anzeigeinformationen durch eine erste Vorrichtung (600) umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t26"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>receiving (S320), by the first apparatus, the indication information sent by a second apparatus.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen (S320) der von einer zweiten Vorrichtung gesendeten Anzeigeinformationen durch die erste Vorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t27"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t28"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>The method according to claim 9 or 10, wherein the method further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9 oder 10, wobei das Verfahren ferner umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t29"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>receiving, by the first apparatus (600), power information sent by the first detection apparatus (500, 700) based on the indication information, wherein the power information is used to indicate the first transmit power.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen von Leistungsinformationen durch die erste Vorrichtung (600), die von der ersten Erfassungsvorrichtung (500, 700) basierend auf den Angabeinformationen gesendet wurden, wobei die Leistungsinformationen verwendet werden, um die erste Übertragungsleistung angeben.</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t30"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t31"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>The method according to claim 9, wherein the sending, by the first apparatus (600), time-frequency resource information and at least one of the power information and the indication information comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9, wobei das Senden von Zeit-Frequenz-Ressourceninformationen und der Leistungsinformationen und/oder der Angabeinformationen durch die erste Vorrichtung (600) umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t32"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>sending, by the first apparatus, the time-frequency resource information and the at least one of the power information and the indication information to a communications apparatus.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden der Zeit-Frequenz-Ressourceninformationen und der Leistungsinformationen und/oder der Angabeinformationen durch die erste Vorrichtung an eine Kommunikationsvorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t33"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t34"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>A computer-readable storage medium, configured to store a computer program, wherein the computer program comprises instructions for implementing the method according to any one of claims 1 to 8, or the method according to any one of claims 9 to 12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Computerlesbares Speichermedium, das konfiguriert ist, um ein Computerprogramm zu speichern, wobei das Computerprogramm Anweisungen zum Implementieren des Verfahrens nach einem der Ansprüche 1 bis 8 oder des Verfahrens nach einem der Ansprüche 9 bis 12 umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t1"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>1</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t2"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t3"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>1. An on-board diagnostic apparatus (5), comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Borddiagnosevorrichtung (5), umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t4"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>a first diagnostic module (511), configured to: monitor and record first fault information;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein erstes Diagnosemodul (511), das konfiguriert ist, um erste Fehlerinformationen zu überwachen und aufzuzeichnen;</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t5"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>a second diagnostic module (512), configured to: monitor and record second fault information, and send the second fault information to the first diagnostic module (511);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein zweites Diagnosemodul (512), das konfiguriert ist, um zweite Fehlerinformationen zu überwachen und aufzuzeichnen und die zweiten Fehlerinformationen an das erste Diagnosemodul (511) zu senden;</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t6"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>a first communication interface, configured to enable the first diagnostic module (511) to communicate with a master computer (6); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine erste Kommunikationsschnittstelle, die konfiguriert ist, um das erste Diagnosemodul (511) in die Lage zu versetzen, mit einem Master-Computer (6) zu kommunizieren; und</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t7"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a second communication interface, configured to enable the second diagnostic module (512) to communicate with the master computer (6);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine zweite Kommunikationsschnittstelle, die konfiguriert ist, um das zweite Diagnosemodul (512) in die Lage zu versetzen, mit dem Master-Computer (6) zu kommunizieren;</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t8"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>wherein the second fault information comprises second diagnostic module fault information indicating a fault of the second diagnostic module (512);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die zweiten Fehlerinformationen Fehlerinformationen des zweiten Diagnosemoduls umfassen, die einen Fehler des zweiten Diagnosemoduls (512) angeben;</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t9"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>characterized in that</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>dadurch gekennzeichnet, dass</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t10"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>the first diagnostic module (511) is further configured to repair the second diagnostic module (512) by restarting the second diagnostic module (512) or by upgrading software of the second diagnostic module (512) when receiving the second diagnostic module fault information; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das erste Diagnosemodul (511) ferner konfiguriert ist, um das zweite Diagnosemodul (512) durch Neustarten des zweiten Diagnosemoduls (512) oder durch Aktualisieren von Software des zweiten Diagnosemoduls (512) zu reparieren, wenn die Fehlerinformationen des zweiten Diagnosemoduls empfangen werden; und</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t11"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>the second diagnostic module (512) corresponds to a virtual machine.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das zweite Diagnosemodul (512) einer virtuellen Maschine entspricht.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t12"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>2. The on-board diagnostic apparatus (5) according to claim 1, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Borddiagnosevorrichtung (5) nach Anspruch 1, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t13"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>a third diagnostic module (513), configured to: monitor and record third fault information, and send the third fault information to the second diagnostic module (512); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein drittes Diagnosemodul (513), das konfiguriert ist, um dritte Fehlerinformationen zu überwachen und aufzuzeichnen und die dritten Fehlerinformationen an das zweite Diagnosemodul (512) zu senden; und</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t14"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>a third communication interface, configured to enable the third diagnostic module (513) to communicate with the master computer (6).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine dritte Kommunikationsschnittstelle, die konfiguriert ist, um das dritte Diagnosemodul (513) in die Lage zu versetzen, mit dem Master-Computer (6) zu kommunizieren.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t15"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>3. The on-board diagnostic apparatus (5) according to claim 2, wherein</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Borddiagnosevorrichtung (5) nach Anspruch 2, wobei</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t16"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>the third fault information comprises third diagnostic module fault information indicating a fault of the third diagnostic module (513); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die dritten Fehlerinformationen Fehlerinformationen des dritten Diagnosemoduls umfassen, die einen Fehler des dritten Diagnosemoduls (513) angeben; und</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t17"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>the second diagnostic module (512) is further configured to repair the third diagnostic module (513) when receiving the third diagnostic module fault information.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das zweite Diagnosemodul (512) ferner konfiguriert ist, um das dritte Diagnosemodul (513) zu reparieren, wenn die Fehlerinformationen des dritten Diagnosemoduls empfangen werden.</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t18"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>4. The on-board diagnostic apparatus (5) according to any one of claims 1 to 3, wherein the first fault information comprises fault information of an underlying system.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Borddiagnosevorrichtung (5) nach einem der Ansprüche 1 bis 3, wobei die ersten Fehlerinformationen Fehlerinformationen eines zugrundeliegenden Systems umfassen.</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t19"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>5. The on-board diagnostic apparatus (5) according to any one of claims 1 to 4, wherein the second fault information comprises fault information of a driving assistance category module.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Borddiagnosevorrichtung (5) nach einem der Ansprüche 1 bis 4, wobei die zweiten Fehlerinformationen Fehlerinformationen eines Fahrassistenzkategoriemoduls umfassen.</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t20"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>6. The on-board diagnostic apparatus (5) according to claim 2 or 3, wherein the third fault information comprises fault information of a driving assistance scenario feature.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Borddiagnosevorrichtung (5) nach Anspruch 2 oder 3, wobei die dritten Fehlerinformationen Fehlerinformationen eines Fahrassistenzszenariomerkmals umfassen.</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t21"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>7. A vehicle fault diagnostic method, comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Fahrzeugfehlerdiagnoseverfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t22"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>monitoring and recording, by a first diagnostic module (511), first fault information;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Überwachen und Aufzeichnen von ersten Fehlerinformationen durch ein erstes Diagnosemodul (511);</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t23"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>monitoring and recording, by a second diagnostic module (512), second fault information, and sending the second fault information to the first diagnostic module (511);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Überwachen und Aufzeichnen von zweiten Fehlerinformationen durch ein zweites Diagnosemodul (512) und Senden der zweiten Fehlerinformationen an das erste Diagnosemodul (511);</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t24"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>communicating, by the first diagnostic module (511), with a master computer (6) through a first communication interface; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Kommunizieren mit einem Master-Computer (6) durch das erste Diagnosemodul (511) über eine erste Kommunikationsschnittstelle; und</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t25"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>communicating, by the second diagnostic module (512), with the master computer (6) through a second communication interface;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Kommunizieren mit dem Master-Computer (6) durch das zweite Diagnosemodul (512) über eine zweite Kommunikationsschnittstelle;</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t26"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>wherein the second fault information comprises second diagnostic module fault information indicating a fault of the second diagnostic module (512);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die zweiten Fehlerinformationen Fehlerinformationen des zweiten Diagnosemoduls umfassen, die einen Fehler des zweiten Diagnosemoduls (512) angeben;</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t27"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>characterized in that</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>dadurch gekennzeichnet, dass</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t28"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>the vehicle fault diagnostic method further comprises: repairing, by the first diagnostic module (511), the second diagnostic module (512) by restarting the second diagnostic module (512) or by upgrading software of the second diagnostic module (512) when receiving the second diagnostic module fault information; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das Fahrzeugfehlerdiagnoseverfahren ferner Folgendes umfasst: Reparieren, durch das erste Diagnosemodul (511), des zweiten Diagnosemoduls (512) durch Neustarten des zweiten Diagnosemoduls (512) oder durch Aktualisieren von Software des zweiten Diagnosemoduls (512), wenn die Fehlerinformationen des zweiten Diagnosemoduls empfangen werden; und</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t29"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>the second diagnostic module (512) corresponds to a virtual machine.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das zweite Diagnosemodul (512) einer virtuellen Maschine entspricht.</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t30"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>8. The vehicle fault diagnostic method according to claim 7, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Fahrzeugfehlerdiagnoseverfahren nach Anspruch 7, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t31"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>monitoring and recording, by a third diagnostic module (513), third fault information, and sending the third fault information to the second diagnostic module (512); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Überwachen und Aufzeichnen von dritten Fehlerinformationen durch ein drittes Diagnosemodul (513) und Senden der dritten Fehlerinformationen an das zweite Diagnosemodul (512); und</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t32"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>communicating, by the third diagnostic module (513), with the outside through a third communication interface.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Kommunizieren mit der Außenseite durch das dritte Diagnosemodul (513) über eine dritte Kommunikationsschnittstelle.</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t33"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>9. The vehicle fault diagnostic method according to claim 8, wherein</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Fahrzeugfehlerdiagnoseverfahren nach Anspruch 8, wobei</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t34"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>the third fault information comprises third diagnostic module fault information indicating a fault of the third diagnostic module (513); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die dritten Fehlerinformationen Fehlerinformationen des dritten Diagnosemoduls umfassen, die einen Fehler des dritten Diagnosemoduls (513) angeben; und</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t35"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>the vehicle fault diagnostic method further comprises: repairing, by the second diagnostic module (512), the third diagnostic module (513) when receiving the third diagnostic module fault information.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>das Fahrzeugfehlerdiagnoseverfahren ferner Folgendes umfasst: Reparieren, durch das zweite Diagnosemodul (512), des dritten Diagnosemoduls (513), wenn die Fehlerinformationen des dritten Diagnosemoduls empfangen werden.</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t36"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t37"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>The vehicle fault diagnostic method according to any one of claims 7 to 9, wherein the first fault information comprises fault information of an underlying system.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Fahrzeugfehlerdiagnoseverfahren nach einem der Ansprüche 7 bis 9, wobei die ersten Fehlerinformationen Fehlerinformationen eines zugrundeliegenden Systems umfassen.</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t38"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t39"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>The vehicle fault diagnostic method according to any one of claims 7 to 10, wherein the second fault information comprises fault information of a driving assistance category module.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Fahrzeugfehlerdiagnoseverfahren nach einem der Ansprüche 7 bis 10, wobei die zweiten Fehlerinformationen Fehlerinformationen eines Fahrassistenzkategoriemoduls umfassen.</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t40"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t41"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>A vehicle, comprising the on-board diagnostic apparatus (5) according to any one of claims 1 to 6.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Fahrzeug, umfassend die Borddiagnosevorrichtung (5) nach einem der Ansprüche 1 bis 6.</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t42"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260528T084551Z"
+        creationid="MyMemory_t43"
+        changedate="20260528T084551Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>A computer-readable storage medium, wherein the computer-readable storage medium stores program instructions, and when the program instructions are run by a computer, the computer is enabled to perform the method according to any one of claims 7 to 11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Computerlesbares Speichermedium, wobei das computerlesbare Speichermedium Programmanweisungen speichert, und wenn die Programmanweisungen von einem Computer ausgeführt werden, der Computer in die Lage versetzt wird, das Verfahren nach einem der Ansprüche 7 bis 11 durchzuführen.</seg></tuv>
+    </tu>
+  </body>
+</tmx>
