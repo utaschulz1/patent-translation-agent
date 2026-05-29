@@ -1,5 +1,7 @@
 EN,DE
-e.g.,zum Beispiel
+apparatus,Einrichtung
+e.g.,z. B.,
+one of,eines von,
 comprise,umfassen,
 comprising,umfassend,
 configure,konfigurieren,
@@ -37,6 +39,7 @@ upstream,stromaufwärts gelegen,
 downstream,stromabwärts gelegen,
 according to claim,nach Anspruch
 feature,Merkmal,
+characteristic,Merkmal,
 subsequent,anschließend,
 method for producing,Verfahren zum Herstellen,
 correspond,korrespondieren,
