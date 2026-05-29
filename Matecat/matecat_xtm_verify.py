@@ -57,14 +57,15 @@ def run(project_id: str) -> None:
     mc_path = mc_files[-1]          # most recent if multiple
     print(f"MateCat reference: {mc_path.name}")
 
-    mc_translations: dict[int, str] = dict(_read_xlf(mc_path))
+    mc_segments, _ = _read_xlf(mc_path)
+    mc_translations: dict[int, str] = dict(mc_segments)
     print(f"  {len(mc_translations)} segments with translations")
 
     # ── Download current XTM XLIFF ────────────────────────────────────────────
 
     # ── Find or download XTM XLIFF ────────────────────────────────────────────
 
-    XTRF_BASE = Path(r"C:\Users\utasc\OneDrive\ArbeitNEU\Comunica DK")
+    from config import WORK_DIR as XTRF_BASE
     _XLIFF_EXTS = {".xlf", ".xliff", ".sdlxliff", ".mqxliff"}
 
     def _find_local_xlf() -> Path | None:
@@ -110,10 +111,12 @@ def run(project_id: str) -> None:
                 raise RuntimeError("No XLIFF extracted from XTM xbpkg.")
             xtm_path = xliffs[0]
             print(f"  Extracted: {xtm_path.name}")
-            xtm_translations: dict[int, str] = dict(_read_xlf(xtm_path))
+            xtm_segments, _ = _read_xlf(xtm_path)
+            xtm_translations: dict[int, str] = dict(xtm_segments)
             print(f"  {len(xtm_translations)} segments with translations")
     else:
-        xtm_translations: dict[int, str] = dict(_read_xlf(xtm_path))
+        xtm_segments, _ = _read_xlf(xtm_path)
+        xtm_translations: dict[int, str] = dict(xtm_segments)
         print(f"  {len(xtm_translations)} segments with translations")
 
     # ── Compare ───────────────────────────────────────────────────────────────

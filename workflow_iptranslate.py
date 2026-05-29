@@ -2,10 +2,10 @@
 workflow.py  —  Patent translation workflow runner
 
 Steps
-    3   Read Gmail (ComunicaDK/TODO), pick email with closest deadline
+    3   Query XTRF vendor API for IN_PROGRESS jobs, pick job with earliest deadline
         → XTRF job setup (folders, source files, glossary)
-        → XTM Excel download via API (fallback: Downloads folder)
-    4   Manual mode: paste XTRF job URL instead of reading email
+        → XTM Excel download via API
+    4   Manual mode: paste XTRF job URL instead of querying API
     5   Pre-translation with IP.appify (requires xlsx in project folder)
     6   Consistency checks (verb + noun comparison)
     6b  Merge glossaries (review and clean before next run)
@@ -34,13 +34,16 @@ def _run(script: Path, *args) -> None:
 
 
 def step3(target_project_id: str | None = None) -> str:
-    import get_XTRF_link
-    extracted = get_XTRF_link.run(target_project_id=target_project_id)
+    import get_XTRF_job
+    extracted = get_XTRF_job.run(target_project_id=target_project_id)
     if not extracted:
-        raise RuntimeError("Step 3: no project found in email intake.")
-    xtrf_url, project_id, msg_id = extracted
+        raise RuntimeError(
+            "Step 3: no unprocessed IN_PROGRESS job found on XTRF.\n"
+            "  → Check that the job is IN_PROGRESS on the XTRF vendor portal."
+        )
+    xtrf_url, project_id, job_id = extracted
     xtrf_job_setup.run(xtrf_url, project_id_override=project_id)
-    if not xtm_download.run_workflow(project_id, msg_id=msg_id):
+    if not xtm_download.run_workflow(project_id, msg_id=job_id):
         raise RuntimeError(f"Step 3: could not obtain xlsx/xlf for {project_id}.")
     return project_id
 

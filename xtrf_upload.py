@@ -1,10 +1,11 @@
 """
 xtrf_upload.py  —  XTRF workflow final step
 
-Uploads 3 deliverable files for a completed patent translation job:
+Uploads 4 deliverable files for a completed patent translation job:
   - *_German (Claims/Description/...).docx
   - *_German (Claims/Description/...).pdf
   - project_QA_Report_<project_id>.xlsx
+  - Appendix A*<project_id>*.xlsx
 
 Usage:
     python xtrf_upload.py <project_id>
@@ -82,14 +83,18 @@ def _find_project_folder(project_id: str) -> Path:
     return matches[0]
 
 
-def _find_files(folder: Path, project_id: str) -> tuple[Path, Path, Path]:
+def _find_files(folder: Path, project_id: str) -> tuple[Path, Path, Path, Path | None]:
     """
-    Return (docx, pdf, xlsx) deliverable files from the project folder.
+    Return (docx, pdf, qa_xlsx, appendix_xlsx) deliverable files from the project folder.
     Raises if any is missing or ambiguous.
     """
-    docx_files = [p for p in folder.glob("*.docx") if _GERMAN_FILE_RE.search(p.stem)]
-    pdf_files  = [p for p in folder.glob("*.pdf")  if _GERMAN_FILE_RE.search(p.stem)]
-    xlsx_files = [p for p in folder.glob("project_QA_Report_*.xlsx")]
+    docx_files     = [p for p in folder.glob("*.docx") if _GERMAN_FILE_RE.search(p.stem)]
+    pdf_files      = [p for p in folder.glob("*.pdf")  if _GERMAN_FILE_RE.search(p.stem)]
+    qa_xlsx_files  = [p for p in folder.glob("project_QA_Report_*.xlsx")]
+    app_xlsx_files = [
+        p for p in folder.glob("Appendix A*.xlsx")
+        if project_id in p.name
+    ]
 
     def _one(label: str, found: list[Path]) -> Path:
         if not found:
@@ -99,7 +104,17 @@ def _find_files(folder: Path, project_id: str) -> tuple[Path, Path, Path]:
             raise ValueError(f"Multiple {label} files found: {names}")
         return found[0]
 
-    return _one("German docx", docx_files), _one("German pdf", pdf_files), _one("QA xlsx", xlsx_files)
+    appendix = app_xlsx_files[0] if len(app_xlsx_files) == 1 else None
+    if len(app_xlsx_files) > 1:
+        names = ", ".join(p.name for p in app_xlsx_files)
+        raise ValueError(f"Multiple Appendix A xlsx files found: {names}")
+
+    return (
+        _one("German docx", docx_files),
+        _one("German pdf", pdf_files),
+        _one("QA xlsx", qa_xlsx_files),
+        appendix,
+    )
 
 
 def _upload_file(session: requests.Session, job_id: int, path: Path) -> dict:
@@ -130,16 +145,22 @@ def run(project_id: str) -> None:
     folder = _find_project_folder(project_id)
     print(f"  Project folder: {folder.name}")
 
-    docx, pdf, xlsx = _find_files(folder, project_id)
+    docx, pdf, xlsx, appendix = _find_files(folder, project_id)
     print(f"  Files to upload:")
     print(f"    {docx.name}")
     print(f"    {pdf.name}")
     print(f"    {xlsx.name}")
+    if appendix:
+        print(f"    {appendix.name}")
 
-    for path in (docx, pdf, xlsx):
+    upload_files = [p for p in (docx, pdf, xlsx, appendix) if p is not None]
+    for path in upload_files:
         print(f"Uploading {path.name} ...", end=" ", flush=True)
         _upload_file(session, job_id, path)
         print("ok")
+
+    if appendix is None:
+        print("No Appendix A uploaded")
 
     # Verify
     r = session.get(f"{BASE_URL}/jobs/classic/{job_id}/target-files")

@@ -9,14 +9,13 @@ When run in the workflow, the file is saved to:
 
 where <project-folder> is the first subfolder whose name contains the project ID.
 
-When run directly, the file is saved to C:\\Users\\utasc\\Downloads
+When run directly, the file is saved to the project's pre-processing folder in WORK_DIR.
 
 Usage:
     python xtm_workbench.py <project_id>
     e.g.  python xtm_workbench.py RTC_2604_P0732
 """
 
-import glob
 import json
 import os
 import shutil
@@ -37,8 +36,6 @@ from dotenv import load_dotenv
 
 import project_log
 from config import WORK_DIR
-
-DOWNLOADS = Path(r"C:\Users\utasc\Downloads")
 
 
 BASE_URL = "https://word.welocalize.com/project-manager-gui"
@@ -451,16 +448,6 @@ def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | li
     return {"xlsx": xlsx, "xliff": xliffs}
 
 
-def _find_xlsx(project_id: str) -> Path | None:
-    """Return the most recently modified xlsx in Downloads matching project_id, or None."""
-    matches = sorted(
-        glob.glob(str(DOWNLOADS / f"{project_id}*.xlsx")),
-        key=os.path.getmtime,
-        reverse=True,
-    )
-    return Path(matches[0]) if matches else None
-
-
 def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
     """Download originals to pre-processing, copy trimmed xlsx + xliff to project folder.
 
@@ -499,29 +486,7 @@ def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
             print(f"  xliff copy: {xlf.name} (project folder)")
         _log("XLSX_DOWNLOADED", detail=str(xlsx_path))
     except Exception as e:
-        print(f"  XTM download failed ({e}) — falling back to Downloads folder.")
-
-    # 2. Fall back to pre-downloaded xlsx in Downloads (no xliff in this path)
-    if xlsx_path is None:
-        found = _find_xlsx(project_id)
-        if found:
-            try:
-                pre_folder = _find_pre_folder(project_id)
-                shutil.copy2(found, pre_folder / found.name)
-                print(f"  Original saved: {found.name} (pre-processing)")
-            except Exception:
-                pass
-
-            dest = proj_dir / found.name
-            shutil.copy2(found, dest)
-            wb = openpyxl.load_workbook(dest)
-            ws = wb.active
-            while ws.max_column > 3:
-                ws.delete_cols(ws.max_column)
-            wb.save(dest)
-            xlsx_path = dest
-            print(f"  Copied from Downloads: {found.name}")
-            _log("XLSX_FOUND", detail=str(xlsx_path))
+        print(f"  XTM download failed: {e}")
 
     if xlsx_path is None:
         _log("XLSX_NOT_FOUND")
@@ -540,7 +505,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python xtm_initial_download.py <project_id>")
         raise SystemExit(1)
-    result = run(sys.argv[1], dest_folder=Path(r"C:\Users\utasc\Downloads"))
+    result = run(sys.argv[1])
     print(f"Excel:  {result['xlsx']}")
     for p in result["xliff"]:
         print(f"XLIFF:  {p}")

@@ -22,6 +22,7 @@ import re
 import time
 import zipfile
 from pathlib import Path
+from urllib.parse import unquote
 
 import requests
 from dotenv import load_dotenv
@@ -85,17 +86,40 @@ def _llm_extract_terms(en_title: str, de_title: str, retries: int = 5) -> list[t
     print("  DeepSeek extraction failed after all retries — glossary will be empty.")
     return []
 
-def _extract_job_id(raw: str) -> str:
-    """Extract the numeric job ID from a full XTRF URL or a bare ID string."""
-    # ignores "classic/" if present
-    m = re.search(r"/jobs?/(?:classic/)?([^/?#]+)", raw)
+def _extract_job_id(raw: str) -> str | None:
+    """Extract the numeric job ID from a full XTRF URL or a bare ID string.
+
+    Returns None when the URL uses the new token-based format (#/job/TOKEN)
+    so the caller can fall back to a project-name search.
+    """
+    # Old format: #/jobs/classic/316307
+    m = re.search(r"/jobs/(?:classic/)?(\d+)", raw)
     if m:
         return m.group(1)
-    
+
     if re.fullmatch(r"\d+", raw.strip()):
         return raw.strip()
-        
+
+    # New format: #/job/BASE64TOKEN — token cannot be used as a REST job ID
+    if re.search(r"/job/[A-Za-z0-9+/=_-]{10,}", raw):
+        return None
+
     raise ValueError(f"Cannot extract job ID from: {raw!r}")
+
+
+def _find_job_id_by_project(session: requests.Session, project_id: str) -> str:
+    """Search the job list for a job whose project name contains project_id."""
+    statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS,PENDING"
+    r = session.get(f"{BASE_URL}/jobs", params={"statuses": statuses})
+    r.raise_for_status()
+    for job in r.json():
+        name = job.get("overview", {}).get("projectName", "")
+        if project_id in name:
+            return str(job["id"])
+    raise ValueError(
+        f"No IN_PROGRESS/PENDING job found for project '{project_id}'. "
+        "Check XTRF or verify the project ID."
+    )
 
 def _login(session: requests.Session, creds: dict) -> None:
     """Authenticate the session against the XTRF vendor portal."""
@@ -109,8 +133,7 @@ def _login(session: requests.Session, creds: dict) -> None:
 
 def _get_job(session: requests.Session, job_id: str) -> dict:
     """Fetch full job JSON from the XTRF API."""
-    # singular 'job/classic' endpoint per confirmed GET trace
-    endpoint = f"{BASE_URL}/job/classic/{job_id}"
+    endpoint = f"{BASE_URL}/jobs/classic/{job_id}"
     
     r = session.get(endpoint, headers={"time-zone-offset-in-minutes": "60"})
     r.raise_for_status()
@@ -130,7 +153,7 @@ def _download_file(session: requests.Session, url: str, dest: Path) -> Path:
     r.raise_for_status()
     cd = r.headers.get("content-disposition", "")
     m = re.search(r'filename[^;=\n]*=\s*["\']?([^"\';\n]+)', cd)
-    fname = m.group(1).strip() if m else dest.name
+    fname = unquote(m.group(1).strip()) if m else dest.name
     out = dest.parent / fname if dest.is_dir() else dest
     with open(out, "wb") as f:
         for chunk in r.iter_content(8192):
@@ -149,8 +172,7 @@ def _download_source_files(
         file_id = sf["id"]
         filename = sf["name"]
         
-        # Again, use singular 'job/classic'
-        url = f"{BASE_URL}/job/classic/{job_id}/source-files/{file_id}"
+        url = f"{BASE_URL}/jobs/classic/{job_id}/source-files/{file_id}"
             
         out_path = dest_folder / filename
         print(f"  Downloading {filename}...")
@@ -210,6 +232,16 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
 
     print(f"Logging in to XTRF...")
     _login(session, creds)
+
+    if job_id is None:
+        if not project_id_override:
+            raise ValueError(
+                "XTRF URL uses the new token-based format (#/job/TOKEN). "
+                "Pass a project ID (e.g. workflow_lara.py --target PROJ_ID) so the job can be looked up."
+            )
+        print(f"Token URL detected — looking up job for '{project_id_override}'...")
+        job_id = _find_job_id_by_project(session, project_id_override)
+        print(f"  Found job ID: {job_id}")
 
     print(f"Fetching job {job_id}...")
     job = _get_job(session, job_id)

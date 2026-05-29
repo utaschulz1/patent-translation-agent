@@ -313,7 +313,7 @@ for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
     en_text_lower = str(en_text).lower()
     all_matches: list[tuple[int, int, str]] = []
     for en_term in glossary_noun_lookup:
-        pat = r"\b" + re.escape(en_term) + r"\b"
+        pat = r"\b" + re.escape(en_term) + r"s?\b"
         for m in re.finditer(pat, en_text_lower):
             all_matches.append((m.start(), m.end(), en_term))
 

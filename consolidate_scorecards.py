@@ -30,8 +30,8 @@ import openpyxl
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
-SCORECARD_DIR = Path(r"C:\Users\utasc\OneDrive\ArbeitNEU\Comunica DK\scorecards")
-HERE          = Path(__file__).parent
+from config import SCORECARD_DIR
+HERE = Path(__file__).parent
 CSV_OUT       = HERE / "scorecard_consolidated.csv"
 LOG_FILE      = HERE / "scorecard_log.json"
 

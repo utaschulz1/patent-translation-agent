@@ -175,7 +175,8 @@ def _extract_xtrf_url(html_body: str) -> str | None:
 
 def _extract_project_id(subject: str) -> str | None:
     # Subject: "You can start with job: ... | SYICTL_2604_P0069 (...)"
-    m = re.search(r'\b([A-Z]{2,}_\d{4}_[A-Z0-9]+)\b', subject)
+    # Some project IDs start with a lowercase letter, e.g. xFDT_2605_P0004
+    m = re.search(r'\b([A-Za-z]{2,}_\d{4}_[A-Z0-9]+)\b', subject)
     return m.group(1) if m else None
 
 

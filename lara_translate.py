@@ -11,10 +11,12 @@
 #     LARA_GLOSSARY_IDS=gls_abc123,gls_def456   # optional, Pro plan
 #     LARA_MEMORY_IDS=mem_abc123,mem_def456      # optional, Team plan only
 #
-# USAGE   python lara_translate.py [--pid <project_id>]
-#           --pid   project folder name under projects/; defaults to current project context
+# USAGE   python lara_translate.py [--pid <project_id>] [--file <filename>] [--seg-range START-END]
+#           --pid    project folder name under projects/; defaults to current project context
+#           --file   explicit xlsx filename to translate (overrides auto-detection)
 #
-# INPUT   projects/<project_id>/<any>.xlsx   — bilingual Excel from XTM
+# INPUT   projects/<project_id>/<project_id>*.xlsx   — bilingual Excel from XTM (auto-detected)
+#         or any .xlsx specified via --file
 # OUTPUT  projects/<project_id>/<name>_translated.xlsx
 # ============================================================
 
@@ -34,6 +36,8 @@ from project_log import project_dir as _pdir
 
 _args = argparse.ArgumentParser()
 _args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
+_args.add_argument("--file", default=None, metavar="FILENAME",
+                   help="Exact xlsx filename (or path) to translate. Overrides auto-detection.")
 _args.add_argument("--seg-range", default=None, metavar="START-END",
                    help="Translate only this segment range, e.g. 421-488.")
 _args = _args.parse_args()
@@ -106,16 +110,33 @@ elif _glossaries_registry:
     glossary_ids = []
 else:
     glossary_ids = []
-xlsx_files = glob.glob(str(proj_dir / "*.xlsx"))
-xlsx_files = [f for f in xlsx_files if not os.path.basename(f).startswith("~$") and not f.endswith("_translated.xlsx")]
+if _args.file:
+    _p = Path(_args.file)
+    input_path = str(_p if _p.is_absolute() else proj_dir / _p)
+    if not os.path.exists(input_path):
+        print(f"ERROR: File not found: {input_path}")
+        exit()
+else:
+    xlsx_files = glob.glob(str(proj_dir / "*.xlsx"))
+    xlsx_files = [f for f in xlsx_files
+                  if not os.path.basename(f).startswith("~$")
+                  and not f.endswith("_translated.xlsx")]
 
-if not xlsx_files:
-    print(f"ERROR: No .xlsx file found in '{proj_dir}'.")
-    exit()
-if len(xlsx_files) > 1:
-    print(f"Multiple .xlsx files found, using: {xlsx_files[0]}")
+    # Prefer files whose name starts with the project ID (XTM export naming convention)
+    project_files = [f for f in xlsx_files
+                     if os.path.basename(f).lower().startswith(proj_dir.name.lower())]
+    if project_files:
+        xlsx_files = project_files
 
-input_path = xlsx_files[0]
+    if not xlsx_files:
+        print(f"ERROR: No source .xlsx file found in '{proj_dir}'.")
+        print(f"  Tip: use --file <filename> to specify it explicitly.")
+        exit()
+    if len(xlsx_files) > 1:
+        print(f"Multiple .xlsx files found, using: {os.path.basename(xlsx_files[0])}")
+        print(f"  Tip: use --file <filename> to select a specific file.")
+
+    input_path = xlsx_files[0]
 
 raw_df  = pd.read_excel(input_path, header=None, engine="openpyxl")
 print(f"Processing: {raw_df.iloc[0, 0]}")

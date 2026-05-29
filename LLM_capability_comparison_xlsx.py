@@ -19,6 +19,7 @@
 # ============================================================
 
 import os
+import re
 import sys
 import glob
 import json
@@ -161,23 +162,49 @@ segments = [
 
 all_pairs = []
 
+def _report_structure(segs: list) -> None:
+    claims_id = next(
+        (s["id"] for s in segs if re.match(r'^claims?\.?\s*$', str(s["source"]).strip(), re.IGNORECASE)),
+        None,
+    )
+    desc_id = next(
+        (s["id"] for s in segs if re.match(r'^(?:detailed\s+)?description\.?\s*$', str(s["source"]).strip(), re.IGNORECASE)),
+        None,
+    )
+    print(f"  Total segments : {len(segs)}")
+    print(f"  CLAIMS header  : segment {claims_id}" if claims_id else "  CLAIMS header  : not found")
+    print(f"  DESCRIPTION    : segment {desc_id}" if desc_id else "  DESCRIPTION    : not found")
+
+_report_structure(segments)
+
 _args = sys.argv[1:]
-try:
-    seg_start = int(_args[0]) if len(_args) >= 1 else 1
-    seg_end   = int(_args[1]) if len(_args) >= 2 else min(100, len(segments))
-except ValueError:
-    print(f"ERROR: invalid arguments {_args!r}.")
-    print(f"  Usage: python {os.path.basename(__file__)} [start] [end]")
-    print(f"  Example: python {os.path.basename(__file__)} 1 100")
-    print(f"  File has {len(segments)} segments. Arguments are 1-based and inclusive.")
-    exit(1)
+if _args:
+    try:
+        seg_start = int(_args[0])
+        seg_end   = int(_args[1]) if len(_args) >= 2 else len(segments)
+    except ValueError:
+        print(f"ERROR: invalid arguments {_args!r}. Expected: start end  (e.g. 421 488)")
+        exit(1)
+elif len(segments) > 50:
+    raw = input(f"\n  {len(segments)} segments (> 50) — enter range (e.g. 421 488) or press Enter to process all: ").strip()
+    if raw:
+        parts = raw.split()
+        try:
+            seg_start = int(parts[0])
+            seg_end   = int(parts[1]) if len(parts) >= 2 else len(segments)
+        except ValueError:
+            print(f"ERROR: invalid range {raw!r}")
+            exit(1)
+    else:
+        seg_start, seg_end = 1, len(segments)
+else:
+    seg_start, seg_end = 1, len(segments)
+
 if seg_start < 1 or seg_end < seg_start or seg_end > len(segments):
-    print(f"ERROR: segment range {seg_start}–{seg_end} is out of bounds (file has {len(segments)} segments).")
-    print(f"  Usage: python {os.path.basename(__file__)} [start] [end]")
-    print(f"  Example: python {os.path.basename(__file__)} 1 100")
+    print(f"ERROR: range {seg_start}–{seg_end} out of bounds (file has {len(segments)} segments).")
     exit(1)
 segments = segments[seg_start - 1:seg_end]
-print(f"Segments {seg_start}–{seg_end} selected ({len(segments)} segments, total in file: {len(data_df)}).")
+print(f"Segments {seg_start}–{seg_end} selected ({len(segments)} of {len(data_df)} total).")
 
 batches = [segments[i:i + BATCH_SIZE] for i in range(0, len(segments), BATCH_SIZE)]
 print(f"\nPhase 1: extracting capability predicate pairs — {len(batches)} batches of up to {BATCH_SIZE} segments...")

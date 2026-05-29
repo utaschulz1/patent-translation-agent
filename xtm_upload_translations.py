@@ -799,10 +799,15 @@ def _upload_via_stomp(
 
                 if not next_tu_ready:
                     if next_uid is not None and any(uid > next_uid for uid in _drain_seen_uids):
-                        # XTM advanced past next_uid — it auto-confirmed it as an ICE match.
-                        # Saving Excel text into it would overwrite the correct auto-fill.
-                        _xtm_skipped.add(next_uid)
-                        print(f"  [{unit_id}/{last_id}] XTM auto-confirmed segment {next_uid} (ICE), will skip")
+                        if next_uid not in tu_updates:
+                            # XTM advanced past next_uid — it auto-confirmed it as ICE.
+                            _xtm_skipped.add(next_uid)
+                            print(f"  [{unit_id}/{last_id}] XTM auto-confirmed segment {next_uid} (ICE), will skip")
+                        else:
+                            # TU_UPDATED for next_uid already arrived in an earlier drain
+                            # and is cached — the higher uid here is a background broadcast,
+                            # not XTM skipping.  Use the cached data normally.
+                            print(f"  [{unit_id}/{last_id}] Note: segment {next_uid} pre-cached; background uid seen (not ICE)")
                     else:
                         print(f"  [{unit_id}/{last_id}] Warning: no TRANS_UNIT_UPDATED for segment {next_uid}, tags may be missing")
 

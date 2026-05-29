@@ -16,6 +16,7 @@ Usage:
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 import xtm_initial_download as _xtm
 from config import WORK_DIR
@@ -58,7 +59,7 @@ def _download_file(
 
     cd = r.headers.get("content-disposition", "")
     m = re.search(r'filename[^;=\n]*=\s*["\']?([^"\';\n]+)', cd)
-    orig_name = m.group(1).strip() if m else f"download_{preview_type}"
+    orig_name = unquote(m.group(1).strip()) if m else f"download_{preview_type}"
 
     content = b"".join(r.iter_content(8192))
     return content, orig_name
