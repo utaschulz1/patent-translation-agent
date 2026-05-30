@@ -1,5 +1,6 @@
 .env
 projects/
+not-in-use/
 gmail_credentials.json
 gmail_token.json
 current_project.json
