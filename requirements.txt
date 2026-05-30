@@ -7,6 +7,8 @@ lara-sdk
 python-docx
 spacy
 websocket-client
+google-api-python-client
+google-auth
 # PyMuPDF       # uncomment to use utilities/extract_align_bilingual_pdf.py
 
 # After installing, download the spacy language models:
