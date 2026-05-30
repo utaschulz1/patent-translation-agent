@@ -1,0 +1,14 @@
+python-dotenv
+requests
+openpyxl
+pandas
+openai
+lara-sdk
+python-docx
+spacy
+websocket-client
+# PyMuPDF       # uncomment to use utilities/extract_align_bilingual_pdf.py
+
+# After installing, download the spacy language models:
+# python -m spacy download en_core_web_sm
+# python -m spacy download de_core_news_sm
