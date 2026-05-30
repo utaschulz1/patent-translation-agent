@@ -268,7 +268,10 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     # 4.1b  Create working folder in codebase and set active project context
     work_folder = PROJECTS_DIR / project_id
     work_folder.mkdir(parents=True, exist_ok=True)
-    project_log.set_context(project_id, work_folder, xtrf_job_folder=str(project_folder))
+    project_log.set_context(project_id, work_folder,
+                            xtrf_job_folder=str(project_folder),
+                            task_type=task_type,
+                            xtrf_job_id=job_id)
     print(f"Created project folder: {work_folder}")
 
     # 4.2  Download + unzip source files
