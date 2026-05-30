@@ -29,7 +29,7 @@ Steps
     15 Run xtrf_upload.py to upload delivery files to XTRF, finalize manually in XTRF
 
 Usage:
-    python workflow_lara.py                     # step 3 (email) → 5 → 6 → 6b → 6c → pause → 7 → 8
+    python workflow_lara.py                     # step 3 (XTRF API, earliest deadline) → 5 → 6 → 6b → 6c → pause → 7 → 8
     python workflow_lara.py SAGI_2604_P0039     # same, filtered to that project ID
     python workflow_lara.py --manual            # step 4 (manual URL, prompts for URL) → same
     python workflow_lara.py --manual <url>      # step 4, URL passed directly (no prompt)

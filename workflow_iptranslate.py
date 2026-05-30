@@ -1,5 +1,5 @@
 """
-workflow.py  —  Patent translation workflow runner
+workflow_iptranslate.py  —  Patent translation workflow runner (IP.appify pre-translation)
 
 Steps
     3   Query XTRF vendor API for IN_PROGRESS jobs, pick job with earliest deadline
@@ -11,9 +11,9 @@ Steps
     6b  Merge glossaries (review and clean before next run)
 
 Usage:
-    python workflow.py                     # step 3 (email, closest deadline) → 5 → 6 → 6b
-    python workflow.py SAGI_2604_P0039     # step 3 filtered to that project ID
-    python workflow.py --manual            # step 4 (manual URL) → 5 → 6 → 6b
+    python workflow_iptranslate.py                     # step 3 (XTRF API, earliest deadline) → 5 → 6 → 6b
+    python workflow_iptranslate.py SAGI_2604_P0039     # step 3 filtered to that project ID
+    python workflow_iptranslate.py --manual            # step 4 (manual URL) → 5 → 6 → 6b
 """
 
 import subprocess
