@@ -35,7 +35,7 @@ def _load_creds() -> dict:
 
 
 def _login(session: requests.Session, creds: dict) -> None:
-    r = session.post(f"{BASE_URL}/login", json=creds)
+    r = session.post(f"{BASE_URL}/sign-in", json=creds)
     r.raise_for_status()
 
 
