@@ -93,7 +93,11 @@ while True:
         raw_df = pd.read_excel(input_path, header=None, engine="openpyxl")
         break
     except PermissionError:
-        input(f"  {os.path.basename(input_path)} is open in Excel — close it, then press Enter...")
+        if sys.stdin.isatty():
+            input(f"  {os.path.basename(input_path)} is open in Excel — close it, then press Enter...")
+        else:
+            print(f"ERROR: {os.path.basename(input_path)} is locked (open in Excel?). Close it and retry.")
+            exit(1)
     except Exception as e:
         print(f"ERROR: Could not read Excel file: {e}")
         exit(1)
@@ -186,17 +190,21 @@ if _args:
         print(f"ERROR: invalid arguments {_args!r}. Expected: start end  (e.g. 421 488)")
         exit(1)
 elif len(segments) > 50:
-    raw = input(f"\n  {len(segments)} segments (> 50) — enter range (e.g. 421 488) or press Enter to process all: ").strip()
-    if raw:
-        parts = raw.split()
-        try:
-            seg_start = int(parts[0])
-            seg_end   = int(parts[1]) if len(parts) >= 2 else len(segments)
-        except ValueError:
-            print(f"ERROR: invalid range {raw!r}")
-            exit(1)
+    if sys.stdin.isatty():
+        raw = input(f"\n  {len(segments)} segments (> 50) — enter range (e.g. 421 488) or press Enter to process all: ").strip()
+        if raw:
+            parts = raw.split()
+            try:
+                seg_start = int(parts[0])
+                seg_end   = int(parts[1]) if len(parts) >= 2 else len(segments)
+            except ValueError:
+                print(f"ERROR: invalid range {raw!r}")
+                exit(1)
+        else:
+            seg_start, seg_end = 1, len(segments)
     else:
-        seg_start, seg_end = 1, len(segments)
+        print(f"ERROR: {len(segments)} segments but no range given. Pass start end as arguments.")
+        exit(1)
 else:
     seg_start, seg_end = 1, len(segments)
 

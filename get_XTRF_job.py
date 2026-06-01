@@ -25,6 +25,9 @@ _DONE_STATES = {"LINK_EXTRACTED", "JOB_FINISHED_SUCCESSFULLY"}
 
 _DEADLINE_FIELDS = ("deadline", "deadlineDate", "dueDate", "finishDate")
 
+# Project IDs starting with these prefixes are not handled by this workflow.
+_SKIP_PREFIXES = ("SI",)
+
 
 def _load_creds() -> dict:
     load_dotenv(_ENV)
@@ -119,6 +122,10 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
         project_name = overview.get("projectName", "")
         project_id = project_name.split("|")[-1].strip()
         dl = _parse_deadline(overview)
+
+        if project_id.startswith(_SKIP_PREFIXES):
+            print(f"  Skipping {project_id} — client not handled by this workflow.")
+            continue
 
         if dl is None:
             print(f"WARNING: deadline not found. Overview keys: {list(overview.keys())}")

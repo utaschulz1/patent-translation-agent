@@ -1,9 +1,0 @@
-https://developers.laratranslate.com/docs/introduction
-https://developers.laratranslate.com/docs/getting-started
-https://developers.laratranslate.com/docs/translate-text
-https://developers.laratranslate.com/docs/translator-class
-https://developers.laratranslate.com/docs/manage-translation-memories
-https://developers.laratranslate.com/docs/adapt-to-translation-memories
-https://developers.laratranslate.com/docs/manage-glossaries
-https://developers.laratranslate.com/docs/configuration-overview
-https://developers.laratranslate.com/docs/pricing-page
