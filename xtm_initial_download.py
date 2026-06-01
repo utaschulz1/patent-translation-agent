@@ -501,14 +501,13 @@ def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
 
 
 def main():
-    """CLI entry point: read project_id from argv and call run()."""
+    """CLI entry point: read project_id from argv and call run_workflow()."""
     if len(sys.argv) < 2:
         print("Usage: python xtm_initial_download.py <project_id>")
         raise SystemExit(1)
-    result = run(sys.argv[1])
-    print(f"Excel:  {result['xlsx']}")
-    for p in result["xliff"]:
-        print(f"XLIFF:  {p}")
+    ok = run_workflow(sys.argv[1])
+    if not ok:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
