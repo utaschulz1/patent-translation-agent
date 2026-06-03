@@ -177,13 +177,32 @@ def _open_editor_write(
 # ---------------------------------------------------------------------------
 
 def _find_excel(project_id: str) -> Path:
-    """Find *_revised_translation_checks*.xlsx in the project pre-processing folder."""
+    """Find *_revised_translation_checks*.xlsx.
+
+    Looks in the project folder (from current_project.json, works with the app
+    locally and on Railway) first, then falls back to the XTRF pre-processing
+    folder for the standalone terminal workflow.
+    """
+    ctx_path = Path(__file__).parent / "current_project.json"
+    if ctx_path.exists():
+        try:
+            ctx = json.loads(ctx_path.read_text(encoding="utf-8"))
+            if ctx.get("project_id") == project_id:
+                proj_dir = Path(ctx["project_folder"])
+                matches = list(proj_dir.glob("*_revised_translation_checks*.xlsx"))
+                if matches:
+                    if len(matches) > 1:
+                        print(f"  Warning: multiple Excel files found, using {matches[0].name}")
+                    return matches[0]
+        except Exception:
+            pass
+
     pre = _find_pre_folder(project_id)
     matches = list(pre.glob("*_revised_translation_checks*.xlsx"))
     if not matches:
         raise RuntimeError(
             f"No *_revised_translation_checks*.xlsx found in {pre}\n"
-            f"Run the archive step first."
+            f"Sync the revised file to the project folder or run the archive step first."
         )
     if len(matches) > 1:
         print(f"  Warning: multiple Excel files found, using {matches[0].name}")
