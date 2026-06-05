@@ -236,6 +236,11 @@ for en, de in glossary_noun_lookup.items():
 
 
 # ── Source xlsx ───────────────────────────────────────────────────────────────
+# Fallback order: prefer *_revised_translation_checks.xlsx if it already exists
+# (re-run after pulling edited file from Drive), otherwise fall back to
+# *_translated.xlsx (first run, from matecat_xlf_to_excel.py).
+# This means re-running the step after a Drive pull re-checks the edited
+# translations, not the original Matecat output.
 
 for pattern in [
     str(proj_dir / "*_revised_translation_checks.xlsx"), str(proj_dir / "*_translated.xlsx")
