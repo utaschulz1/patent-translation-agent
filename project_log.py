@@ -10,13 +10,14 @@ Public API:
 """
 
 import json
+import os
 import time
 from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).parent
 _CTX_FILE = HERE / "current_project.json"
-_LOG_FILE = HERE / "project_log.json"
+_LOG_FILE = Path(os.environ.get("PROJECT_LOG_PATH", str(HERE / "project_log.json")))
 
 def _read_log() -> dict:
     """Read and parse the log file. Raises RuntimeError if the file is corrupted."""
