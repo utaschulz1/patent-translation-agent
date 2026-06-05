@@ -19,7 +19,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 # Code-side directories — always relative to this file, work on any OS
 HERE         = Path(__file__).parent
-PROJECTS_DIR = HERE / "projects"
+PROJECTS_DIR = Path(os.environ.get("PROJECTS_DIR", str(HERE / "projects")))
 
 # Storage root — the only value that differs between machines/backends
 WORK_DIR      = Path(os.environ["WORK_DIR"])
