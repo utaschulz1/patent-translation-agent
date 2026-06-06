@@ -6,8 +6,15 @@ Clears:
   - project_log.json      (removes the entry keyed by xtrf_job_id)
   - workflow.db           (deletes project + workflow_steps rows)
 
-Usage:
+Usage (local):
     python delete_project.py <project_id> [xtrf_job_id]
+
+Usage (Railway — run from patent-translation-app/ in PowerShell):
+    ~/.railway/bin/railway.exe run `
+        --project 198f1cb5-1b9e-461b-af3a-7e6256c88b2a `
+        --environment dfa296aa-9f7d-4d9a-8b2d-76230454bc79 `
+        --service 9cefa5f3-4212-4127-8978-61fd79680590 `
+        python agent/delete_project.py <project_id> [xtrf_job_id]
 
 If xtrf_job_id is omitted, it is read from current_project.json or
 workflow.db. If it cannot be determined, the project_log.json step is
@@ -24,7 +31,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 _CTX_FILE = HERE / "current_project.json"
 _LOG_FILE = Path(os.environ.get("PROJECT_LOG_PATH", str(HERE / "project_log.json")))
-_DB_FILE = Path(os.environ.get("WORKFLOW_DB", str(HERE.parent / "patent-translation-app" / "workflow.db")))
+_DB_FILE = Path(os.environ.get("DB_PATH", os.environ.get("WORKFLOW_DB", str(HERE.parent / "patent-translation-app" / "workflow.db"))))
 
 
 def _resolve_xtrf_job_id(project_id: str, given: str | None) -> str | None:
