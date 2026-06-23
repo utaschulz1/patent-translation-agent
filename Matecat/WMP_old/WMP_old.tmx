@@ -1,0 +1,2165 @@
+<?xml version="1.0" ?>
+<!DOCTYPE tmx SYSTEM "https://uri.etsi.org/lis/002/v1.4.2/tmx14.dtd">
+<tmx version="1.4">
+  <header creationtool="MyMemory - mymemory.translated.net"
+          creationtoolversion="1.3.25"
+          creationid="Translated"
+          datatype="PlainText"
+          segtype="sentence"
+          o-tmf="MyMemory"
+          adminlang="en-US"
+          srclang="en-US"/>
+  <body>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t1"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t2"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t3"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>receiving, by a base station (105) from an access and mobility management function, AMF, (155) of a core network, a message indicating a start of an overload of the core network, the message comprising a first closed access group identifier, CAG ID;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen, durch eine Basisstation (105) von einer Zugangs- und Mobilitätsverwaltungsfunktion, AMF, (155) eines Kernnetzwerks, einer Nachricht, die einen Beginn einer Überlastung des Kernnetzwerks anzeigt, wobei die Nachricht eine erste geschlossene Zugangsgruppen-Kennung, CAG-ID, umfasst;</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t4"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>sending, by the base station to a wireless device and based on the overload of the core network, barring information indicating that access via a closed access group associated with the first CAG ID is barred, wherein the sending the barring information to the wireless device comprises broadcasting the barring information in a system information block, SIB; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden, durch die Basisstation an eine drahtlose Vorrichtung und basierend auf der Überlastung des Kernnetzwerks, von Sperrinformationen, die anzeigen, dass ein Zugang über eine geschlossene Zugangsgruppe, die der ersten CAG-ID zugeordnet ist, gesperrt ist, wobei das Senden der Sperrinformationen an die drahtlose Vorrichtung Broadcasten der Sperrinformationen in einem Systeminformationsblock, SIB, umfasst; und</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t5"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>receiving, by the base station from the wireless device, an access request associated with a second closed access group.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Zugangsanforderung, die einer zweiten geschlossenen Zugangsgruppe zugeordnet ist, durch die Basisstation von der drahtlosen Vorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t6"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>2. The method of claim 1, wherein the message comprises one or more of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Verfahren nach Anspruch 1, wobei die Nachricht eines oder mehrere der Folgenden Elemente umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t7"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a public land mobile network identifier; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Kennung für ein öffentliches Mobilfunknetz; und</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t8"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>a non-public network identifier.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Kennung für ein nicht-öffentliches Netzwerk.</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t9"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>3. The method of any of claims 1 to 2, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Verfahren nach einem der Ansprüche 1 bis 2, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t10"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>receiving, by the base station from the AMF, a second message indicating a stop of the overload of the core network; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen, durch die Basisstation von der AMF, einer zweiten Nachricht, die ein Ende der Überlastung des Kernnetzwerks anzeigt; und</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t11"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>sending, by the base station to the wireless device and based on the stop of the overload of the core network, barring information indicating that the closed access group associated with the first CAG ID is not subject to access barring.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden, durch die Basisstation an die drahtlose Vorrichtung und basierend auf dem Ende der Überlastung des Kernnetzwerks, von Sperrinformationen, die anzeigen, dass die geschlossene Zugangsgruppe, die der ersten CAG-ID zugeordnet ist, keiner Zugangssperre unterliegt.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t12"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>4. The method of any of claims 1 to 3, wherein the barring information further comprises a time duration indicating that the wireless device is not allowed to access a wireless network for the time duration.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Verfahren nach einem der Ansprüche 1 bis 3, wobei die Sperrinformationen ferner eine Zeitdauer umfassen, die anzeigt, dass der drahtlosen Vorrichtung der Zugang zu einem drahtloses Netzwerk für die Zeitdauer nicht erteilt wird.</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t13"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>5. A base station comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Basisstation, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t14"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>one or more processors; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen oder mehrere Prozessoren; und</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t15"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>memory storing instructions that, when executed by the one or more processors, cause the base station to perform the method of any one of claims 1 to 4.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Speicher, der Anweisungen speichert, die, wenn sie durch den einen oder die mehreren Prozessoren ausgeführt werden, die Basisstation veranlassen, das Verfahren nach einem der Ansprüche 1 bis 4 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t16"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>6. A non-transitory computer-readable medium comprising instructions that, when executed by one or more processors, cause the one or more processors to perform the method of any one of claims 1 to 4.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Nicht-transitorisches computerlesbares Medium, umfassend Anweisungen, die bei Ausführung durch einen oder mehrere Prozessoren den einen oder die mehreren Prozessoren veranlassen, das Verfahren nach einem der Ansprüche 1 bis 4 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t17"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>7. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t18"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>sending, by an access and mobility management function, AMF, (155) of a core network to a base station (105), a message indicating a start of an overload of the core network, the message comprising a first closed access group identifier, CAG ID.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden von einer Zugangs- und Mobilitätsverwaltungsfunktion, AMF, (155) eines Kernnetzwerks an eine Basisstation (105), einer Nachricht, die einen Beginn einer Überlastung des Kernnetzwerks anzeigt, wobei die Nachricht eine erste geschlossene Zugangsgruppen-Kennung, CAG-ID, umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t19"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>8. The method of claim 7, wherein the message comprises one or more of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Verfahren nach Anspruch 7, wobei die Nachricht eines oder mehrere der Folgenden Elemente umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t20"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>a public land mobile network identifier; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Kennung für ein öffentliches Mobilfunknetz; und</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t21"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>a non-public network identifier.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Kennung für ein nicht-öffentliches Netzwerk.</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t22"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>9. The method of any of claims 7 to 8, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Verfahren nach einem der Ansprüche 7 bis 8, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t23"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>sending, by the AMF to the base station, a second message indicating a stop of the overload of the core network.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden, durch die AMF an die Basisstation, einer zweiten Nachricht, die ein Ende der Überlastung des Kernnetzwerks anzeigt.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t24"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t25"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>The method of any of claims 7 to 9, wherein the second message comprises one or more CAG IDs.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 7 bis 9, wobei die zweite Nachricht eine oder mehrere CAG-IDs umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t26"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t27"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>The method of any of claims 7 to 10, further comprising receiving, via the base station, a non-access stratum message from a wireless device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 7 bis 10, ferner umfassend ein Empfangen einer Nicht-Zugangsschicht-Nachricht von einer drahtlosen Vorrichtung über die Basisstation.</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t28"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t29"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>An access and mobility management function, AMF, (155) comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Zugangs- und Mobilitätsverwaltungsfunktion, AMF, (155), umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t30"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>one or more processors; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen oder mehrere Prozessoren; und</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t31"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>memory storing instructions that, when executed by the one or more processors, cause the AMF to perform the method of any one of claims 7 to 11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Speicher, der Anweisungen speichert, die, wenn sie von dem einen oder den mehreren Prozessoren ausgeführt werden, die AMF veranlassen, das Verfahren nach einem der Ansprüche 7 bis 11 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t32"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t33"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>A non-transitory computer-readable medium comprising instructions that, when executed by one or more processors, cause the one or more processors to perform the method of any one of claims 7 to 11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Nichttransitorisches computerlesbares Medium, umfassend Anweisungen, die bei Ausführung durch einen oder mehrere Prozessoren den einen oder die mehreren Prozessoren veranlassen, das Verfahren nach einem der Ansprüche 7 bis 11 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t34"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t35"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>A system comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>System, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t36"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>an access and mobility management function, AMF, (155) of a core network, the AMF comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Zugangs- und Mobilitätsverwaltungsfunktion, AMF, (155) eines Kernnetzwerks, die AMF umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t37"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>one or more first processors; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen oder mehrere erste Prozessoren; und</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t38"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>first memory storing first instructions that, when executed by the one or more first processors, cause the AMF to:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen ersten Speicher, der erste Anweisungen speichert, die bei Ausführung durch den einen oder die mehreren ersten Prozessoren die AMF zu Folgendem veranlassen:</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t39"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>send a message indicating a start of an overload of the core network, the message comprising a first closed access group identifier, CAG ID; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Nachricht, die einen Beginn einer Überlastung des Kernnetzwerks anzeigt senden, wobei die Nachricht eine erste geschlossene Zugangsgruppen-Kennung, CAG-ID, umfasst; und</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t40"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>a base station (105) comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Basisstation (105), umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t41"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>one or more second processors; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen oder mehrere zweite Prozessoren; und</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t42"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>second memory storing second instructions that, when executed by the one or more second processors, cause the base station to:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen zweiten Speicher, der zweite Anweisungen speichert, die bei Ausführung durch den einen oder die mehreren zweiten Prozessoren die Basisstation zu Folgendem veranlassen:</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t43"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>receive the message indicating the start of the overload of the core network;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Nachricht empfangen, die den Beginn der Überlastung des Kernnetzwerks angibt;</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t44"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>send, to a wireless device based on the overload of the core network, barring information indicating that access via a closed access group associated with the first CAG ID, wherein the sending the barring information to the wireless device comprises broadcasting the barring information in a system information block, SIB; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>an eine drahtlose Vorrichtung, basierend auf der Überlastung des Kernnetzwerks, Sperrinformationen senden, die anzeigen, dass ein Zugang über eine geschlossene Zugangsgruppe, die der ersten CAG-ID zugeordnet ist, wobei das Senden der Sperrinformationen an die drahtlose Vorrichtung Broadcasten der Sperrinformationen in einem Systeminformationsblock, SIB, umfasst; und</seg></tuv>
+    </tu>
+    <tu tuid="t45"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t45"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t45">
+      <tuv xml:lang="en-US"><seg>receive, from the wireless device, an access request associated with a second closed access group.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Zugangsanforderung, die einer zweiten geschlossenen Zugangsgruppe zugeordnet ist, von der drahtlosen Vorrichtung.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t1"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t2"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t3"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>receiving, by a base station central unit from a first base station distributed unit, an indication that one or more cells are associated with a first closed access group; the base station central unit being communicatively coupled with an access and mobility management function;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Angabe durch eine Basisstation-Zentraleinheit von einer ersten Basisstation-Verteilungseinheit, dass eine oder mehrere Zellen mit einer ersten geschlossenen Zugangsgruppe assoziiert sind; wobei die Basisstation-Zentraleinheit kommunikativ mit einer Zugangs- und Mobilitätsverwaltungsfunktion gekoppelt ist;</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t4"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>determining, by the base station central unit and based on the indication, cell configuration parameters of the one or more cells for a wireless device that is allowed to access the first closed access group;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen von Zellkonfigurationsparametern der einen oder der mehreren Zellen für eine drahtlose Vorrichtung, die zugelassen ist, auf die erste geschlossene Zugangsgruppe zuzugreifen, durch die Basisstation-Zentraleinheit und basierend auf der Angabe;</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t5"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>sending, by the base station central unit to the first base station distributed unit, a context configuration message comprising the cell configuration parameters;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden einer Kontextkonfigurationsnachricht an die erste Basisstation-Verteilereinheit durch die Basisstation-Zentraleinheit, umfassend die Zellkonfigurationsparameter;</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t6"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>receiving, by the base station central unit from a second base station distributed unit, a configuration request message comprising second cell information of one or more second cells of the second base station distributed unit, wherein the second cell information indicates that the second cells are not associated with the first closed access group; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Konfigurationsanforderungsnachricht durch die Basisstation-Zentraleinheit von einer zweiten Basisstation-Verteilungseinheit, umfassend zweite Zellinformationen einer oder mehrerer zweiter Zellen der zweiten Basisstation-Verteilungseinheit, wobei die zweiten Zellinformationen angeben, dass die zweiten Zellen nicht mit der ersten geschlossenen Zugangsgruppe assoziiert sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t7"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>determining, by the base station central unit, based on the second cell information, to not configure the one or more second cells of the second base station distributed unit for the wireless device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen durch die Basisstation-Zentraleinheit basierend auf den zweiten Zellinformationen, dass die eine oder die mehreren zweiten Zellen der zweiten Basisstation-Verteilungseinheit für die drahtlose Vorrichtung nicht konfiguriert werden.</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t8"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>2. The method of claim 1, wherein the indication is a message comprising one or more parameters of the first base station distributed unit, wherein the one or more parameters indicate that the one or more cells are associated with the first closed access group.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Verfahren nach Anspruch 1, wobei die Angabe eine Nachricht ist, umfassend einen oder mehrere Parameter der ersten Basisstation-Verteilungseinheit, wobei der eine oder die mehreren Parameter angeben, dass die eine oder die mehreren Zellen mit der ersten geschlossenen Zugangsgruppe assoziiert sind.</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t9"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>3. The method of any of claims 1 to 2, further comprising receiving, by the base station central unit from a second base station, a handover request message for the wireless device indicating that the wireless device is allowed to access the first closed access group, wherein the context configuration message is based on the handover request message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Verfahren nach einem der Ansprüche 1 bis 2, ferner umfassend Empfangen einer Übergabeanforderungsnachricht für die drahtlose Vorrichtung durch die Basisstation-Zentraleinheit von einer zweiten Basisstation, die angibt, dass die drahtlose Vorrichtung zugelassen ist, auf die erste geschlossene Zugangsgruppe zuzugreifen, wobei die Kontextkonfigurationsnachricht auf der Übergabeanforderungsnachricht basiert.</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t10"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>4. The method of any of claims 1 to 2, further comprising receiving, by the base station central unit from the wireless device, a radio resource control, RRC, request message for the wireless device indicating that the wireless device is allowed to access the first closed access group, wherein</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Verfahren nach einem der Ansprüche 1 bis 2, ferner umfassend Empfangen einer Funkressourcensteuerungs-(RRC-)Anforderungsnachricht für die drahtlose Vorrichtung durch die Basisstation-Zentraleinheit, die angibt, dass die drahtlose Vorrichtung zugelassen ist, auf die erste geschlossene Zugangsgruppe zuzugreifen, wobei</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t11"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>the context configuration message is based on the RRC request message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Kontextkonfigurationsnachricht auf der RRC-Anforderungsnachricht basiert.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t12"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>5. The method of any of claims 1 to 2, further comprising receiving, by the base station central unit from the access and mobility management function, a wireless device context configuration request message for the wireless device indicating that the wireless device is allowed to access the first closed access group, wherein the context configuration message is based on the wireless device context configuration request message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Verfahren nach einem der Ansprüche 1 bis 2, ferner umfassend Empfangen einer Drahtlos-Vorrichtungs-Kontextkonfigurationsanforderungsnachricht für die drahtlose Vorrichtung durch die Basisstation-Zentraleinheit von der Zugangs- und Mobilitätsverwaltungsfunktion, die angibt, dass die drahtlose Vorrichtung zugelassen ist, auf die erste geschlossene Zugangsgruppe zuzugreifen, wobei die Kontextkonfigurationsnachricht auf der Drahtlos-Vorrichtungs-Kontextkonfigurationsanforderungsnachricht basiert.</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t13"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>6. A base station central unit comprising one or more processors and memory storing instructions that, when executed by the one or more processors, cause the base station central unit to perform the method of any one of claims 1 to 5.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Basisstation-Zentraleinheit, umfassend einen oder mehrere Prozessoren und Speicher, die Anweisungen speichern, die, wenn sie von dem einen oder den mehreren Prozessoren ausgeführt werden, die Basisstation-Zentraleinheit dazu veranlassen, das Verfahren nach einem der Ansprüche 1 bis 5 auszuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t14"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>7. A non-transitory computer-readable medium comprising instructions that, when executed by one or more processors, cause the one or more processors to perform the method of any one of claims 1 to 5.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Nichtflüchtiges, computerlesbares Medium, umfassend Anweisungen, die, wenn sie von einem oder mehreren Prozessoren ausgeführt werden, den einen oder die mehreren Prozessoren dazu veranlassen, das Verfahren nach einem der Ansprüche 1 bis 5 auszuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t15"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>8. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t16"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>sending, by a first base station distributed unit to a base station central unit, the base station central unit being connected to an access and mobility management function, an indication that one or more cells are associated with a first closed access group;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden einer Angabe, dass eine oder mehrere Zellen mit einer ersten geschlossenen Zugangsgruppe assoziiert sind, durch eine erste Basisstation-Verteilungseinheit an eine Basisstation-Zentraleinheit, wobei die Basisstation-Zentraleinheit mit einer Zugangs- und Mobilitätsverwaltungsfunktion verbunden ist;</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t17"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>receiving, by the first base station distributed unit from the base station central unit, a context configuration message comprising cell configuration parameters of the one or more cells;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Kontextkonfigurationsnachricht, umfassend Zellkonfigurationsparameter der einen oder der mehreren Zellen, durch die erste Basisstation-Verteilungseinheit von der Basisstation-Zentraleinheit;</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t18"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>sending, by a second base station distributed unit to the base station central unit, a configuration request message comprising second cell information of one or more second cells of the second base station distributed unit, wherein the second cell information indicates that the second cells are not associated with the first closed access group; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden einer Konfigurationsanforderungsnachricht durch eine zweite Basisstation-Verteilungseinheit an die Basisstation-Zentraleinheit, umfassend zweite Zellinformationen einer oder mehrerer zweiter Zellen der zweiten Basisstation-Verteilungseinheit, wobei die zweiten Zellinformationen angeben, dass die zweiten Zellen nicht mit der ersten geschlossenen Zugangsgruppe assoziiert sind; und</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t19"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>determining, by the base station central unit, based on the second cell information, to not configure the one or more second cells of the second base station distributed unit for the wireless device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Bestimmen durch die Basisstation-Zentraleinheit basierend auf den zweiten Zellinformationen, dass die eine oder die mehreren zweiten Zellen der zweiten Basisstation-Verteilungseinheit für die drahtlose Vorrichtung nicht konfiguriert werden.</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t20"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>9. The method of claim 8, wherein the indication is a message comprising one or more parameters of the first base station distributed unit, wherein the one or more parameters indicate that</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Verfahren nach Anspruch 8, wobei die Angabe eine Nachricht ist, umfassend einen oder mehrere Parameter der ersten Basisstation-Verteilungseinheit, wobei der eine oder die mehreren Parameter angeben, dass</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t21"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>the one or more cells are associated with the first closed access group.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die eine oder die mehreren Zellen mit der ersten geschlossenen Zugangsgruppe verbunden sind.</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t22"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t23"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>The method of any of claims 8 to 9, wherein the context configuration message is for a wireless device that is allowed to access the first closed access group.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 8 bis 9, wobei die Kontextkonfigurationsnachricht für eine drahtlose Vorrichtung ist, die zugelassen ist, auf die erste geschlossenen Zugangsgruppe zuzugreifen.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t24"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t25"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>The method of any of claims 9 to 10, wherein the one or more parameters comprise at least one of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 9 bis 10, wobei der eine oder die mehreren Parameter mindestens eines der folgenden Elemente umfassen:</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t26"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>a physical cell identifier indicating a cell of the one or more cells; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine physikalische Zellkennung, die eine Zelle der einen oder der mehreren Zellen angibt; oder</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t27"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>a parameter indicating whether a non-member of the first closed access group is allowed to access the cell of the one or more cells.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Parameter, der angibt, ob ein Nichtmitglied der ersten geschlossenen Zugangsgruppe zugelassen ist, auf die Zelle der einen oder der mehreren Zellen zuzugreifen.</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t28"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t29"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>The method of any of claims 8 to 11, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 8 bis 11, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t30"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>receiving, by the first base station distributed unit from the base station central unit, a system information block for at least one of the one or more cells, the system information block comprising an identifier of the first closed access group; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen eines Systeminformationsblocks für mindestens eine der einen oder der mehreren Zellen durch die erste Basisstations-Verteilungseinheit von der Basisstations-Zentraleinheit, der Systeminformationsblock umfassend eine Kennung der ersten geschlossenen Zugangsgruppe; und</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t31"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>transmitting, by the first base station distributed unit, the system information block to one or more wireless devices.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Übertragen des Systeminformationsblocks durch die erste Basisstation-Verteilungseinheit an eine oder mehrere drahtlose Vorrichtungen.</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t32"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t33"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>A non-transitory computer-readable medium comprising instructions that, when executed by one or more processors, cause the one or more processors to perform the method of any one of claims 8 to 12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Nichtflüchtiges, computerlesbares Medium, umfassend Anweisungen, die, wenn sie von einem oder mehreren Prozessoren ausgeführt werden, den einen oder die mehreren Prozessoren dazu veranlassen, das Verfahren nach einem der Ansprüche 8 bis 12 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t34"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t35"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>A system comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>System, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t36"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>a base station central unit being communicatively coupled with an access and mobility management function and comprising: one or more processors and memory storing instructions that, when executed by the one or more processors, cause the base station central unit to:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Basisstation-Zentraleinheit, die kommunikativ mit einer Zugangs- und Mobilitätsverwaltungsfunktion gekoppelt ist und Folgendes umfasst: einen oder mehrere Prozessoren und Speicher, die Anweisungen speichern, die, wenn sie von dem einen oder den mehreren Prozessoren ausgeführt werden, die Basisstation-Zentraleinheit zu Folgendem veranlassen:</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t37"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>receive, from a first base station distributed unit, an indication that one or more cells are associated with a first closed access group;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>von einer ersten Basisstation-Verteilungseinheit eine Angabe empfangen, dass eine oder mehrere Zellen mit einer ersten geschlossenen Zugangsgruppe assoziiert sind;</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t38"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>determine, based on the indication, cell configuration parameters of the one or more cells for a wireless device that is allowed to access the first closed access group;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>basierend auf der Angabe Zellkonfigurationsparameter der einen oder mehreren Zellen für eine drahtlose Vorrichtung bestimmen, die zugelassen ist, auf die erste geschlossene Zugangsgruppe zuzugreifen;</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t39"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>send, to the first base station distributed unit, a context configuration message comprising the cell configuration parameters;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Kontextkonfigurationsnachricht an die erste Basisstation-Verteilungseinheit senden, umfassend die Zellkonfigurationsparameter;</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t40"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>receive, from a second base station distributed unit, a configuration request message comprising second cell information of one or more second cells of the second base station distributed unit, wherein the second cell information indicates that the second cells are not associated with the first closed access group;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Konfigurationsanforderungsnachricht von einer zweiten Basisstation-Verteilungseinheit empfangen, umfassend zweite Zellinformationen einer oder mehrerer zweiter Zellen der zweiten Basisstation-Verteilungseinheit, wobei die zweiten Zellinformationen angeben, dass die zweiten Zellen nicht mit der ersten geschlossenen Zugangsgruppe assoziiert sind;</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t41"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>determine, based on the second cell information, to not configure the one or more second cells of the second base station distributed unit for the wireless device; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>basierend auf den Informationen der zweiten Zelle bestimmen, die eine oder die mehreren zweiten Zellen der zweiten Basisstation-Verteilungseinheit nicht für die drahtlose Vorrichtung zu konfigurieren; und</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t42"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>the first base station distributed unit, wherein the first base station distributed unit comprises: one or more processors and memory storing instructions that, when executed by the one or more processors, cause the first base station distributed unit to:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die erste Basisstation-Verteilungseinheit, wobei die erste Basisstation-Verteilungseinheit umfasst: einen oder mehrere Prozessoren und Speicher, die Anweisungen speichern, die, wenn sie von dem einen oder den mehreren Prozessoren ausgeführt werden, die erste Basisstation-Verteilungseinheit zu Folgendem veranlassen:</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t43"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>send the indication to the base station central unit; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Angabe an die Basisstation-Zentraleinheit senden; und</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t44"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>receive the context configuration message from the base station central unit.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die Kontextkonfigurationsnachricht von der Basisstation-Zentraleinheit empfangen.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t1"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t2"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. An atomizing assembly (1), comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Zerstäubungsanordnung (1), umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t3"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>a heating assembly (11);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Heizbaugruppe (11);</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t4"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>a liquid conducting member (15);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Flüssigkeitsleitelement (15);</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t5"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>a cover (12); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Abdeckung (12); und</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t6"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>a seat (13),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Sitz (13),</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t7"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>wherein the heating assembly (11) comprises a heating member (111),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Heizbaugruppe (11) ein Heizelement (111) umfasst,</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t8"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>wherein one of the cover (12) and the seat (13) is provided with an accommodating chamber (123) open to the other one of the cover (12) and the seat (13),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei entweder die Abdeckung (12) oder der Sitz (13) mit einer Aufnahmekammer (123) bereitgestellt ist, die zu dem jeweils anderen von Abdeckung (12) oder Sitz (13) hin offen ist,</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t9"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>wherein the heating assembly (11) and the liquid conducting member (15) are disposed in the accommodating chamber (123),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Heizbaugruppe (11) und das Flüssigkeitsleitelement (15) in der Aufnahmekammer (123) angeordnet sind,</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t10"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>wherein the liquid conducting member (15) is in contact with the heating member (111), the seat (13) is connected with the cover (12), and the heating assembly (11) is clamped between the cover (12) and the seat (13),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Flüssigkeitsleitelement (15) mit dem Heizelement (111) in Kontakt steht, der Sitz (13) mit der Abdeckung (12) verbunden ist und die Heizbaugruppe (11) zwischen der Abdeckung (12) und dem Sitz (13) eingeklemmt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t11"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>wherein the heating member (111) comprises a heating portion (1111) configured for heating and atomizing a liquid and an electrical connecting portion (1112) connected with the heating portion (1111) and configured for electrical connection with an electrode,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Heizelement (111) einen Heizabschnitt (1111), der zum Erhitzen und Zerstäuben einer Flüssigkeit konfiguriert ist, und einen elektrischen Verbindungsabschnitt (1112) umfasst, der mit dem Heizabschnitt (1111) verbunden und zur elektrischen Verbindung mit einer Elektrode konfiguriert ist,</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t12"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>wherein the heating member (111) is transversely arranged, and the electrical connecting portion (1112) extends outwards,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Heizelement (111) quer angeordnet ist und sich der elektrische Verbindungsabschnitt (1112) nach außen erstreckt,</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t13"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>wherein the cover (12) is provided with an electrode connecting hole (124) open longitudinally and configured for an insertion of the electrode (14),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Abdeckung (12) mit einem Elektrodenanschlussloch (124) bereitgestellt ist, das in Längsrichtung offen und für ein Einführen der Elektrode (14) konfiguriert ist,</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t14"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>wherein the electrical connecting portion (1112) extends transversely or obliquely into an inlet of the electrode connecting hole (124), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich der elektrische Verbindungsabschnitt (1112) quer oder schräg in einen Einlass des Elektrodenanschlusslochs (124) hinein erstreckt, und</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t15"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>wherein the atomizing assembly (1) further comprises the electrode (14),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Zerstäubungsanordnung (1) ferner die Elektrode (14) umfasst,</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t16"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>wherein the electrode (14) is inserted into the electrode connecting hole (124), and bends the electrical connecting portion (1112) into the electrode connecting hole (124) along an opening edge of the electrode connecting hole (124), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Elektrode (14) in das Elektrodenanschlussloch (124) eingeführt ist und den elektrischen Verbindungsabschnitt (1112) in das Elektrodenanschlussloch (124) entlang einer Öffnungskante des Elektrodenanschlusslochs (124) biegt, und</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t17"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>wherein the electrical connecting portion (1112) is electrically connected with a side surface of the electrode (14).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der elektrische Verbindungsabschnitt (1112) mit einer Seitenfläche der Elektrode (14) elektrisch verbunden ist.</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t18"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>2. The atomizing assembly (1) of claim 1, wherein a bottom portion of the cover (12) is provided with the accommodating chamber (123) open longitudinally,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Zerstäubungsanordnung (1) nach Anspruch 1, wobei ein unterer Abschnitts der Abdeckung (12) mit der in Längsrichtung offenen Aufnahmekammer (123) bereitgestellt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t19"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>wherein the accommodating chamber (123) and the electrode connecting hole (124) are located on a same side of the cover (12),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich die Aufnahmekammer (123) und das Elektrodenanschlussloch (124) auf derselben Seite der Abdeckung (12) befinden,</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t20"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>wherein the accommodating chamber (123) comprises a first portion (1231) configured for accommodating the liquid conducting member (15) and a second portion (1232) configured for accommodating the heating assembly (11),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Aufnahmekammer (123) einen ersten Abschnitt (1231) umfasst, der zum Aufnehmen des Flüssigkeitsleitelements (15) konfiguriert ist, und einen zweiten Abschnitt (1232), der zum Aufnehmen der Heizbaugruppe (11) konfiguriert ist,</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t21"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>wherein the first portion (1231) and the second portion (1232) are connected with each other and arranged from deep to outside in turn,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der erste Abschnitt (1231) und der zweite Abschnitt (1232) miteinander verbunden sind und nacheinander von unten und außen angeordnet sind,</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t22"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>wherein a position, in a second transverse direction (b), of a side wall of the second portion (1232) of the accommodating chamber (123) is provided with an electrical connecting through port (125) for the electrical connecting portion (1112) to protrude from inside to outside, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei eine Position in einer zweiten Querrichtung (b) einer Seitenwand des zweiten Abschnitts (1232) der Aufnahmekammer (123) mit einer elektrischen Verbindungsdurchgangsöffnung (125) bereitgestellt ist, damit der elektrische Verbindungsabschnitt (1112) von innen nach außen vorstehen kann, und</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t23"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>wherein the electrode connecting hole (124) is disposed outside the electrical connecting through port (125), so that the electrical connecting portion (1112) extends into an opening position of the electrode connecting hole (124) through the electrical connecting through port (125).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Elektrodenanschlussloch (124) außerhalb der elektrischen Verbindungsdurchgangsöffnung (125) angeordnet ist, sodass sich der elektrische Verbindungsabschnitt (1112) in eine Öffnungsposition des Elektrodenanschlusslochs (124) durch die elektrische Verbindungsdurchgangsöffnung (125) erstreckt.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t24"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>3. The atomizing assembly (1) of claim 1, wherein the seat (13) is provided with an electrode through hole (131) corresponding to the electrode connecting hole (124) and extending longitudinally, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Zerstäubungsanordnung (1) nach Anspruch 1, wobei der Sitz (13) mit einem Elektrodendurchgangsloch (131) bereitgestellt ist, das dem Elektrodenanschlussloch (124) entspricht und sich in Längsrichtung erstreckt, und</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t25"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>wherein the electrode (14) passes through the electrode through hole (131) and is inserted into the electrode connecting hole (124).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Elektrode (14) durch das Elektrodendurchgangsloch (131) verläuft und in das Elektrodenanschlussloch (124) eingeführt ist.</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t26"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>4. The atomizing assembly (1) of claim 3, wherein the electrode (14) comprises a head (141) configured for electrically connecting with an external circuit and a rob (142) configured for inserting into the electrode connecting hole (124),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Zerstäubungsanordnung (1) nach Anspruch 3, wobei die Elektrode (14) einen Kopf (141) umfasst, der zum elektrischen Verbinden mit einem externen Stromkreis konfiguriert ist, und eine Stange (142), die zum Einführen in das Elektrodenanschlussloch (124) konfiguriert ist,</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t27"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>wherein a radial dimension of the head (141) is larger than a radial dimension of the rob (142),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei eine radiale Abmessung des Kopfes (141) größer ist als eine radiale Abmessung der Stange (142),</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t28"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>wherein the rob (142) passes through the electrode through hole (131) and is inserted into the electrode connecting hole (124), and bends the electrical connecting portion (1112) into the electrode connecting hole (124) along the opening edge of the electrode connecting hole (124),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Stange (142) durch das Elektrodendurchgangsloch (131) verläuft und in das Elektrodenanschlussloch (124) eingeführt ist und den elektrischen Verbindungsabschnitt (1112) in das Elektrodenanschlussloch (124) entlang der Öffnungskante des Elektrodenanschlusslochs (124) biegt,</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t29"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>wherein the bent portion of the electrical connecting portion (1112) is located between a side wall of the electrode connecting hole (124) and a side surface of the rob (142), and the electrical connecting portion (1112) is electrically connected with the side surface of the rob (142), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der gebogene Abschnitt des elektrischen Verbindungsabschnitts (1112) zwischen einer Seitenwand des Elektrodenanschlusslochs (124) und einer Seitenfläche der Stange (142) angeordnet ist, und der elektrische Verbindungsabschnitt (1112) elektrisch mit der Seitenfläche der Stange (142) verbunden ist, und</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t30"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>wherein the head (141) is exposed outside the seat (13).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der Kopf (141) außerhalb des Sitzes (13) freiliegt.</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t31"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>5. The atomizing assembly (1) of claim 1, wherein the heating assembly (11) comprises a reinforcing frame (112) that is combined with the heating portion (1111) to support the heating portion (1111),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Zerstäubungsanordnung (1) nach Anspruch 1, wobei die Heizbaugruppe (11) einen Verstärkungsrahmen (112) umfasst, der mit der Heizbaugruppe (1111) verbunden ist, um den Heizabschnitt (1111) zu stützen,</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t32"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>wherein the electrical connecting portion (1112) extends out of the reinforcing frame (112),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich der elektrische Verbindungsabschnitt (1112) aus dem Verstärkungsrahmen (112) heraus erstreckt,</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t33"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>wherein the reinforcing frame (112) comprises a transverse wall (1121) and a longitudinal wall (1122) surrounding the transverse wall (1121),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der Verstärkungsrahmen (112) eine Querwand (1121) umfasst und eine Längswand (1122), die die Querwand (1121) umgibt,</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t34"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>wherein the heating member (111) is combined with a top of the transverse wall (1121), and the longitudinal wall (1122) is disposed at a bottom of the transverse wall (1121), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Heizelement (111) mit einer Oberseite der Querwand (1121) verbunden ist, und die Längswand (1122) an einer Unterseite der Querwand (1121) angeordnet ist, und</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t35"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>wherein the transverse wall (1121) is provided with a vent hole (1123) extending longitudinally, and the longitudinal wall (1122) is provided with a first air vent (1124) extending transversely, so that a gas generated by the heating member (111) flows sequentially through the vent hole (1123) and the first air vent (1124) from inside to outside.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Querwand (1121) mit einer Entlüftungsloch (1123) bereitgestellt ist, die sich in Längsrichtung erstreckt, und die Längswand (1122) mit einer ersten Entlüftung (1124) bereitgestellt ist, die sich in Querrichtung erstreckt, so dass ein von dem Heizelement (111) erzeugtes Gas sequenziell durch die Entlüftungsloch (1123) und die erste Entlüftung (1124) von innen nach außen strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t36"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>6. The atomizing assembly (1) of claim 5, wherein a transverse dimension of the liquid conducting member (15) is comparable to a transverse dimension of the accommodating chamber (123), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Zerstäubungsanordnung (1) nach Anspruch 5, wobei eine Querabmessung des Flüssigkeitsleitelements (15) mit einer Querabmessung der Aufnahmekammer (123) vergleichbar ist, und</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t37"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>wherein the reinforcing frame (112) supports a bottom of the heating portion (1111), and the liquid conducting member (15) is disposed at a top of the heating portion (1111).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der Verstärkungsrahmen (112) eine Unterseite des Heizabschnitts (1111) stützt und das Flüssigkeitsleitelement (15) an einer Oberseite des Heizabschnitts (1111) angeordnet ist.</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t38"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>7. The atomizing assembly (1) of claim 5, wherein a bottom of the cover (12) is provided with the accommodating chamber (123) open longitudinally,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Zerstäubungsanordnung (1) nach Anspruch 5, wobei eine Unterseite der Abdeckung (12) mit einer in Längsrichtung offenen Aufnahmekammer (123) bereitgestellt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t39"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>wherein the accommodating chamber (123) and the electrode connecting hole (124) are located on a same side of the cover (12),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich die Aufnahmekammer (123) und das Elektrodenanschlussloch (124) auf derselben Seite der Abdeckung (12) befinden,</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t40"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>wherein the accommodating chamber (123) comprises a first portion (1231) configured for accommodating the liquid conducting member (15) and a second portion (1232) configured for accommodating the heating assembly (11),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Aufnahmekammer (123) einen ersten Abschnitt (1231) umfasst, der zum Aufnehmen des Flüssigkeitsleitelements (15) konfiguriert ist, und einen zweiten Abschnitt (1232), der zum Aufnehmen der Heizbaugruppe (11) konfiguriert ist,</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t41"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>wherein the first portion (1231) and the second portion (1232) are connected with each other and arranged from deep to outside in turn,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei der erste Abschnitt (1231) und der zweite Abschnitt (1232) miteinander verbunden sind und nacheinander von unten und außen angeordnet sind,</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t42"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>wherein a position, in a first transverse direction (a), of a side wall of the second portion (1232) of the accommodating chamber (123) is provided with a second air vent (127) extending transversely, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei eine Position in einer ersten Querrichtung (a) einer Seitenwand des zweiten Abschnitts (1232) der Aufnahmekammer (123) mit einer zweiten, sich quer erstreckenden Entlüftung (127) bereitgestellt ist, und</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t43"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>wherein the second air vent (127) corresponds to the first air vent (1124), so that a gas generated by the heating member (111) flows through the first air vent (1124) and the second air vent (127) in turn from inside to outside.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die zweite Entlüftung (127) der ersten Entlüftung (1124) entspricht, sodass ein von dem Heizelement (111) erzeugtes Gas abwechselnd durch die erste Entlüftung (1124) und die zweite Entlüftung (127) von innen nach außen strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t44"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>8. The atomizing assembly (1) of claim 7, wherein an outer side of the cover (12) is provided with a third air vent (128) extending longitudinally, so that the gas generated by the heating member (111) flows through the first air vent (1124), the second air vent (127) and the third air vent (128) in turn.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Zerstäubungsanordnung (1) nach Anspruch 7, wobei eine Außenseite der Abdeckung (12) mit einer dritten, sich in Längsrichtung erstreckenden Entlüftung (128) bereitgestellt ist, sodass das von dem Heizelement (111) erzeugte Gas nacheinander durch die erste Entlüftung (1124), die zweite Entlüftung (127) und die dritte Entlüftung (128) strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t45"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t45"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t45">
+      <tuv xml:lang="en-US"><seg>9. The atomizing assembly (1) of claim 8, wherein the seat (13) is provided with a fourth air vent (132), and the fourth air vent (132) corresponds to the second air vent (127) and is connected with the third air vent (128), so that the gas generated by the heating member (111) flows through the first air vent (1124), the second air vent (127), the fourth air vent (132) and the third air vent (128) in turn.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Zerstäubungsanordnung (1) nach Anspruch 8, wobei der Sitz (13) mit einer vierten Entlüftung (132) bereitgestellt ist und die vierte Entlüftung (132) der zweiten Entlüftung (127) entspricht und mit der dritten Entlüftung (128) verbunden ist, sodass das von dem Heizelement (111) erzeugte Gas nacheinander durch die erste Entlüftung (1124), die zweite Entlüftung (127), die vierte Entlüftung (132) und die dritte Entlüftung (128) strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t46"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t46"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t46">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t47"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t47"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t47">
+      <tuv xml:lang="en-US"><seg>The atomizing assembly (1) of claim 8, wherein a top of the cover (12) is provided with an air passage (129) communicating to the third air vent (128), so that the gas generated by the heating member (111) flows through the first air vent (1124), the second air vent (127), the third air vent (128) and the air passage (129) in turn.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Zerstäubungsanordnung (1) nach Anspruch 8, wobei eine Oberseite der Abdeckung (12) mit einem Luftdurchgang (129), der mit der dritten Entlüftung (128) kommuniziert, bereitgestellt ist, sodass das von dem Heizelement (111) erzeugte Gas nacheinander durch die erste Entlüftung (1124), die zweite Entlüftung (127), die dritte Entlüftung (128) und den Luftdurchgang (129) strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t48"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t48"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t48">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t49"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t49"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t49">
+      <tuv xml:lang="en-US"><seg>The atomizing assembly (1) of claim 9, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Zerstäubungsanordnung (1) nach Anspruch 9, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t50"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t50"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t50">
+      <tuv xml:lang="en-US"><seg>a first sealing member (3) covering a top of the cover (12) and provided with a fifth air vent (31),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein erstes Dichtungselement (3), das eine Oberseite der Abdeckung (12) abdeckt und mit einer fünften Entlüftung (31) bereitgestellt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t51"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t51"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t51">
+      <tuv xml:lang="en-US"><seg>wherein the fifth air vent (31) corresponds to the air passage (129) and is connected with the third air vent (128), so that the gas generated by the heating member (111) flows through the first air vent (1124), the second air vent (127), the third air vent (128) and the fifth air vent (31) in turn.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die fünfte Entlüftung (31) dem Luftdurchgang (129) entspricht und mit der dritten Entlüftung (128) verbunden ist, sodass das von dem Heizelement (111) erzeugte Gas nacheinander durch die erste Entlüftung (1124), die zweite Entlüftung (127), die dritte Entlüftung (128) und die fünfte Entlüftung (31) strömt.</seg></tuv>
+    </tu>
+    <tu tuid="t52"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t52"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t52">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t53"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t53"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t53">
+      <tuv xml:lang="en-US"><seg>An atomizing device, comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Zerstäubungsvorrichtung, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t54"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t54"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t54">
+      <tuv xml:lang="en-US"><seg>a housing (2); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Gehäuse (2); und</seg></tuv>
+    </tu>
+    <tu tuid="t55"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t55"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t55">
+      <tuv xml:lang="en-US"><seg>the atomizing assembly (1) of any one of claims 1 to 12 disposed in the housing (2),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die in dem Gehäuse (2) angeordnete Zerstäubungsanordnung (1) nach einem der Ansprüche 1 bis 12,</seg></tuv>
+    </tu>
+    <tu tuid="t56"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t56"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t56">
+      <tuv xml:lang="en-US"><seg>wherein the housing (2) is provided with a liquid conveying structure and an air outlet structure,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Gehäuse (2) mit einer Flüssigkeitsbeförderungsstruktur und einer Luftauslassstruktur bereitgestellt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t57"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t57"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t57">
+      <tuv xml:lang="en-US"><seg>wherein the liquid conveying structure is communicated to the liquid conducting member (15), so that the liquid flows to the liquid conducting member (15) through the liquid conveying structure, and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Flüssigkeitsbeförderungsstruktur mit dem Flüssigkeitsleitelement (15) in Verbindung steht, sodass die Flüssigkeit durch die Flüssigkeitsbeförderungsstruktur zu dem Flüssigkeitsleitelement (15) fließt, und</seg></tuv>
+    </tu>
+    <tu tuid="t58"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t58"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t58">
+      <tuv xml:lang="en-US"><seg>wherein the liquid conducting member (15) conducts the liquid to the heating member (111) for heating and atomizing to generate a gas, and the gas flows out through the air outlet structure.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei das Flüssigkeitsleitelement (15) die Flüssigkeit zu dem Heizelement (111) zum Erhitzen und Zerstäuben leitet, um ein Gas zu erzeugen, und das Gas durch die Luftauslassstruktur ausströmt.</seg></tuv>
+    </tu>
+    <tu tuid="t59"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t59"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t59">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t60"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t60"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t60">
+      <tuv xml:lang="en-US"><seg>A manufacturing method of the atomizing assembly (1) of any one of claims 1 to 11, comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Herstellungsverfahren der Zerstäubungsanordnung (1) nach einem der Ansprüche 1 bis 11, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t61"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t61"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t61">
+      <tuv xml:lang="en-US"><seg>S1, combining the cover (12) with the seat (13), and clamping the liquid conducting member (15) and the heating assembly (11) between the cover (12) and the seat (13), to make the heating member (111) and the liquid conducting member (15) in close contact;</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>S1, Verbinden der Abdeckung (12) mit dem Sitz (13) und Einklemmen des Flüssigkeitsleitelements (15) und der Heizbaugruppe (11) zwischen der Abdeckung (12) und dem Sitz (13), um das Heizelement (111) und das Flüssigkeitsleitelement (15) in engen Kontakt zu bringen;</seg></tuv>
+    </tu>
+    <tu tuid="t62"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t62"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t62">
+      <tuv xml:lang="en-US"><seg>S2, inserting the electrode (14) into the electrode connecting hole (124), and the electrode (14) bending the electrical connecting portion (1112) into the electrode connecting hole (124) and electrically connecting with the electrical connecting portion (1112).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>S2, Einführen der Elektrode (14) in das Elektrodenanschlussloch (124) und Biegen des elektrischen Verbindungsabschnitts (1112) in das Elektrodenanschlussloch (124) durch die Elektrode (14) und Verbinden mit dem elektrischen Verbindungsabschnitt (1112).</seg></tuv>
+    </tu>
+    <tu tuid="t63"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t63"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t63">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t64"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t64"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t64">
+      <tuv xml:lang="en-US"><seg>A manufacturing method of the atomizing device of claim 12, comprising the manufacturing method of the atomizing assembly of claim 13, and further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Herstellungsverfahren der Zerstäubungsvorrichtung nach Anspruch 12, umfassend das Herstellungsverfahren der Zerstäubungsanordnung nach Anspruch 13, und ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t65"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t65"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t65">
+      <tuv xml:lang="en-US"><seg>S3, connecting the cover (12) of the atomizing assembly (1) with a first sealing member (3), and connecting the seat (13) with a second sealing member (4);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>S3, Verbinden der Abdeckung (12) der Zerstäubungsanordnung (1) mit einem ersten Dichtungselement (3) und Verbinden des Sitzes (13) mit einem zweiten Dichtungselement (4);</seg></tuv>
+    </tu>
+    <tu tuid="t66"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t66"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t66">
+      <tuv xml:lang="en-US"><seg>S4, placing the atomizing assembly (1) into the housing (2), and the first sealing member (3) and the second sealing member (4) forming a seal between an outer side of the atomizing assembly (1) and an inner wall of the housing (2).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>S4, Platzieren der Zerstäubungsanordnung (1) in dem Gehäuse (2), wobei das erste Dichtungselement (3) und das zweite Dichtungselement (4) eine Dichtung zwischen einer Außenseite der Zerstäubungsanordnung (1) und einer Innenwand des Gehäuses (2) bilden.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t1"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>CLAIMS</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>PATENTANSPRÜCHE</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t2"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t3"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>receiving, by an access and mobility management function, AMF, from a base station, a location report indicating that an altitude of a wireless device is changed based on a threshold; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen eines Standortberichts, der angibt, dass sich die Höhe eines kabellosen Endgeräts auf der Grundlage eines Schwellenwerts geändert hat, durch eine Zugangs- und Mobilitätsverwaltungsfunktion (AMF) von einer Basisstation; und</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t4"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>sending, by the AMF to a network exposure function, NEF, a message notifying an altitude change of the wireless device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden einer Nachricht durch die AMF an eine Netzwerk-Exposure-Funktion (NEF), in der eine Höhenänderung des kabellosen Endgeräts mitgeteilt wird.</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t5"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>2. The method of claim 1, wherein the message notifying the altitude change is sent via the NEF to an unmanned aerial system, UAS, application server, AS.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Verfahren nach Anspruch 1, wobei die Nachricht, die die Höhenänderung mitteilt, über die NEF an ein unbemanntes Flugsystem (UAS) und einen Anwendungsserver (AS) gesendet wird.</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t6"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>3. The method of claim 2, further comprising receiving, by the AMF from the UAS AS via the NEF, a request message indicating:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Verfahren nach Anspruch 2, ferner umfassend Empfangen einer Anforderungsnachricht durch die AMF von dem UAS AS über die NEF, die Folgendes angibt:</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t7"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a request for a notification of the altitude change of the wireless device; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Anforderung für eine Benachrichtigung über die Höhenänderung des kabellosen Endgeräts; und</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t8"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>the threshold for determining the altitude change.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>den Schwellenwert zum Bestimmen der Höhenänderung.</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t9"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>4. The method of claim 3, wherein the request message comprises an event exposure subscribe request message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Verfahren nach Anspruch 3, wobei die Anforderungsnachricht eine Ereignis-Exposure-Abonnement-Anforderungsnachricht umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t10"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>5. The method of one of claims 2 to 4, further comprising sending, by the AMF to the base station, a location reporting request for the notification of the altitude change of the wireless device based on the threshold.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Verfahren nach einem der Ansprüche 2 bis 4, ferner umfassend Senden einer Standortmeldungsanforderung durch die AMF an die Basisstation zur Benachrichtigung über die Höhenänderung des kabellosen Endgeräts auf der Grundlage des Schwellenwerts.</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t11"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>6. The method of one of claims 1 to 5, wherein the threshold is associated with an upper height level for the altitude change; and wherein the message notifying the altitude change indicates that the wireless device is above the upper height level.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Verfahren nach einem der Ansprüche 1 bis 5, wobei der Schwellenwert mit einem oberen Höhenniveau für die Höhenänderung assoziiert ist; und wobei die Nachricht, die die Höhenänderung mitteilt, anzeigt, dass sich das kabellose Endgerät oberhalb des oberen Höhenniveaus befindet.</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t12"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>7. A method comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Verfahren, umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t13"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>receiving, by a base station from an access and mobility management function, AMF, a request for a notification of an altitude change of a wireless device based on a threshold; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer Anforderung für eine Benachrichtigung über eine Höhenänderung eines kabellosen Endgeräts auf der Grundlage eines Schwellenwerts durch eine Basisstation von einer Zugangs- und Mobilitätsverwaltungsfunktion (AMF); und</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t14"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>sending, by the base station to the AMF and based on the request, a location report indicating that an altitude of the wireless device is changed.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden eines Standortberichts, der angibt, dass sich die Höhe des kabellosen Endgeräts geändert hat, durch die Basisstation an die AMF und auf der Grundlage der Anforderung.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t15"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>8. The method of claim 7, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Verfahren nach Anspruch 7, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t16"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>sending, by the base station to the wireless device, a radio resource control, RRC, message indicating a measurement report for a change in height of the wireless device; and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Senden einer Funkressourcensteuerungsnachricht (RRC) von der Basisstation an das kabellose Endgerät, die einen Messbericht für eine Höhenänderung des kabellosen Endgeräts angibt; und</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t17"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>receiving, by the base station from the wireless device, an RRC response message notifying the change in height of the wireless device.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Empfangen einer RRC-Antwortnachricht durch die Basisstation von dem kabellosen Endgerät, die die Änderung der Höhe des kabellosen Endgeräts mitteilt.</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t18"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>9. The method of one of claims 7 to 8, wherein the threshold comprises at least one of:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Verfahren nach einem der Ansprüche 7 bis 8, wobei der Schwellenwert mindestens eines der Folgenden umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t19"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>an upper height level; or</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine oberes Höhenniveau; oder</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t20"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>a lower height level.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein unteres Höhenniveau.</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t21"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t22"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>The method of claim 9, wherein the location report indicates that the wireless device is above the upper height level.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9, wobei der Standortbericht angibt, dass sich das kabellose Endgerät oberhalb des oberen Höhenniveaus befindet.</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t23"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t24"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>The method of claim 9, wherein the location report indicates that the wireless device is below the lower height level.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach Anspruch 9, wobei der Standortbericht angibt, dass sich das kabellose Endgerät unterhalb des unteren Höhenniveaus befindet.</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t25"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t26"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>The method of one of claims 8 to 11, wherein the RRC message comprises an RRC connection reconfiguration message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 8 bis 11, wobei die RRC-Nachricht eine RRC-Verbindungs-Neukonfigurationsnachricht umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t27"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t28"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>The method of one of claims 8 to 11, wherein the RRC message comprises an RRC resume message.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Verfahren nach einem der Ansprüche 8 bis 11, wobei die RRC-Nachricht eine RRC-Wiederaufnahme-Nachricht umfasst.</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t29"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t30"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>An apparatus, comprising one or more processors and memory storing instructions that, when executed by the one or more processors, cause the apparatus to perform the method of any of claims 1 to 13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung, umfassend einen oder mehrere Prozessoren und einen Speicher, der Befehle speichert, die, wenn sie von dem einen oder mehreren Prozessoren ausgeführt werden, die Vorrichtung dazu veranlassen, das Verfahren nach einem der Ansprüche 1 bis 13 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t31"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>15.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>15.</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t32"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>A non-transitory computer-readable medium comprising instructions that, when executed by one or more processors of an apparatus, cause the apparatus to perform the method of any of claims 1 to 13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Nichttransitorisches computerlesbares Medium, umfassend Anweisungen, die, wenn sie durch einen oder mehrere Prozessoren einer Vorrichtung ausgeführt werden, die Vorrichtung veranlassen, das Verfahren nach einem der Ansprüche 1 bis 13 durchzuführen.</seg></tuv>
+    </tu>
+    <tu tuid="t1"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t1"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t1">
+      <tuv xml:lang="en-US"><seg>Claims</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Patentansprüche</seg></tuv>
+    </tu>
+    <tu tuid="t2"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t2"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t2">
+      <tuv xml:lang="en-US"><seg>1. An apparatus (100; 900; 1000) comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>1. Vorrichtung (100; 900; 1000), umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t3"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t3"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t3">
+      <tuv xml:lang="en-US"><seg>a body section (160; 1060), the body section (160; 1060) configured for positioning adjacent to a first side (14) of a supporting structure (10), the body section (160; 1060) having a bottom portion (268); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Körperteil (160; 1060), wobei der Körperteil (160; 1060) zum Positionieren benachbart zu einer ersten Seite (14) einer Stützstruktur (10) konfiguriert ist, wobei der Körperteil (160; 1060) einen unteren Abschnitt (268) aufweist; und</seg></tuv>
+    </tu>
+    <tu tuid="t4"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t4"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t4">
+      <tuv xml:lang="en-US"><seg>a mounting section (102; 902; 1002), the mounting section (102; 902; 1002) extending from the bottom portion (268) of the body section (160; 1060), the mounting section (102; 902; 1002) configured for insertion into a mounting aperture (20) defined in the supporting structure first side (14), the mounting section (102; 902; 1002) comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Befestigungsteil (102; 902; 1002), wobei der Befestigungsteil (102; 902; 1002) sich von dem unteren Abschnitt (268) des Körperteils (160; 1060) erstreckt, der Befestigungsteil (102; 902; 1002) zur Einführung in eine in der ersten Seite (14) der Stützstruktur definierte Befestigungsöffnung (20) konfiguriert ist, wobei der Befestigungsteil (102; 902; 1002) Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t5"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t5"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t5">
+      <tuv xml:lang="en-US"><seg>a mounting stud (104; 1004);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Befestigungsbolzen (104; 1004);</seg></tuv>
+    </tu>
+    <tu tuid="t6"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t6"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t6">
+      <tuv xml:lang="en-US"><seg>a first branch (318; 1012) extending from the mounting stud (104; 1004);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine erste Abzweigung (318; 1012), die sich von dem Befestigungsbolzen (104; 1004) erstreckt;</seg></tuv>
+    </tu>
+    <tu tuid="t7"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t7"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t7">
+      <tuv xml:lang="en-US"><seg>a second branch (320; 1014) extending from the mounting stud (104; 1004), the second branch (320; 1014) spaced apart from the first branch (318; 1004), the first branch (318; 1004) positioned between the body section (160; 1060) and the second branch (320; 1014), the first branch (318; 1012) and the second branch (320; 1014) configured for deflection in a direction of the body section (160; 1060) upon insertion of the mounting section (102; 902; 1002) into the mounting aperture (20), the second branch (320; 1014) further comprising an upper side (226; 1026) facing the body section (160; 1060),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine zweite Abzweigung (320; 1014), die sich von dem Befestigungsbolzen (104; 1004) erstreckt, wobei die zweite Abzweigung (320; 1014) von der ersten Abzweigung (318; 1004) beabstandet ist, die erste Abzweigung (318; 1004) zwischen dem Körperteil (160; 1060) und der zweiten Abzweigung (320; 1014) positioniert ist und die erste Abzweigung (318; 1012) und die zweite Abzweigung (320; 1014) zur Ablenkung bei Einführung des Befestigungsteils (102; 902; 1002) in die Befestigungsöffnung (20) in eine Richtung des Körperteils (160; 1060) konfiguriert sind, die zweite Abzweigung (320; 1014) ferner umfassend eine dem Körperteil (160; 1060) zugewandte obere Seite (226; 1026),</seg></tuv>
+    </tu>
+    <tu tuid="t8"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t8"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t8">
+      <tuv xml:lang="en-US"><seg>the first branch (318; 1012) further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>die erste Abzweigung (318; 1012) ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t9"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t9"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t9">
+      <tuv xml:lang="en-US"><seg>a lower side (328; 1028), the lower side (328; 1028) facing the upper side (326; 1026) of the second branch (320; 1014); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine untere Seite (328; 1028), wobei die untere Seite (328; 1028) der oberen Seite (326; 1026) der zweiten Abzweigung (320; 1014) zugewandt ist; und</seg></tuv>
+    </tu>
+    <tu tuid="t10"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t10"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t10">
+      <tuv xml:lang="en-US"><seg>a flange member (350; 950; 1050) extending from the lower side (328; 1028), the flange member (350; 950; 1050) configured for contacting the upper side (328; 1026) of the second branch (320; 1014) during insertion of the mounting section (102; 902; 1002) into the mounting aperture (20) to limit a deflection of the second branch (320; 1014) in the direction of the body section (160; 1060),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Flanschelement (350; 950; 1050), das sich von der unteren Seite (328; 1028) erstreckt, wobei das Flanschelement (350; 950; 1050) zum In-Kontakt-Kommen während einer Einführung des Befestigungsteils (102; 902; 1002) in die Befestigungsöffnung (20) mit der oberen Seite (328; 1026) der zweiten Abzweigung (320; 1014) konfiguriert ist, um eine Ablenkung der zweiten Abzweigung (320; 1014) in die Richtung des Körperteils (160; 1060) zu begrenzen,</seg></tuv>
+    </tu>
+    <tu tuid="t11"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t11"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t11">
+      <tuv xml:lang="en-US"><seg>characterized in that the first branch (318) further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>dadurch gekennzeichnet, dass die erste Abzweigung (318) ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t12"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t12"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t12">
+      <tuv xml:lang="en-US"><seg>a root (230) connecting to the mounting stud (104);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Basis (230), verbunden mit dem Befestigungsbolzen (104);</seg></tuv>
+    </tu>
+    <tu tuid="t13"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t13"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t13">
+      <tuv xml:lang="en-US"><seg>an end (232) spaced apart from the root (230); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Ende (232), beabstandet von der Basis (230); und</seg></tuv>
+    </tu>
+    <tu tuid="t14"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t14"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t14">
+      <tuv xml:lang="en-US"><seg>a fin portion (234) defined between the root (320) and the end (232), the fin portion (234) spaced apart from the root (230) and the end (232), the flange member (350) located on the fin portion (234), wherein the flange member (350) is spaced apart from the root (230) and the end (232).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Rippenabschnitt (234), definiert zwischen der Basis (320) und dem Ende (232), wobei der Rippenabschnitt (234) von der Basis (230) und dem Ende (232) beabstandet ist, wobei sich das Flanschelement (350) auf dem Rippenabschnitt (234) befindet, wobei das Flanschelement (350) von der Basis (230) und dem Ende (232) beabstandet ist.</seg></tuv>
+    </tu>
+    <tu tuid="t15"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t15"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t15">
+      <tuv xml:lang="en-US"><seg>2. The apparatus of claim 1, wherein the flange member (350) extends annularly to a longitudinal axis of the mounting stud (104).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>2. Vorrichtung nach Anspruch 1, wobei sich das Flanschelement (350) ringförmig zu einer Längsachse des Befestigungsbolzens (104) erstreckt.</seg></tuv>
+    </tu>
+    <tu tuid="t16"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t16"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t16">
+      <tuv xml:lang="en-US"><seg>3. The apparatus of claim 1 or 2, wherein the flange member further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>3. Vorrichtung nach Anspruch 1 oder 2, wobei das Flanschelement ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t17"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t17"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t17">
+      <tuv xml:lang="en-US"><seg>a single flange member segment (950) that extends along the lower side of the first branch.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein einzelnes Flanschelementsegment (950), das sich entlang der unteren Seite der ersten Abzweigung erstreckt.</seg></tuv>
+    </tu>
+    <tu tuid="t18"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t18"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t18">
+      <tuv xml:lang="en-US"><seg>4. The apparatus of any one of the preceding claims, wherein the flange member (350) further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>4. Vorrichtung nach einem der vorhergehenden Ansprüche, wobei das Flanschelement (350) ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t19"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t19"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t19">
+      <tuv xml:lang="en-US"><seg>multiple flange member segments that extend along the lower side (328) of the first branch (318).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>mehrere Flanschelementsegmente, die sich entlang der unteren Seite (328) der ersten Abzweigung (318) erstrecken.</seg></tuv>
+    </tu>
+    <tu tuid="t20"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t20"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t20">
+      <tuv xml:lang="en-US"><seg>5. The apparatus of any one of the preceding claims, wherein the flange member (350) further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>5. Vorrichtung nach einem der vorhergehenden Ansprüche, wobei das Flanschelement (350) ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t21"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t21"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t21">
+      <tuv xml:lang="en-US"><seg>an outer ramp portion (404) extending away from the lower side (328) of the first branch (318);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen äußeren Rampenabschnitt (404), der sich von der unteren Seite (328) der ersten Abzweigung (318) weg erstreckt;</seg></tuv>
+    </tu>
+    <tu tuid="t22"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t22"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t22">
+      <tuv xml:lang="en-US"><seg>an inner ramp portion (406) extending away from the lower side (328) of the first branch (318); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen inneren Rampenabschnitt (406), der sich von der unteren Seite (328) der ersten Abzweigung (318) weg erstreckt; und</seg></tuv>
+    </tu>
+    <tu tuid="t23"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t23"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t23">
+      <tuv xml:lang="en-US"><seg>a flat portion (402) extending between the outer ramp portion (404) and the inner ramp portion (406).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen flachen Abschnitt (402), der sich zwischen dem äußeren Rampenabschnitt (404) und dem inneren Rampenabschnitt (406) erstreckt.</seg></tuv>
+    </tu>
+    <tu tuid="t24"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t24"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t24">
+      <tuv xml:lang="en-US"><seg>6. The apparatus of any one of the preceding claims, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>6. Vorrichtung nach einem der vorhergehenden Ansprüche, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t25"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t25"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t25">
+      <tuv xml:lang="en-US"><seg>a third branch (1016) extending from the mounting stud (1004), the third branch (1016) spaced apart from the second branch (1014), the second branch (1014) positioned between the body section (1060) and the third branch (1016), the third branch (1016) configured to deform in a direction of the body section (1060) upon insertion of the mounting section (1002) into the mounting aperture, the third branch (1016) further comprising a third branch upper side facing the body section (1060),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine dritte Abzweigung (1016), die sich von dem Befestigungsbolzen (1004) erstreckt, wobei die dritte Abzweigung (1016) von der zweiten Abzweigung (1014) beabstandet ist, die zweite Abzweigung (1014) zwischen dem Körperteil (1060) und der dritten Abzweigung (1016) positioniert ist, die dritte Abzweigung (1016) konfiguriert ist, um sich bei Einführung des Befestigungsteils (1002) in die Befestigungsöffnung in Richtung des Körperteils (1060) zu verformen, die dritte Abzweigung (1016) ferner umfassend eine obere Seite der dritten Abzweigung, die dem Körperteil (1060) zugewandt ist,</seg></tuv>
+    </tu>
+    <tu tuid="t26"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t26"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t26">
+      <tuv xml:lang="en-US"><seg>wherein the second branch (1014) further comprises a second flange member extending from a second branch lower side, the second flange member configured for contacting the third branch upper side of the third branch (1016) during insertion of the mounting section (1002) into the mounting aperture to limit the deflection of the third branch (1016) in the direction of the body section (1060).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die zweite Abzweigung (1014) ferner ein zweites Flanschelement umfasst, das sich von einer unteren Seite der zweiten Abzweigung erstreckt, wobei das zweite Flanschelement zum In-Kontakt-Kommen während einer Einführung des Befestigungsteils (1002) in die Befestigungsöffnung mit der oberen Seite der dritten Abzweigung (1016) konfiguriert ist, um die Ablenkung der dritten Abzweigung (1016) in die Richtung des Körperteils (1060) zu begrenzen.</seg></tuv>
+    </tu>
+    <tu tuid="t27"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t27"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t27">
+      <tuv xml:lang="en-US"><seg>7. The apparatus of any one of the preceding claims, wherein the mounting section (102) further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>7. Vorrichtung nach einem der vorhergehenden Ansprüche, wobei der Befestigungsteil (102) ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t28"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t28"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t28">
+      <tuv xml:lang="en-US"><seg>a cap portion (138) extending away from the bottom portion (268) of the body section (160), the cap portion (138) shaped with a profile configured to receive a portion of a branch (140) of the mounting section (102).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Kappenabschnitt (138), der sich von dem unteren Abschnitt (268) des Körperteils (160) weg erstreckt, wobei der Kappenabschnitt (138) mit einem Profil geformt ist, das konfiguriert ist, um einen Abschnitt einer Abzweigung (140) des Befestigungsteils (102) aufzunehmen.</seg></tuv>
+    </tu>
+    <tu tuid="t29"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t29"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t29">
+      <tuv xml:lang="en-US"><seg>8. The apparatus of claim 7, wherein the portion of the branch (140) of the mounting section (102) received into the profile is an uppermost branch.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>8. Vorrichtung nach Anspruch 7, wobei der Abschnitt der Abzweigung (140) des Befestigungsteils (102), der in das Profil aufgenommen wird, eine oberste Abzweigung ist.</seg></tuv>
+    </tu>
+    <tu tuid="t30"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t30"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t30">
+      <tuv xml:lang="en-US"><seg>9. The apparatus of claim 7, wherein the cap portion (138) comprises an axially extending flange (242) shaped to receive a portion of a branch (140) of the mounting section (102).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>9. Vorrichtung nach Anspruch 7, wobei der Kappenabschnitt (138) einen sich axial erstreckenden Flansch (242) umfasst, geformt, um einen Abschnitt einer Abzweigung (140) des Befestigungsteils (102) aufzunehmen.</seg></tuv>
+    </tu>
+    <tu tuid="t31"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t31"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t31">
+      <tuv xml:lang="en-US"><seg>10.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>10.</seg></tuv>
+    </tu>
+    <tu tuid="t32"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t32"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t32">
+      <tuv xml:lang="en-US"><seg>The apparatus of any one of the preceding claims,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung nach einem der vorhergehenden Ansprüche,</seg></tuv>
+    </tu>
+    <tu tuid="t33"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t33"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t33">
+      <tuv xml:lang="en-US"><seg>wherein the second branch (1014) further comprises:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die zweite Abzweigung (1014) ferner Folgendes umfasst:</seg></tuv>
+    </tu>
+    <tu tuid="t34"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t34"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t34">
+      <tuv xml:lang="en-US"><seg>a lower side (228), the lower side (228) facing away from the body section (1060); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine untere Seite (228), wobei die untere Seite (228) von dem Körperteil (1060) abgewandt ist; und</seg></tuv>
+    </tu>
+    <tu tuid="t35"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t35"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t35">
+      <tuv xml:lang="en-US"><seg>a flange member (350) extending from the lower side (228), the flange member (350) configured for contacting an upper side of a third branch (1016) during insertion of the mounting section into the mounting aperture (20) to limit a deflection of the third branch (1016) in the direction of the body section (1060), wherein the first branch (1012) and the second branch (1014) each further comprise:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Flanschelement (350), das sich von der unteren Seite (228) erstreckt, wobei das Flanschelement (350) zum In-Kontakt-Kommen während einer Einführung des Befestigungsteils in die Befestigungsöffnung (20) mit einer oberen Seite einer dritten Abzweigung (1016) konfiguriert ist, um eine Ablenkung der dritten Abzweigung (1016) in die Richtung des Körperteils (1060) zu begrenzen, wobei die erste Abzweigung (1012) und die zweite Abzweigung (1014) jeweils ferner Folgendes umfassen:</seg></tuv>
+    </tu>
+    <tu tuid="t36"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t36"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t36">
+      <tuv xml:lang="en-US"><seg>a root (320) connecting to the mounting stud (104);</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>eine Basis (320), verbunden mit dem Befestigungsbolzen (104);</seg></tuv>
+    </tu>
+    <tu tuid="t37"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t37"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t37">
+      <tuv xml:lang="en-US"><seg>an end (232) spaced apart from the root (320); and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>ein Ende (232), beabstandet von der Basis (320); und</seg></tuv>
+    </tu>
+    <tu tuid="t38"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t38"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t38">
+      <tuv xml:lang="en-US"><seg>a fin portion (234) defined between the root (320) and the end (232), the fin portion (234) spaced apart from the root (320) and the end (232), wherein the flange members (350) of the first branch (1012) and the second branch (1014) are located on their respective fin portions (234), the flange members (350) of the first branch (1012) and the second branch (1014) are spaced apart from their respective roots (320) and ends (232).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Rippenabschnitt (234), definiert zwischen der Basis (320) und dem Ende (232), wobei der Rippenabschnitt (234) von der Basis (320) und dem Ende (232) beabstandet ist, wobei sich die Flanschelemente (350) der ersten Abzweigung (1012) und der zweiten Abzweigung (1014) an ihren jeweiligen Rippenabschnitten befinden (234), wobei die Flanschelemente (350) der ersten Abzweigung (1012) und der zweiten Abzweigung (1014) von ihren jeweiligen Basen (320) und Enden (232) beabstandet sind.</seg></tuv>
+    </tu>
+    <tu tuid="t39"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t39"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t39">
+      <tuv xml:lang="en-US"><seg>11.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>11.</seg></tuv>
+    </tu>
+    <tu tuid="t40"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t40"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t40">
+      <tuv xml:lang="en-US"><seg>The apparatus of claim 10,</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung nach Anspruch 10,</seg></tuv>
+    </tu>
+    <tu tuid="t41"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t41"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t41">
+      <tuv xml:lang="en-US"><seg>wherein the first branch and the second branch are branches in an array (522) of branches (112),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die erste Abzweigung und die zweite Abzweigung Abzweigungen in einer Reihe (522) von Abzweigungen (112) sind,</seg></tuv>
+    </tu>
+    <tu tuid="t42"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t42"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t42">
+      <tuv xml:lang="en-US"><seg>wherein multiple of the branches in the array (522) of branches (112) each comprise a flange member (350),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei mehrere der Abzweigungen in der Reihe (522) von Abzweigungen (112) jeweils ein Flanschelement (350) umfassen,</seg></tuv>
+    </tu>
+    <tu tuid="t43"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t43"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t43">
+      <tuv xml:lang="en-US"><seg>wherein the apparatus further comprises a second array (524) of branches (112),</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei die Vorrichtung ferner eine zweite Reihe (524) von Abzweigungen (112) umfasst,</seg></tuv>
+    </tu>
+    <tu tuid="t44"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t44"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t44">
+      <tuv xml:lang="en-US"><seg>wherein the array (524) of branches (112) extends along a first peripheral region of the mounting stud (104), and</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich die Reihe (524) von Abzweigungen (112) entlang eines ersten peripheren Bereichs des Befestigungsbolzens (104) erstreckt, und</seg></tuv>
+    </tu>
+    <tu tuid="t45"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t45"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t45">
+      <tuv xml:lang="en-US"><seg>wherein the second array (524) of branches extends along a second peripheral region of the mounting stud (104).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>wobei sich die zweite Reihe (524) von Abzweigungen entlang eines zweiten peripheren Bereichs des Befestigungsbolzens (104) erstreckt.</seg></tuv>
+    </tu>
+    <tu tuid="t46"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t46"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t46">
+      <tuv xml:lang="en-US"><seg>12.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>12.</seg></tuv>
+    </tu>
+    <tu tuid="t47"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t47"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t47">
+      <tuv xml:lang="en-US"><seg>The apparatus of any one of the preceding claims, wherein the first branch and the second branch (320; 1014) extend radially from the mounting stud (104; 1004).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung nach einem der vorhergehenden Ansprüche, wobei sich die erste Abzweigung und die zweite Abzweigung (320; 1014) radial von dem Befestigungsbolzen (104; 1004) erstrecken.</seg></tuv>
+    </tu>
+    <tu tuid="t48"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t48"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t48">
+      <tuv xml:lang="en-US"><seg>13.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>13.</seg></tuv>
+    </tu>
+    <tu tuid="t49"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t49"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t49">
+      <tuv xml:lang="en-US"><seg>The apparatus of any one of the preceding claims, wherein the first branch (318; 1012) and the second branch (320; 1014) are branches in an array (522) of branches (112) that extend radially from the mounting stud (104; 1004).</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung nach einem der vorhergehenden Ansprüche, wobei die erste Abzweigung (318; 1012) und die zweite Abzweigung (320; 1014) Abzweigungen in einer Reihe (522) von Abzweigungen (112) sind, die sich radial von dem Befestigungsbolzen (104; 1004) erstrecken.</seg></tuv>
+    </tu>
+    <tu tuid="t50"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t50"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t50">
+      <tuv xml:lang="en-US"><seg>14.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>14.</seg></tuv>
+    </tu>
+    <tu tuid="t51"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t51"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t51">
+      <tuv xml:lang="en-US"><seg>The apparatus of any one of the preceding claims, further comprising:</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>Vorrichtung nach einem der vorhergehenden Ansprüche, ferner umfassend:</seg></tuv>
+    </tu>
+    <tu tuid="t52"
+        srclang="en-US"
+        creationdate="20260611T062628Z"
+        creationid="MyMemory_t52"
+        changedate="20260611T062628Z"
+        changeid="MyMemory_t52">
+      <tuv xml:lang="en-US"><seg>a connector section (170) attaching to the body section (160; 1060), the connector section (170) configured for connecting with an object support configured for attaching to a component.</seg></tuv>
+      <tuv xml:lang="de-DE"><seg>einen Verbindungsteil (170), der an dem Körperteil (160; 1060) angebracht ist, wobei der Verbindungsteil (170) zum Verbinden mit einer Objektstütze konfiguriert ist, die zum Anbringen an einer Komponente konfiguriert ist.</seg></tuv>
+    </tu>
+  </body>
+</tmx>

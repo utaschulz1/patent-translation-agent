@@ -10,6 +10,9 @@ performs the full step-4 setup:
 Usage:
     python xtrf_job_setup.py <job-url-or-id>
 
+    <job-url-or-id> must be the XTRF job URL or numeric job ID from the
+    start email — NOT the project ID (e.g. "HALA_2606_P0476").
+
     Examples:
         python xtrf_job_setup.py https://comunicadk.s.xtrf.eu/vendors/#/jobs/classic/316307
         python xtrf_job_setup.py 316307
@@ -333,7 +336,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
 def main():
     """CLI entry point — parse arguments and call run()."""
     parser = argparse.ArgumentParser(description="XTRF step 4: job setup")
-    parser.add_argument("job", help="XTRF job URL or numeric job ID from the start email")
+    parser.add_argument("job", help="XTRF job URL or numeric job ID from the start email (not the project ID)")
     args = parser.parse_args()
     result = run(args.job)
     print(f"Project folder: {result['project_folder']}")

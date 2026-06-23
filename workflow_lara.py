@@ -2,7 +2,7 @@
 workflow.py  —  Patent translation workflow runner
 
 Steps
-    1 NOT IN THIS SCRIPT BUT IN A GOOGLE SCRIPT: every 5 minutes, check Gmail for "NEW JOB OFFER" by ComunicaDK, check calendar, if time, accept job, wait for start email, then add calendar entry with deadline, move start email to "TODO" label, move NEW JOB EMAIL to "Process" label
+    1 NOT IN THIS SCRIPT BUT IN A GOOGLE SCRIPT: every 5 minutes, check XTRF for "NEW JOB OFFER" by ComunicaDK, check calendar, if time, accept job, wait for start email, then add calendar entry with deadline, move start email to "TODO" label, move NEW JOB EMAIL to "Process" label
     2 NOT IN THIS SCRIPT BUT IN A GOOGLE SHEET: in google sheet, run email2sheet script to get all jobs into my accounting format to be pasted into my real accounting.
     ----------Start of this script:-------------
     3   Query XTRF vendor API for IN_PROGRESS jobs, pick job with earliest deadline
@@ -36,10 +36,11 @@ Usage:
     python workflow_lara.py --from-5a                        # resume from step 5a (source doc already in project folder)
     python workflow_lara.py --from-5b                        # resume from step 5b (glossary uploaded, retry pre-translation)
     python workflow_lara.py --from-6                         # resume from step 6 (re-run LLM checks + merge + cleanup)
-    python workflow_lara.py --from-6 --seg-range 421-488    # same, claims only
+    python workflow_lara.py --from-6 --seg-range 421-488    # example, claims only
     python workflow_lara.py --from-6b                        # resume from step 6b (LLM checks done, merge glossaries)
     python workflow_lara.py --from-6c                        # resume from step 6c (glossary merged, run LLM cleanup)
     python workflow_lara.py --from-7                         # resume from step 7 (after manual review)
+    python workflow_lara.py --from-9                         # resume from step 9 (Matecat translation done, run export + checks + upload)
     python workflow_lara.py --from-10                        # resume from step 10 (re-run export + checks)
     python workflow_lara.py --from-11                        # resume from step 11 (upload XLF to XTM)
 """
@@ -193,6 +194,7 @@ if __name__ == "__main__":
     from_6b    = "--from-6b" in sys.argv
     from_6c    = "--from-6c" in sys.argv
     from_7     = "--from-7"  in sys.argv
+    from_9     = "--from-9"  in sys.argv
     from_10    = "--from-10" in sys.argv
     from_11    = "--from-11" in sys.argv
     seg_range  = next(
@@ -203,11 +205,11 @@ if __name__ == "__main__":
     target     = args[0] if args and not manual else None
     manual_url = args[0] if args and manual else None
 
-    if from_5a or from_5b or from_6 or from_6b or from_6c or from_7 or from_10 or from_11:
+    if from_5a or from_5b or from_6 or from_6b or from_6c or from_7 or from_9 or from_10 or from_11:
         project_id = project_log.project_dir().name
         label = ("5a" if from_5a else "5b" if from_5b else "6" if from_6
                  else "6b" if from_6b else "6c" if from_6c else "7" if from_7
-                 else "10" if from_10 else "11")
+                 else "9" if from_9 else "10" if from_10 else "11")
         print(f"Resuming from step {label} — project: {project_id}")
     else:
         try:
@@ -215,9 +217,10 @@ if __name__ == "__main__":
         except RuntimeError as e:
             _crash("3/4", e, seg_range)
 
-    skip_to_6  = from_6  or from_6b or from_6c or from_7 or from_10 or from_11
-    skip_to_6b = from_6b or from_6c or from_7 or from_10 or from_11
-    skip_to_6c = from_6c or from_7 or from_10 or from_11
+    skip_to_6  = from_6  or from_6b or from_6c or from_7 or from_9 or from_10 or from_11
+    skip_to_6b = from_6b or from_6c or from_7 or from_9 or from_10 or from_11
+    skip_to_6c = from_6c or from_7 or from_9 or from_10 or from_11
+    skip_to_9  = from_9  or from_10 or from_11
     skip_to_10 = from_10 or from_11
     skip_to_11 = from_11
 
@@ -244,14 +247,14 @@ if __name__ == "__main__":
         except RuntimeError as e:
             _crash("6b", e, seg_range)
 
-    if not from_7 and not skip_to_10:
+    if not from_7 and not skip_to_9:
         try:
             step6c()
         except RuntimeError as e:
             _crash("6c", e, seg_range)
         manual_review(project_id)
 
-    if not skip_to_10:
+    if not skip_to_9:
         try:
             step7()
         except RuntimeError as e:
@@ -262,6 +265,7 @@ if __name__ == "__main__":
         except RuntimeError as e:
             _crash("8", e, seg_range)
 
+    if not skip_to_10:
         step9()
 
     if not skip_to_11:

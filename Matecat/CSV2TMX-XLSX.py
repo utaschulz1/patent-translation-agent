@@ -1,13 +1,13 @@
 # ============================================================
-# CSV2TMX.py  —  Convert a clean_glossary / glossary CSV to TMX
+# CSV2TMX-XLSX.py  —  Convert a clean_glossary / glossary CSV to TMX
 # ============================================================
 # Reads EN/DE columns from a glossary CSV and writes a TMX 1.4
 # file ready to import into a MateCat "Glossary" memory.
 #
 # USAGE
-#   python CSV2TMX.py <path/to/glossary.csv>
-#   python CSV2TMX.py <path/to/glossary.csv> <output.tmx>   # explicit output
-#   python CSV2TMX.py <path/to/glossary.csv> --xlsx          # also write XLSX
+#   python CSV2TMX-XLSX.py <path/to/glossary.csv>
+#   python CSV2TMX-XLSX.py <path/to/glossary.csv> <output.tmx>   # explicit output
+#   python CSV2TMX-XLSX.py <path/to/glossary.csv> --xlsx          # also write XLSX
 #
 # Output defaults to <same folder>/<stem>.tmx
 # --xlsx writes <same folder>/<stem>.xlsx in MateCat glossary format
