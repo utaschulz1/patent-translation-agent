@@ -347,18 +347,14 @@ epo_en, epo_de = "", ""
 
 if glossary_path.exists():
     with open(glossary_path, newline="", encoding="utf-8-sig") as f:
-        for line in f:
-            stripped = line.strip()
-            if not stripped or stripped.startswith("#"):
-                continue
-            if "EPO EN:" in stripped or "EPO DE:" in stripped:
-                parts = next(csv.reader([stripped]))
-                for part in parts:
-                    p = part.strip()
-                    if p.upper().startswith("EPO EN:"):
-                        epo_en = p[7:].strip()
-                    elif p.upper().startswith("EPO DE:"):
-                        epo_de = p[7:].strip()
+        for row in csv.reader(f):
+            cells = [c.strip() for c in row]
+            if any(c.upper().startswith("EPO EN:") or c.upper().startswith("EPO DE:") for c in cells):
+                for c in cells:
+                    if c.upper().startswith("EPO EN:"):
+                        epo_en = c[7:].strip()
+                    elif c.upper().startswith("EPO DE:"):
+                        epo_de = c[7:].strip()
                 break
 
 print(f"EPO title EN: {epo_en[:70]}" + ("..." if len(epo_en) > 70 else ""))
@@ -689,6 +685,21 @@ if errors:
             print(f"   {e}")
     else:
         print("Retry successful — all errors resolved.")
+
+
+# ── Drop any LLM-echoed title row ─────────────────────────────────────────────
+# epo_title is sent as reference context only ("the EPO title" is not one of
+# consistent_terms/inconsistent_verbs/inconsistent_nouns), but the model
+# sometimes returns it anyway with its own (possibly non-official) translation.
+# The authoritative pair is written separately below — drop any LLM row that
+# duplicates the title's EN so it can't override/conflict with the real one.
+if epo_en:
+    _epo_en_norm = epo_en.strip().lower()
+    _dropped_title_rows = [(en, de) for en, de in clean_rows if en.strip().lower() == _epo_en_norm]
+    if _dropped_title_rows:
+        clean_rows = [(en, de) for en, de in clean_rows if en.strip().lower() != _epo_en_norm]
+        for en, de in _dropped_title_rows:
+            print(f"  Dropped LLM-echoed title row: {en!r} → {de!r} (using authoritative EPO DE instead)")
 
 
 # ── Restore consistent terms dropped by the LLM ───────────────────────────────

@@ -195,13 +195,27 @@ def _unzip_all(zip_paths: list[Path], dest_folder: Path) -> list[Path]:
 
 
 def _parse_epo_title(instructions_html: str) -> tuple[str, str]:
-    """Extract the English and German EPO title strings from the job instructions HTML."""
+    """Extract the English and German EPO title strings from the job instructions HTML.
+
+    Finds every "German:"/"English:"/"French:" marker and takes the text between
+    each one and whichever marker comes next (or end of string), then cuts that
+    slice at its first newline. This avoids assuming any particular separator
+    character between a title and the next marker — some jobs put
+    "German: ... English: ..." on one line with no real delimiter to anchor on;
+    others put unrelated instructions text on the lines following the title.
+    """
     text = re.sub(r"<[^>]+>", " ", instructions_html)
     text = re.sub(r"&nbsp;", " ", text)
-    de_m = re.search(r"German:\s*(.*?)(?=\s*(?:English|French):|$)", text, re.DOTALL)
-    en_m = re.search(r"English:\s*(.*?)(?=\s*(?:German|French):|$)", text, re.DOTALL)
-    de = de_m.group(1).strip() if de_m else ""
-    en = en_m.group(1).strip() if en_m else ""
+    markers = list(re.finditer(r"(German|English|French):", text))
+    en, de = "", ""
+    for i, m in enumerate(markers):
+        next_start = markers[i + 1].start() if i + 1 < len(markers) else len(text)
+        value = text[m.end():next_start].split("\n", 1)[0].strip()
+        lang = m.group(1)
+        if lang == "English" and not en:
+            en = value
+        elif lang == "German" and not de:
+            de = value
     return en, de
 
 
