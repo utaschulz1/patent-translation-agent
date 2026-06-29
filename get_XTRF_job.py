@@ -18,6 +18,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 import project_log
+from config import extract_project_id
 
 _ENV = Path(__file__).parent / ".env"
 BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
@@ -120,7 +121,7 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
         job_id = str(job["id"])
         overview = job.get("overview", {})
         project_name = overview.get("projectName", "")
-        project_id = project_name.split("|")[-1].strip()
+        project_id = extract_project_id(project_name)
         dl = _parse_deadline(overview)
 
         if project_id.startswith(_SKIP_PREFIXES):

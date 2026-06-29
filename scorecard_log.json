@@ -194,5 +194,81 @@
   "Response to 25_0929_9091_DS_US_2.xlsx": {
     "analyzed": "2026-05-07",
     "rows_extracted": 22
+  },
+  "26_0507_5009_US_IE_4.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 8
+  },
+  "26_0511_5364_US_IE_4.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 17
+  },
+  "26_0512_5241_US_IE_3 (1).xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 10
+  },
+  "26_0512_5305_US_IE_3.5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 13
+  },
+  "26_0513_5142_US_IE_3.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 11
+  },
+  "26_0514_5172_US_IE_4.5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 6
+  },
+  "26_0514_5360_US_IE_4.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 6
+  },
+  "26_0514_5388_UT_IE_4.5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 6
+  },
+  "26_0515_5457_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 0
+  },
+  "26_0518_5266_US_IE_4.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 18
+  },
+  "26_0519_5655_US_IE__5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 4
+  },
+  "26_0520_5413_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 8
+  },
+  "26_0520_5621_ US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 5
+  },
+  "26_0520_5623_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 3
+  },
+  "26_0520_5681_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 4
+  },
+  "26_0522_5854_US_AK_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 4
+  },
+  "26_0525_5856_US_LB_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 2
+  },
+  "26_0601_6010_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 5
+  },
+  "26_0608_6537_US_IE_5.xlsx": {
+    "analyzed": "2026-06-25",
+    "rows_extracted": 7
   }
 }

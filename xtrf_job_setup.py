@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 import project_log
-from config import PROJECTS_DIR, WORK_DIR
+from config import PROJECTS_DIR, WORK_DIR, extract_project_id
 
 BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
 MODEL = "deepseek/deepseek-chat-v3-0324"
@@ -272,7 +272,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
 
     # project_id_override comes from the email subject (e.g. "HUAW_2604_P0843");
     # fall back to the XTRF project name when no override is supplied.
-    project_id = project_id_override or project_name.split("|")[-1].strip()
+    project_id = project_id_override or extract_project_id(project_name)
     folder_name = _make_folder_name(id_number, project_id)
 
     # 4.1  Create folders

@@ -49,7 +49,7 @@ KEEPALIVE_INTERVAL      = 25     # seconds between /sayHelloToServer.serv calls
 TEST_SEGMENT_LIMIT: int | None = None
 START_FROM_SEGMENT_ID: int     = 3
 DEBUG_SOURCE_NODES_LIMIT       = 0
-UPLOAD_BATCH_SIZE              = 15   # re-open editor every N segments to get a fresh session token
+UPLOAD_BATCH_SIZE              = 10  # re-open editor every N segments to get a fresh session token
 FILE_FILTER: str | None        = None  # set via --file; selects task by filename substring
 BATCH_WAIT_SECONDS             = 120  # wait between batches for server to release doc lock
 

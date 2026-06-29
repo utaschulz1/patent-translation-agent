@@ -237,13 +237,17 @@ for en, de in glossary_noun_lookup.items():
 
 # ── Source xlsx ───────────────────────────────────────────────────────────────
 # Fallback order: prefer *_revised_translation_checks.xlsx if it already exists
-# (re-run after pulling edited file from Drive), otherwise fall back to
-# *_translated.xlsx (first run, from matecat_xlf_to_excel.py).
-# This means re-running the step after a Drive pull re-checks the edited
-# translations, not the original Matecat output.
+# (re-run after pulling edited file from Drive), otherwise *_GERMAN_translated.xlsx
+# (the Matecat/xlf-derived file from matecat_xlf_to_excel.py), otherwise any
+# *_translated.xlsx. The middle pattern matters because the project folder also
+# holds the Lara pretranslation's *_translated.xlsx (named after the project,
+# not the patent) — without it, a plain "*_translated.xlsx" glob can pick that
+# file instead of the Matecat one, depending on filename sort order.
 
 for pattern in [
-    str(proj_dir / "*_revised_translation_checks.xlsx"), str(proj_dir / "*_translated.xlsx")
+    str(proj_dir / "*_revised_translation_checks.xlsx"),
+    str(proj_dir / "*_GERMAN_translated.xlsx"),
+    str(proj_dir / "*_translated.xlsx"),
 ]:
     src_files = [f for f in glob.glob(pattern) if not Path(f).name.startswith("~$")]
     if src_files:

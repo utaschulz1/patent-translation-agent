@@ -1,7 +1,7 @@
 {
   "_meta": {
     "purpose": "Reference taxonomy for classifying EN->DE patent translation errors from scorecard reviews.",
-    "sources": "49 reviewer scorecards (324 corrections), analysed 2026-05.",
+    "sources": "68 reviewer scorecards (461 corrections), analysed 2026-05 to 2026-06-25.",
     "consistency": "existing.function maps to linter.py function names."
   },
   "existing_linter_checks": {
@@ -202,7 +202,7 @@
   },
   "proposed_new_linter_checks": {
     "linter_new:article_first_mention": {
-      "scorecard_occurrences": 18,
+      "scorecard_occurrences": 29,
       "description": "Definite article (der/die/das) used on the first mention of a term; should be indefinite or none. Applies especially to nominalized verbs (das Bestimmen -> Bestimmen or ein Bestimmen).",
       "pattern": "Detect das/die/der before a capitalized infinitive in DE; flag on first occurrence only.",
       "example_error": "wobei das Bestimmen der Projektionszeit",
@@ -218,7 +218,7 @@
       "implementation_note": "Partially implemented: schritt_zum covers Schritt zum [Infinitiv], durch_verwendung covers durch Verwendung and durch [X-ung]. Remaining: general result-noun to nominalized-verb detection requires morphological analysis or lookup table."
     },
     "linter_new:genitive_separation": {
-      "scorecard_occurrences": 9,
+      "scorecard_occurrences": 13,
       "description": "Genitive object incorrectly separated from governing verb by intervening adverbials. Decision: leave for human reviewers.",
       "pattern": "[Nominalized-Verb], [durch/von/mit NP], [genitive NP]",
       "example_error": "Empfangen, durch das UE, einer Praembel",
@@ -238,8 +238,8 @@
       "catchable_by": "linter:comprise_umfassen (partial); glossary_checker"
     },
     "glossary:include": {
-      "scorecard_occurrences": 7,
-      "description": "include/including -> aufweisen or beinhalten (NOT umfassen).",
+      "scorecard_occurrences": 13,
+      "description": "include/including -> aufweisen or beinhalten (NOT umfassen). NOTE: in at least one project (26_0512_5305) the reviewer instead required einschliessen/eingeschlossen for include/including/included, with beinhalten flagged as the error -- term mapping appears to be project-glossary-dependent, not fixed across all patents.",
       "catchable_by": "glossary_checker"
     },
     "glossary:is_are_value": {

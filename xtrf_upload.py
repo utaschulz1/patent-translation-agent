@@ -55,20 +55,32 @@ def _login(session: requests.Session, creds: dict) -> None:
 
 
 def _find_job_id(session: requests.Session, project_id: str) -> int:
-    """Return the XTRF job id for the given project_id (searches IN_PROGRESS jobs)."""
+    """Return the XTRF job id for the given project_id (searches IN_PROGRESS jobs).
+
+    A project can have more than one matching job at once, e.g. the main
+    translation job plus a separate, not-yet-accepted "Issues resolution"
+    job scheduled for later. PENDING jobs are not ready to receive target
+    files, so IN_PROGRESS jobs are preferred when both are present.
+    """
     statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS,PENDING"
     r = session.get(f"{BASE_URL}/jobs", params={"statuses": statuses})
     r.raise_for_status()
     jobs = r.json()
-    for job in jobs:
-        name = job.get("overview", {}).get("projectName", "")
-        # projectName is e.g. "PLPA_2605_P0021" or "Patents | PLPA_2605_P0021"
-        if project_id in name:
-            return job["id"]
-    raise ValueError(
-        f"No IN_PROGRESS job found for project '{project_id}'. "
-        "Check XTRF or pass a different status."
-    )
+    matches = [j for j in jobs if project_id in j.get("overview", {}).get("projectName", "")]
+    if not matches:
+        raise ValueError(
+            f"No IN_PROGRESS job found for project '{project_id}'. "
+            "Check XTRF or pass a different status."
+        )
+    in_progress = [j for j in matches if j.get("overview", {}).get("status") != "PENDING"]
+    candidates = in_progress or matches
+    if len(candidates) > 1:
+        details = ", ".join(
+            f"{j['id']} ({j.get('overview', {}).get('type')}, {j.get('overview', {}).get('status')})"
+            for j in candidates
+        )
+        raise ValueError(f"Multiple matching jobs for '{project_id}': {details}. Pass a more specific id.")
+    return candidates[0]["id"]
 
 
 def _find_project_folder(project_id: str) -> Path:
@@ -127,6 +139,8 @@ def _upload_file(session: requests.Session, job_id: int, path: Path) -> dict:
             files={"file": (path.name, fh, mime)},
             headers={"Accept": "text/plain, */*; q=0.01"},
         )
+    if not r.ok:
+        print(f"\n  Response body: {r.text[:1000]}", file=sys.stderr)
     r.raise_for_status()
     return r.json() if r.content else {}
 
