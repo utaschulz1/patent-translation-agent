@@ -1,4 +1,5 @@
 .env
+.venv/
 projects/
 not-in-use/
 gmail_credentials.json
