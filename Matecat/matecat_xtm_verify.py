@@ -47,7 +47,8 @@ def _normalise(text: str) -> str:
 
 
 def run(project_id: str) -> None:
-    proj_dir = ROOT / "projects" / project_id
+    from project_log import find_project_dir as _find_project_dir
+    proj_dir = _find_project_dir(project_id)
 
     # ── MateCat reference file ────────────────────────────────────────────────
 

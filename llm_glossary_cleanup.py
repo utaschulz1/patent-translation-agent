@@ -264,7 +264,7 @@ client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
 # ── Project paths ─────────────────────────────────────────────────────────────
 
 proj_dir   = project_log.project_dir()
-project_id = proj_dir.name
+project_id = project_log.load_context()["project_id"]
 print(f"Project: {project_id}")
 
 verb_pairs_path  = proj_dir / "verb_segment_pairs.csv"

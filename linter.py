@@ -603,10 +603,7 @@ if __name__ == "__main__":
     # ── Locate input file ─────────────────────────────────────────────────────
 
     if _args.pid:
-        proj_dir = Path(__file__).parent / "projects" / _args.pid
-        if not proj_dir.exists():
-            print(f"ERROR: Project folder not found: {proj_dir}")
-            exit()
+        proj_dir = project_log.find_project_dir(_args.pid)
     else:
         proj_dir = project_log.project_dir()
 

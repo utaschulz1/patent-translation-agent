@@ -273,7 +273,8 @@ def _read_xlf(
 
 
 def run(project_id: str) -> None:
-    proj_dir = ROOT / "projects" / project_id
+    from project_log import find_project_dir as _find_project_dir
+    proj_dir = _find_project_dir(project_id)
 
     # Find *_GERMAN.xlf
     xlf_files = list(proj_dir.glob("*_GERMAN.xlf"))

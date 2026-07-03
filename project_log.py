@@ -51,6 +51,15 @@ def project_dir() -> Path:
     return Path(load_context()["project_folder"])
 
 
+def find_project_dir(project_id: str) -> Path:
+    """Scan the projects directory for the pre-processing folder containing project_id."""
+    projects_root = HERE / "projects"
+    matches = [p for p in projects_root.iterdir() if p.is_dir() and project_id in p.name]
+    if not matches:
+        raise RuntimeError(f"Project folder not found for {project_id!r} in {projects_root}")
+    return matches[0] / "pre-processing"
+
+
 def set_context(project_id: str, project_folder: Path, **extra) -> None:
     ctx = {
         "project_id": project_id,

@@ -178,10 +178,7 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
 # ── Project glossary ──────────────────────────────────────────────────────────
 
 if _args.pid:
-    proj_dir = Path(__file__).parent / "projects" / _args.pid
-    if not proj_dir.exists():
-        print(f"ERROR: Project folder not found: {proj_dir}")
-        exit()
+    proj_dir = project_log.find_project_dir(_args.pid)
 else:
     proj_dir = project_log.project_dir()
 

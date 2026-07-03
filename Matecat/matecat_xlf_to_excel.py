@@ -26,7 +26,7 @@ from openpyxl.styles import Alignment
 HERE = Path(__file__).parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
-from project_log import project_dir as _pdir
+from project_log import project_dir as _pdir, find_project_dir as _find_project_dir
 
 _XLF_NS = "urn:oasis:names:tc:xliff:document:1.2"
 
@@ -50,14 +50,13 @@ _ap.add_argument("--pid", default=None)
 _args = _ap.parse_args()
 
 if _args.pid:
-    proj_dir = ROOT / "projects" / _args.pid
-    if not proj_dir.exists():
-        print(f"ERROR: Project folder not found: {proj_dir}")
-        sys.exit(1)
+    project_id = _args.pid
+    proj_dir = _find_project_dir(_args.pid)
 else:
-    proj_dir = _pdir()
-
-project_id = proj_dir.name
+    from project_log import load_context as _load_context
+    _ctx = _load_context()
+    project_id = _ctx["project_id"]
+    proj_dir = Path(_ctx["project_folder"])
 
 xlf_files = list(proj_dir.glob("*_GERMAN.xlf"))
 if not xlf_files:
