@@ -57,6 +57,7 @@ def find_project_dir(project_id: str) -> Path:
     matches = [p for p in projects_root.iterdir() if p.is_dir() and project_id in p.name]
     if not matches:
         raise RuntimeError(f"Project folder not found for {project_id!r} in {projects_root}")
+    matches.sort(key=lambda p: len(p.name), reverse=True)
     return matches[0] / "pre-processing"
 
 

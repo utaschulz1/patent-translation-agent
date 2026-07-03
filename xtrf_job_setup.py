@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 import project_log
-from config import PROJECTS_DIR, WORK_DIR, extract_project_id
+from config import WORK_DIR, extract_project_id
 
 BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
 MODEL = "deepseek/deepseek-chat-v3-0324"
@@ -164,23 +164,38 @@ def _download_file(session: requests.Session, url: str, dest: Path) -> Path:
     return out
 
 
+def _strip_tilde_suffix(name: str) -> str:
+    """Return the base filename without a Windows-style ~N dedup suffix (e.g. foo~1.zip → foo.zip)."""
+    stem, _, ext = name.rpartition(".")
+    stem_clean = re.sub(r"~\d+$", "", stem)
+    return f"{stem_clean}.{ext}" if ext else stem_clean
+
+
 def _download_source_files(
     session: requests.Session, job_id: str, source_files: list, dest_folder: Path
 ) -> list[Path]:
-    """Download all downloadable source files for a job into dest_folder."""
+    """Download all downloadable source files for a job into dest_folder.
+
+    Skips files whose name is a ~N duplicate of an already-downloaded file
+    (XTRF sometimes returns the same attachment twice with a ~1 suffix).
+    """
     downloaded = []
+    downloaded_bases: set[str] = set()
     for sf in source_files:
         if not sf.get("downloadable"):
             continue
-        file_id = sf["id"]
         filename = sf["name"]
-        
-        url = f"{BASE_URL}/jobs/classic/{job_id}/source-files/{file_id}"
-            
+        base = _strip_tilde_suffix(filename)
+        if base in downloaded_bases:
+            print(f"  Skipping duplicate: {filename} (already have {base})")
+            continue
+        url = f"{BASE_URL}/jobs/classic/{job_id}/source-files/{sf['id']}"
         out_path = dest_folder / filename
         print(f"  Downloading {filename}...")
         _download_file(session, url, out_path)
         downloaded.append(out_path)
+        downloaded_bases.add(base)
+        downloaded_bases.add(filename)
     return downloaded
 
 
@@ -190,10 +205,14 @@ def _unzip_all(zip_paths: list[Path], dest_folder: Path) -> list[Path]:
     for zp in zip_paths:
         if zp.suffix.lower() != ".zip":
             continue
-        with zipfile.ZipFile(zp) as zf:
-            zf.extractall(dest_folder)
-            extracted.extend(dest_folder / n for n in zf.namelist())
-        zp.unlink()
+        try:
+            with zipfile.ZipFile(zp) as zf:
+                zf.extractall(dest_folder)
+                extracted.extend(dest_folder / n for n in zf.namelist())
+            zp.unlink()
+        except zipfile.BadZipFile:
+            print(f"  WARNING: {zp.name} is not a valid zip — skipping and deleting.")
+            zp.unlink()
     return extracted
 
 
@@ -282,14 +301,11 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     pre_folder.mkdir(exist_ok=True)
     print(f"Created XTRF folder: {project_folder}")
 
-    # 4.1b  Create working folder in codebase and set active project context
-    work_folder = PROJECTS_DIR / project_id
-    work_folder.mkdir(parents=True, exist_ok=True)
-    project_log.set_context(project_id, work_folder,
+    # 4.1b  Set active project context (pre-processing folder is the working area)
+    project_log.set_context(project_id, pre_folder,
                             xtrf_job_folder=str(project_folder),
                             task_type=task_type,
                             xtrf_job_id=job_id)
-    print(f"Created project folder: {work_folder}")
 
     # 4.2  Download + unzip source files
     if source_files:
@@ -310,7 +326,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     if en_title:
         print(f"EPO title found — extracting terms with DeepSeek...")
         pairs = _llm_extract_terms(en_title, de_title)
-        csv_path = _write_glossary(project_id, pairs, work_folder, en_title, de_title)
+        csv_path = _write_glossary(project_id, pairs, pre_folder, en_title, de_title)
         print(f"Glossary written: {csv_path}  ({len(pairs)} term(s))")
         for en, de in pairs:
             print(f"  {en}  →  {de}")
@@ -330,7 +346,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     print("=" * 50)
     print("Step 4 complete. Next: open XTM link from the XTRF job page (step 5).")
     print(f"XTM login: https://word.welocalize.com/project-manager-gui/login.jsp?client=IP#!/login")
-    return {"project_id": project_id, "project_folder": str(work_folder)}
+    return {"project_id": project_id, "project_folder": str(pre_folder)}
 
 
 def main():
