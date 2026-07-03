@@ -18,7 +18,6 @@ Usage:
 
 import json
 import os
-import shutil
 import zipfile
 import random
 import re
@@ -454,45 +453,38 @@ def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
     msg_id: Gmail message ID used to write log events; pass None for the manual path.
     Returns True on success, False if no files could be obtained.
     """
-    proj_dir = project_log.project_dir()
     xlsx_path: Path | None = None
 
     def _log(state, detail=None):
         if msg_id:
             project_log.log_event(msg_id, state, detail=detail)
 
-    # 1. Try XTM API: originals → pre-processing, trimmed xlsx + xliff → project folder
+    # 1. Try XTM API: download xlsx + xliff directly into pre-processing, trim xlsx in place
     try:
         print("Downloading XTM Excel + XLIFF via API...")
         result = run(project_id)  # dest_folder=None → _find_pre_folder → pre-processing
-        xlsx_orig = result["xlsx"]
+        xlsx_path = result["xlsx"]
         xliff_paths = result["xliff"]
 
-        xlsx_dest = proj_dir / xlsx_orig.name
-        shutil.copy2(xlsx_orig, xlsx_dest)
-        wb = openpyxl.load_workbook(xlsx_dest)
+        wb = openpyxl.load_workbook(xlsx_path)
         ws = wb.active
         while ws.max_column > 3:
             ws.delete_cols(ws.max_column)
-        wb.save(xlsx_dest)
-        xlsx_path = xlsx_dest
+        wb.save(xlsx_path)
 
+        print(f"  xlsx: {xlsx_path.name}")
         for xlf in xliff_paths:
-            shutil.copy2(xlf, proj_dir / xlf.name)
-
-        print(f"  xlsx original: {xlsx_orig.name} (pre-processing)")
-        print(f"  xlsx trimmed copy: {xlsx_dest.name} (project folder)")
-        for xlf in xliff_paths:
-            print(f"  xliff copy: {xlf.name} (project folder)")
+            print(f"  xliff: {xlf.name}")
         _log("XLSX_DOWNLOADED", detail=str(xlsx_path))
     except Exception as e:
         print(f"  XTM download failed: {e}")
 
     if xlsx_path is None:
         _log("XLSX_NOT_FOUND")
+        pre = _find_pre_folder(project_id)
         print(
             f"WARNING: Could not obtain xlsx/xlf for {project_id}.\n"
-            f"  Place xlsx and xlf in {proj_dir} and re-run."
+            f"  Place xlsx and xlf in {pre} and re-run."
         )
         return False
 
