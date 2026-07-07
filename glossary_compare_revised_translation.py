@@ -22,8 +22,8 @@ checks (e.g. "umfass*" without "compris*", "Vielzahl" without "plurality") are
 handled by the linter instead.
 
 Public API (importable):
-  build_glossary_lookups(proj_dir) → (verb_lookup, noun_lookup, all_de_noun_terms)
-  check_segment_glossary(en_text, de_text, verb_lookup, noun_lookup, all_de_noun_terms) → list[str]
+  build_glossary_lookups(proj_dir) → (verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms)
+  check_segment_glossary(en_text, de_text, verb_lookup, noun_lookup, all_de_noun_terms, verb_fallback) → list[str]
 """
 
 import argparse
@@ -103,14 +103,41 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     if " " in de_term:
         # Stem each word by stripping known adj suffixes, then build a regex so
         # that inflected forms (e.g. "optischen" matching "optische") are found.
-        parts = []
+        de_stems: list[str] = []
+        parts: list[str] = []
         for word in de_lower.split():
             stem = word
             for suffix in _DE_ADJ_SUFFIXES:
                 if word.endswith(suffix) and len(word) - len(suffix) >= 4:
                     stem = word[: -len(suffix)]
                     break
+            de_stems.append(stem)
             parts.append(re.escape(stem) + r"\w*")
+
+        # Mask longer multi-word DE phrases that contain this phrase as a
+        # component (same problem as single-word masking, but for phrases).
+        # Example: "organisierte Punktwolke" inside "geglättete organisierte
+        # Punktwolke" — mask the longer phrase first so findall below only
+        # counts standalone occurrences.
+        if other_de_terms:
+            for other in other_de_terms:
+                if " " not in other or len(other) <= len(de_term):
+                    continue
+                other_words = other.lower().split()
+                other_stems = []
+                for w in other_words:
+                    stem = w
+                    for suffix in _DE_ADJ_SUFFIXES:
+                        if w.endswith(suffix) and len(w) - len(suffix) >= 4:
+                            stem = w[: -len(suffix)]
+                            break
+                    other_stems.append(stem)
+                if not all(ds in other_stems for ds in de_stems):
+                    continue
+                other_parts = [re.escape(s) + r"\w*" for s in other_stems]
+                mask_pat = re.compile(r"\s+".join(other_parts), re.IGNORECASE)
+                text_lower = mask_pat.sub(lambda m: " " * len(m.group()), text_lower)
+
         return len(re.findall(r"\s+".join(parts), text_lower))
 
     # Mask multi-word DE phrases that contain de_term as a component word.
@@ -147,7 +174,10 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
             ol = other.lower()
             words = ol.split() if " " in ol else [ol]
             for w in words:
-                if len(w) > len(de_lower) and len(w) >= 5:
+                # Require > 2 chars longer so German inflections (+e/+s/+en/+er/+em/+es)
+                # don't suppress tokens of the same root. Only genuine compounds are
+                # typically 3+ chars longer than the base term.
+                if len(w) > len(de_lower) + 2 and len(w) >= 5:
                     longer_de.append(w)
 
     # Split on whitespace and strip surrounding punctuation only — hyphens are
@@ -177,10 +207,12 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, list]:
-    """Load the project glossary and return (verb_lookup, noun_lookup, all_de_noun_terms).
+def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, dict, list]:
+    """Load the project glossary and return (verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms).
 
-    verb_lookup:      {en_lemma: de_lemma}
+    verb_lookup:      {en_lemma: de_lemma}   — full lemma-based matching
+    verb_fallback:    {en_lemma: de_raw}     — word/truncation matching for verbs whose
+                                               DE form is not in de_verb_lookup
     noun_lookup:      {en_phrase_lower: de_phrase_original}
     all_de_noun_terms: list of all DE values in noun_lookup (for compound masking)
     """
@@ -199,6 +231,7 @@ def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, list]:
     gloss_df.columns = ["EN", "DE"]
 
     verb_lookup: dict[str, str] = {}
+    verb_fallback: dict[str, str] = {}
     for _, row in gloss_df.iterrows():
         en_raw = str(row["EN"]).strip().lower()
         de_raw = str(row["DE"]).strip().lower()
@@ -208,9 +241,13 @@ def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, list]:
         if en_lemma is None:
             continue
         de_lemma = de_verb_lookup.get(de_raw)
-        if de_lemma is None:
-            continue
-        verb_lookup.setdefault(en_lemma, de_lemma)
+        if de_lemma is not None:
+            verb_lookup.setdefault(en_lemma, de_lemma)
+        else:
+            # DE form not in lemma table — fall back to truncation word matching
+            # (same approach as noun checker). _count_noun_in_de's own guards
+            # (token length ±3, prefix-match) keep false positives low.
+            verb_fallback.setdefault(en_lemma, de_raw)
 
     noun_lookup: dict[str, str] = {}
     for _, row in gloss_df.iterrows():
@@ -223,7 +260,7 @@ def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, list]:
         noun_lookup.setdefault(en_raw.lower(), de_raw)
 
     all_de_noun_terms = list(noun_lookup.values())
-    return verb_lookup, noun_lookup, all_de_noun_terms
+    return verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms
 
 
 def check_segment_glossary(
@@ -232,30 +269,30 @@ def check_segment_glossary(
     verb_lookup: dict,
     noun_lookup: dict,
     all_de_noun_terms: list[str],
+    verb_fallback: dict | None = None,
 ) -> list[str]:
     """Run verb + noun glossary checks on a single segment. Returns list of issue strings."""
     notes: list[str] = []
 
-    en_counts = _count_lemmas(en_text, en_verb_lookup)
-    de_counts = _count_lemmas(de_text, de_verb_lookup, strip_de_adj=True)
-
-    for en_lemma, en_count in sorted(en_counts.items()):
-        de_lemma = verb_lookup.get(en_lemma)
-        if de_lemma is None:
-            continue
-        de_count = de_counts.get(de_lemma, 0)
-        print(f"[gloss-verb] '{en_lemma}'×{en_count} → '{de_lemma}'×{de_count}", flush=True)
-        if de_count == 0:
-            notes.append(f"EN: {en_lemma} ({en_count}), DE: missing, expected: {de_lemma}")
-        elif de_count != en_count:
-            notes.append(f"EN: {en_lemma} ({en_count}), DE: {de_lemma} ({de_count})")
-
+    # ── Noun phrase matches (computed first so their spans can be masked from
+    # verb counting — a verb used attributively inside a glossary noun phrase,
+    # e.g. "selecting" in "radius selecting means", must not be counted as a
+    # standalone verb action when the phrase itself is translated as a compound).
     en_text_lower = en_text.lower()
     all_matches: list[tuple[int, int, str]] = []
     for en_term in noun_lookup:
         pat = r"\b" + re.escape(en_term) + r"s?\b"
         for m in re.finditer(pat, en_text_lower):
             all_matches.append((m.start(), m.end(), en_term))
+
+    # When two terms match the same span (e.g. "segment" and "segments" both
+    # matching the token "segments" via the s? suffix), keep only the longest
+    # (most specific) term so the singular doesn't produce a phantom count.
+    span_best: dict[tuple[int, int], str] = {}
+    for s, e, t in all_matches:
+        if (s, e) not in span_best or len(t) > len(span_best[(s, e)]):
+            span_best[(s, e)] = t
+    all_matches = [(s, e, t) for (s, e), t in span_best.items()]
 
     valid_matches = [
         (s, e, t) for s, e, t in all_matches
@@ -265,6 +302,34 @@ def check_segment_glossary(
         )
     ]
 
+    # ── Verb check — mask noun-phrase spans before counting EN verb lemmas
+    masked_chars = list(en_text_lower)
+    for s, e, _ in valid_matches:
+        for i in range(s, e):
+            masked_chars[i] = " "
+    masked_en = "".join(masked_chars)
+
+    en_counts = _count_lemmas(masked_en, en_verb_lookup)
+    de_counts = _count_lemmas(de_text, de_verb_lookup, strip_de_adj=True)
+
+    _fallback = verb_fallback or {}
+    for en_lemma, en_count in sorted(en_counts.items()):
+        de_lemma = verb_lookup.get(en_lemma)
+        if de_lemma is not None:
+            de_count = de_counts.get(de_lemma, 0)
+            de_label = de_lemma
+        elif en_lemma in _fallback:
+            de_label = _fallback[en_lemma]
+            de_count = _count_noun_in_de(de_label, de_text, all_de_noun_terms)
+        else:
+            continue
+        print(f"[gloss-verb] '{en_lemma}'×{en_count} → '{de_label}'×{de_count}", flush=True)
+        if de_count == 0:
+            notes.append(f"EN: {en_lemma} ({en_count}), DE: missing, expected: {de_label}")
+        elif de_count != en_count:
+            notes.append(f"EN: {en_lemma} ({en_count}), DE: {de_label} ({de_count})")
+
+    # ── Noun check
     noun_en_counts: dict[str, int] = defaultdict(int)
     for _, _, en_term in valid_matches:
         noun_en_counts[en_term] += 1
@@ -293,12 +358,15 @@ def main() -> None:
     else:
         proj_dir = project_log.project_dir()
 
-    verb_lookup, noun_lookup, all_de_noun_terms = build_glossary_lookups(proj_dir)
+    verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms = build_glossary_lookups(proj_dir)
 
     print(f"Glossary: {proj_dir}")
     print(f"Verb entries loaded: {len(verb_lookup)}")
     for en, de in verb_lookup.items():
         print(f"  {en} → {de}")
+    print(f"Verb fallback entries: {len(verb_fallback)}")
+    for en, de in verb_fallback.items():
+        print(f"  {en} → {de} (word match)")
     print(f"Noun entries loaded: {len(noun_lookup)}")
     for en, de in noun_lookup.items():
         print(f"  {en} → {de}")
@@ -348,7 +416,8 @@ def main() -> None:
             continue
 
         notes = check_segment_glossary(
-            str(en_text), str(de_text), verb_lookup, noun_lookup, all_de_noun_terms
+            str(en_text), str(de_text), verb_lookup, noun_lookup, all_de_noun_terms,
+            verb_fallback=verb_fallback,
         )
 
         if notes:
