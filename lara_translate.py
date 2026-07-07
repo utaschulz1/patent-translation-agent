@@ -86,8 +86,8 @@ memory_ids = _parse_ids("LARA_MEMORY_IDS")   # Team plan required for adapt_to
 _glossaries_file = Path(__file__).parent / "lara_glossaries.json"
 _glossaries_registry: dict = json.loads(_glossaries_file.read_text(encoding="utf-8")) if _glossaries_file.exists() else {}
 
-if memory_ids:
-    print(f"TM adaptation: {memory_ids}")
+_memories_file = Path(__file__).parent / "lara_memories.json"
+_memories_registry: dict = json.loads(_memories_file.read_text(encoding="utf-8")) if _memories_file.exists() else {}
 
 # ============================================================
 # Load Excel
@@ -110,6 +110,13 @@ elif _glossaries_registry:
     glossary_ids = []
 else:
     glossary_ids = []
+
+_memory_key = f"memory_{proj_dir.name}"
+if _memory_key in _memories_registry:
+    memory_ids = [_memories_registry[_memory_key]] + memory_ids
+    print(f"ICE TM:        {_memories_registry[_memory_key]}  ({_memory_key})")
+if memory_ids:
+    print(f"TM adaptation: {memory_ids}")
 if _args.file:
     _p = Path(_args.file)
     input_path = str(_p if _p.is_absolute() else proj_dir / _p)
