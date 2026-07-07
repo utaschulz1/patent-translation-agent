@@ -20,6 +20,10 @@ term in the EN source. A DE glossary term that appears in the target without a
 corresponding EN term in the source is not detected here. Target-triggered
 checks (e.g. "umfass*" without "compris*", "Vielzahl" without "plurality") are
 handled by the linter instead.
+
+Public API (importable):
+  build_glossary_lookups(proj_dir) → (verb_lookup, noun_lookup, all_de_noun_terms)
+  check_segment_glossary(en_text, de_text, verb_lookup, noun_lookup, all_de_noun_terms) → list[str]
 """
 
 import argparse
@@ -35,10 +39,6 @@ from openpyxl.styles import Alignment
 import pandas as pd
 
 import project_log
-
-_args = argparse.ArgumentParser()
-_args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
-_args = _args.parse_args()
 
 HERE = Path(__file__).parent
 HEADER_ROWS = 3  # rows 1–3 are filename / column-name / language lines in the xlsx
@@ -175,150 +175,84 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     return count
 
 
-# ── Project glossary ──────────────────────────────────────────────────────────
+# ── Public API ────────────────────────────────────────────────────────────────
 
-if _args.pid:
-    proj_dir = project_log.find_project_dir(_args.pid)
-else:
-    proj_dir = project_log.project_dir()
+def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, list]:
+    """Load the project glossary and return (verb_lookup, noun_lookup, all_de_noun_terms).
 
-glossary_files = [
-    f for f in glob.glob(str(proj_dir / "clean_glossary_*.csv"))
-    if not any(x in f for x in ("results", "flags"))
-]
-if not glossary_files:
-    raise FileNotFoundError(f"No clean_glossary_*.csv found in {proj_dir}")
+    verb_lookup:      {en_lemma: de_lemma}
+    noun_lookup:      {en_phrase_lower: de_phrase_original}
+    all_de_noun_terms: list of all DE values in noun_lookup (for compound masking)
+    """
+    glossary_files = [
+        f for f in glob.glob(str(proj_dir / "clean_glossary_*.csv"))
+        if not any(x in f for x in ("results", "flags"))
+    ]
+    if not glossary_files:
+        raise FileNotFoundError(f"No clean_glossary_*.csv found in {proj_dir}")
 
-gloss_df = pd.read_csv(
-    glossary_files[0], encoding="utf-8-sig",
-    comment="#", header=0, usecols=[0, 1],
-)
-gloss_df.columns = ["EN", "DE"]
+    gloss_df = pd.read_csv(
+        glossary_files[0], encoding="utf-8-sig",
+        comment="#", header=0, usecols=[0, 1],
+        keep_default_na=False,
+    )
+    gloss_df.columns = ["EN", "DE"]
 
-# Build verb-only lookup: en_lemma → de_lemma.
-# Filters to entries whose EN term is a known verb; lemmatizes both sides.
-glossary_verb_lookup: dict[str, str] = {}
-for _, row in gloss_df.iterrows():
-    en_raw = str(row["EN"]).strip().lower()
-    de_raw = str(row["DE"]).strip().lower()
-    if " " in de_raw:           # skip multi-word DE phrases — not in DE verb lookup
-        continue
-    en_lemma = en_verb_lookup.get(en_raw)
-    if en_lemma is None:        # not a known verb, skip
-        continue
-    de_lemma = de_verb_lookup.get(de_raw)
-    if de_lemma is None:         # DE side is a noun or unknown — not a verb pair, skip
-        continue
-    glossary_verb_lookup.setdefault(en_lemma, de_lemma)
+    verb_lookup: dict[str, str] = {}
+    for _, row in gloss_df.iterrows():
+        en_raw = str(row["EN"]).strip().lower()
+        de_raw = str(row["DE"]).strip().lower()
+        if " " in de_raw:
+            continue
+        en_lemma = en_verb_lookup.get(en_raw)
+        if en_lemma is None:
+            continue
+        de_lemma = de_verb_lookup.get(de_raw)
+        if de_lemma is None:
+            continue
+        verb_lookup.setdefault(en_lemma, de_lemma)
 
-print(f"Glossary: {glossary_files[0]}")
-print(f"Verb entries loaded: {len(glossary_verb_lookup)}")
-for en, de in glossary_verb_lookup.items():
-    print(f"  {en} → {de}")
+    noun_lookup: dict[str, str] = {}
+    for _, row in gloss_df.iterrows():
+        en_raw = str(row["EN"]).strip()
+        de_raw = str(row["DE"]).strip()
+        if en_verb_lookup.get(en_raw.lower()) is not None:
+            continue
+        if len(de_raw) < 5:
+            continue
+        noun_lookup.setdefault(en_raw.lower(), de_raw)
 
-# Build noun lookup: all non-verb entries with DE term >= 5 chars.
-glossary_noun_lookup: dict[str, str] = {}  # en_phrase (lower) → de_phrase (original)
-for _, row in gloss_df.iterrows():
-    en_raw = str(row["EN"]).strip()
-    de_raw = str(row["DE"]).strip()
-    if en_verb_lookup.get(en_raw.lower()) is not None:
-        continue    # verb — handled separately
-    if len(de_raw) < 5:
-        continue    # too short for reliable truncation matching
-    glossary_noun_lookup.setdefault(en_raw.lower(), de_raw)
-
-print(f"Noun entries loaded: {len(glossary_noun_lookup)}")
-for en, de in glossary_noun_lookup.items():
-    print(f"  {en} → {de}")
+    all_de_noun_terms = list(noun_lookup.values())
+    return verb_lookup, noun_lookup, all_de_noun_terms
 
 
-# ── Source xlsx ───────────────────────────────────────────────────────────────
-# Fallback order: prefer *_revised_translation_checks.xlsx if it already exists
-# (re-run after pulling edited file from Drive), otherwise *_GERMAN_translated.xlsx
-# (the Matecat/xlf-derived file from matecat_xlf_to_excel.py), otherwise any
-# *_translated.xlsx. The middle pattern matters because the project folder also
-# holds the Lara pretranslation's *_translated.xlsx (named after the project,
-# not the patent) — without it, a plain "*_translated.xlsx" glob can pick that
-# file instead of the Matecat one, depending on filename sort order.
+def check_segment_glossary(
+    en_text: str,
+    de_text: str,
+    verb_lookup: dict,
+    noun_lookup: dict,
+    all_de_noun_terms: list[str],
+) -> list[str]:
+    """Run verb + noun glossary checks on a single segment. Returns list of issue strings."""
+    notes: list[str] = []
 
-for pattern in [
-    str(proj_dir / "*_revised_translation_checks.xlsx"),
-    str(proj_dir / "*_GERMAN_translated.xlsx"),
-    str(proj_dir / "*_translated.xlsx"),
-]:
-    src_files = [f for f in glob.glob(pattern) if not Path(f).name.startswith("~$")]
-    if src_files:
-        break
+    en_counts = _count_lemmas(en_text, en_verb_lookup)
+    de_counts = _count_lemmas(de_text, de_verb_lookup, strip_de_adj=True)
 
-if not src_files:
-    raise FileNotFoundError(f"No _translated.xlsx found in {proj_dir}")
-
-src_path = Path(src_files[0])
-print(f"\nSource: {src_path.name}")
-
-src_wb = openpyxl.load_workbook(src_path)
-src_ws = src_wb.active
-
-
-# ── Build output workbook ─────────────────────────────────────────────────────
-
-out_wb = openpyxl.Workbook()
-out_ws = out_wb.active
-
-# Copy 3-row header, columns A–C only
-for row_num in range(1, HEADER_ROWS + 1):
-    for col in range(1, 4):
-        out_ws.cell(row=row_num, column=col).value = src_ws.cell(row=row_num, column=col).value
-
-out_ws.cell(row=2, column=4).value = "Glossary Checks"
-
-out_ws.column_dimensions["B"].width = 60
-out_ws.column_dimensions["C"].width = 60
-out_ws.column_dimensions["D"].width = 55
-
-
-# ── Process data rows ─────────────────────────────────────────────────────────
-
-annotated = 0
-
-for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
-    seg_id  = src_ws.cell(row=row_num, column=1).value
-    en_text = src_ws.cell(row=row_num, column=2).value
-    de_text = src_ws.cell(row=row_num, column=3).value
-
-    out_ws.cell(row=row_num, column=1).value = seg_id
-    out_ws.cell(row=row_num, column=2).value = en_text
-    out_ws.cell(row=row_num, column=3).value = de_text
-
-    if not en_text or not de_text:
-        continue
-
-    en_counts = _count_lemmas(str(en_text), en_verb_lookup)
-    de_counts = _count_lemmas(str(de_text), de_verb_lookup, strip_de_adj=True)
-
-    notes = []
-
-    # Verb check
     for en_lemma, en_count in sorted(en_counts.items()):
-        de_lemma = glossary_verb_lookup.get(en_lemma)
+        de_lemma = verb_lookup.get(en_lemma)
         if de_lemma is None:
             continue
         de_count = de_counts.get(de_lemma, 0)
+        print(f"[gloss-verb] '{en_lemma}'×{en_count} → '{de_lemma}'×{de_count}", flush=True)
         if de_count == 0:
-            notes.append(
-                f"EN: {en_lemma} ({en_count}), DE: missing, expected: {de_lemma}"
-            )
+            notes.append(f"EN: {en_lemma} ({en_count}), DE: missing, expected: {de_lemma}")
         elif de_count != en_count:
-            notes.append(
-                f"EN: {en_lemma} ({en_count}), DE: {de_lemma} ({de_count})"
-            )
+            notes.append(f"EN: {en_lemma} ({en_count}), DE: {de_lemma} ({de_count})")
 
-    # Noun check — longest-match-wins: collect all glossary phrase matches with
-    # their character positions, then discard any match fully contained within
-    # a longer match. This prevents "sl traffic" firing inside "lte sl traffic".
-    en_text_lower = str(en_text).lower()
+    en_text_lower = en_text.lower()
     all_matches: list[tuple[int, int, str]] = []
-    for en_term in glossary_noun_lookup:
+    for en_term in noun_lookup:
         pat = r"\b" + re.escape(en_term) + r"s?\b"
         for m in re.finditer(pat, en_text_lower):
             all_matches.append((m.start(), m.end(), en_term))
@@ -336,36 +270,107 @@ for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
         noun_en_counts[en_term] += 1
 
     for en_term, en_count in sorted(noun_en_counts.items()):
-        de_term = glossary_noun_lookup[en_term]
-        de_count = _count_noun_in_de(de_term, str(de_text), list(glossary_noun_lookup.values()))
+        de_term = noun_lookup[en_term]
+        de_count = _count_noun_in_de(de_term, de_text, all_de_noun_terms)
+        print(f"[gloss-noun] '{en_term}'×{en_count} → '{de_term}'×{de_count}", flush=True)
         if de_count == 0:
-            notes.append(
-                f"EN: {en_term} ({en_count}), DE: missing, expected: {de_term}"
-            )
+            notes.append(f"EN: {en_term} ({en_count}), DE: missing, expected: {de_term}")
         elif de_count != en_count:
-            notes.append(
-                f"EN: {en_term} ({en_count}), DE: {de_term} ({de_count})"
-            )
+            notes.append(f"EN: {en_term} ({en_count}), DE: {de_term} ({de_count})")
 
-    if notes:
-        cell = out_ws.cell(row=row_num, column=4)
-        cell.value = "\n".join(notes)
-        cell.alignment = Alignment(wrap_text=True)
-        annotated += 1
+    return notes
 
 
-# ── Save ──────────────────────────────────────────────────────────────────────
+# ── Script entry point ────────────────────────────────────────────────────────
 
-out_name = src_path.name.replace("_translated.xlsx", "_revised_translation_checks.xlsx")
-if out_name == src_path.name:          # fallback if pattern didn't match
-    out_name = src_path.stem + "_re-checked.xlsx"
-out_path = proj_dir / out_name
-try:
-    out_wb.save(out_path)
-except PermissionError:
-    stamp = datetime.now().strftime("%H%M%S")
-    out_path = proj_dir / out_name.replace(".xlsx", f"_{stamp}.xlsx")
-    out_wb.save(out_path)
+def main() -> None:
+    _parser = argparse.ArgumentParser()
+    _parser.add_argument("--pid", default=None)
+    args = _parser.parse_args()
 
-print(f"\nAnnotated {annotated} segment(s).")
-print(f"Saved: {out_path}")
+    if args.pid:
+        proj_dir = project_log.find_project_dir(args.pid)
+    else:
+        proj_dir = project_log.project_dir()
+
+    verb_lookup, noun_lookup, all_de_noun_terms = build_glossary_lookups(proj_dir)
+
+    print(f"Glossary: {proj_dir}")
+    print(f"Verb entries loaded: {len(verb_lookup)}")
+    for en, de in verb_lookup.items():
+        print(f"  {en} → {de}")
+    print(f"Noun entries loaded: {len(noun_lookup)}")
+    for en, de in noun_lookup.items():
+        print(f"  {en} → {de}")
+
+    for pattern in [
+        str(proj_dir / "*_revised_translation_checks.xlsx"),
+        str(proj_dir / "*_GERMAN_translated.xlsx"),
+        str(proj_dir / "*_translated.xlsx"),
+    ]:
+        src_files = [f for f in glob.glob(pattern) if not Path(f).name.startswith("~$")]
+        if src_files:
+            break
+
+    if not src_files:
+        raise FileNotFoundError(f"No _translated.xlsx found in {proj_dir}")
+
+    src_path = Path(src_files[0])
+    print(f"\nSource: {src_path.name}")
+
+    src_wb = openpyxl.load_workbook(src_path)
+    src_ws = src_wb.active
+
+    out_wb = openpyxl.Workbook()
+    out_ws = out_wb.active
+
+    for row_num in range(1, HEADER_ROWS + 1):
+        for col in range(1, 4):
+            out_ws.cell(row=row_num, column=col).value = src_ws.cell(row=row_num, column=col).value
+
+    out_ws.cell(row=2, column=4).value = "Glossary Checks"
+    out_ws.column_dimensions["B"].width = 60
+    out_ws.column_dimensions["C"].width = 60
+    out_ws.column_dimensions["D"].width = 55
+
+    annotated = 0
+
+    for row_num in range(HEADER_ROWS + 1, src_ws.max_row + 1):
+        seg_id  = src_ws.cell(row=row_num, column=1).value
+        en_text = src_ws.cell(row=row_num, column=2).value
+        de_text = src_ws.cell(row=row_num, column=3).value
+
+        out_ws.cell(row=row_num, column=1).value = seg_id
+        out_ws.cell(row=row_num, column=2).value = en_text
+        out_ws.cell(row=row_num, column=3).value = de_text
+
+        if not en_text or not de_text:
+            continue
+
+        notes = check_segment_glossary(
+            str(en_text), str(de_text), verb_lookup, noun_lookup, all_de_noun_terms
+        )
+
+        if notes:
+            cell = out_ws.cell(row=row_num, column=4)
+            cell.value = "\n".join(notes)
+            cell.alignment = Alignment(wrap_text=True)
+            annotated += 1
+
+    out_name = src_path.name.replace("_translated.xlsx", "_revised_translation_checks.xlsx")
+    if out_name == src_path.name:
+        out_name = src_path.stem + "_re-checked.xlsx"
+    out_path = proj_dir / out_name
+    try:
+        out_wb.save(out_path)
+    except PermissionError:
+        stamp = datetime.now().strftime("%H%M%S")
+        out_path = proj_dir / out_name.replace(".xlsx", f"_{stamp}.xlsx")
+        out_wb.save(out_path)
+
+    print(f"\nAnnotated {annotated} segment(s).")
+    print(f"Saved: {out_path}")
+
+
+if __name__ == "__main__":
+    main()
