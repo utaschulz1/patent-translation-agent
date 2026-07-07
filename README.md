@@ -1,6 +1,8 @@
 # patent-translation-agent
 
-Automation scripts for EN→DE patent translation. Covers XTRF job intake (step 3), job setup (step 4), XTM file download, pre-translation via Lara and IP.appify (step 5), and LLM-based consistency/glossary checks (step 6).
+Automation scripts for EN→DE patent translation. The scripts are orchestrated by
+the FastAPI app in the parent repository (`patent-translation-app`). Individual
+scripts can also be run standalone for debugging.
 
 ---
 
@@ -9,52 +11,55 @@ Automation scripts for EN→DE patent translation. Covers XTRF job intake (step 
 ```
 patent-translation-agent/
 │
-├── get_XTRF_job.py               # Step 3: fetch pending jobs from XTRF job list
-├── xtrf_job_setup.py             # Step 4: XTRF login → create folders → download sources → glossary CSV
+├── get_XTRF_job.py               Fetch pending jobs from XTRF job list
+├── xtrf_job_setup.py             XTRF login → create folders → download sources → glossary CSV
 │
-├── xtm_initial_download.py       # Step: XTM download → xlsx + xliff to project folder
+├── xtm_initial_download.py       XTM download → xlsx + xliff to project folder
+├── xtm_upload_translations.py    Upload revised translation xlsx back to XTM
+├── xtm_final_download.py         Final XTM download (docx/PDF/xlsx deliverables)
+├── xtm_probe_preview_types.py    Helper: probe available XTM preview types
 │
-├── lara_translate.py             # Step 5 (primary): Lara pre-translation
-├── lara_glossary_upload.py       # Upload project glossary to Lara
-├── lara_glossary_download.py     # Download glossary from Lara
-├── lara_glossary_upload_standard.py  # Upload standard glossary to Lara
+├── ice_tm_creation.py            Extract ICE/100% XLF matches → create Lara TM with adapt_to
+├── import_segments.py            Parse source XLF → write segments to workflow.db for CAT UI
+├── lara_translate.py             Lara pre-translation (uses project ICE TM + glossary)
+├── lara_segment.py               Per-segment Lara translation for CAT UI + update_project_tm()
+├── lara_glossary_upload.py       Upload project glossary to Lara
+├── lara_glossary_download.py     Download glossary from Lara
+├── lara_glossary_upload_standard.py  Upload standard glossary to Lara
 │
-├── ipappify_translate.py         # Step 5 (alt): IP.appify pre-translation (Azure B2C auth)
-├── ipappify_translate_apikey.py  # Step 5 (alt): IP.appify pre-translation (API key auth)
+├── ipappify_translate.py         IP.appify pre-translation (Azure B2C auth — legacy)
+├── ipappify_translate_apikey.py  IP.appify pre-translation (API key auth — current)
 │
-├── LLM_verb_comparison_xlsx.py   # Step 6: verb consistency check → verb_flags.csv + _checks.xlsx
-├── LLM_noun_comparison_xlsx.py   # Step 6: noun consistency check → noun_inconsistency_table.csv
-├── LLM_capability_comparison_xlsx.py  # Step 6: capability consistency check
-├── merge_glossaries.py           # Step 6b: merge verb/noun/standard glossaries → project glossary
-├── llm_glossary_cleanup.py       # Step 6b: LLM-based cleanup of merged glossary
-├── glossary_compare.py           # Step 6c: rule-based glossary mismatch check
-├── glossary_compare_revised_translation.py  # Step 6c: glossary check on revised translation
+├── LLM_verb_comparison_xlsx.py   Verb consistency check → verb_flags.csv + _checks.xlsx
+├── LLM_noun_comparison_xlsx.py   Noun consistency check → noun_inconsistency_table.csv
+├── LLM_capability_comparison_xlsx.py  Capability consistency check
+├── merge_glossaries.py           Merge verb/noun/standard glossaries → project glossary
+├── llm_glossary_cleanup.py       LLM-based cleanup of merged glossary (DeepSeek V3 via OpenRouter)
+├── glossary_compare.py           Rule-based glossary mismatch check on translated output
+├── glossary_compare_revised_translation.py  Glossary check on revised translation
+├── linter.py                     Terminology linter — detects forbidden patterns in DE text
 │
-├── xtm_upload_translations.py    # Upload revised translation xlsx back to XTM
-├── xtm_final_download.py         # Final XTM download (docx/PDF/xlsx deliverables)
-├── xtrf_upload.py                # Upload deliverables to XTRF vendor portal
+├── xtrf_upload.py                Upload deliverables to XTRF vendor portal
+├── delete_project.py             Remove project from workflow.db
+├── delete_project_folder.py      Delete local project folder (confirm backup first)
 │
-├── gdrive.py                     # Google Drive sync module (push + pull)
-├── gdrive_push.py                # Push project files to Google Drive
-├── gdrive_pull_revised.py        # Pull revised translation from Google Drive
-├── pull_from_gdrive.py           # General-purpose Drive pull
+├── project_log.py                Shared: project context, find_project_dir(), event log
+├── config.py                     Shared configuration
+├── consolidate_scorecards.py     Consolidate QA scorecards across segments
 │
-├── workflow_lara.py              # Orchestrator: Lara pre-translation workflow
-├── workflow_iptranslate.py       # Orchestrator: IP.appify workflow
-├── workflow_review.py            # Orchestrator: post-translation review workflow
+├── standard_glossary.csv         Shared EN→DE terminology used by merge_glossaries.py
 │
-├── config.py                     # Shared configuration
-├── linter.py                     # Terminology linter
-├── archive_preprocessing.py      # Archive and preprocessing utilities
-├── consolidate_scorecards.py     # Consolidate QA scorecards
-├── project_log.py                # Shared: project context (project_dir()) + event log
-├── standard_glossary.csv         # Shared terminology used by merge_glossaries.py
-├── stop-eng.txt                  # Stop words (legacy spaCy reference)
+├── lara_glossaries.json          Registry: project_id → Lara glossary ID (written at upload)
+├── lara_memories.json            Registry: memory_{project_id} → Lara TM ID (written by ICE_TM_CREATION)
+├── DE_verb_lemma_lookup.json     DE verb lemma lookup table (spacy pre-computed)
+├── EN_verb_lemma_lookup.json     EN verb lemma lookup table (spacy pre-computed)
+├── linter_categories.json        Category definitions for the terminology linter
+├── scorecard_log.json            Cross-project QA scorecard log
 │
-├── Matecat/                      # Matecat integration scripts
+├── Matecat/                      Matecat integration scripts
 │   ├── matecat_upload.py
 │   ├── matecat_download.py
-│   ├── matecat_xtm_upload.py     # XLF upload from Matecat to XTM
+│   ├── matecat_xtm_upload.py     XLF upload from Matecat to XTM
 │   ├── matecat_xtm_verify.py
 │   ├── matecat_glossary_upload.py
 │   ├── matecat_info.py
@@ -64,22 +69,26 @@ patent-translation-agent/
 │   ├── Excel2TMX.py
 │   └── extract_xlf_from_xbpkg.py
 │
-├── utilities/                    # One-off and alignment tools
+├── utilities/                    One-off and alignment tools
 │   ├── align_docx.py
 │   ├── sort_csv_alphabet.py
-│   └── extract_align_bilingual_pdf.py
+│   ├── extract_align_bilingual_pdf.py
+│   ├── project_spreadsheet.gs    Google Apps Script: project tracking spreadsheet
+│   └── scheduler_xtrf.gs         Google Apps Script: XTRF job scheduling helper
 │
-├── projects/                     # Per-project working folders — gitignored
-│   └── PCODE_YYMM_PNNNN/
-│       ├── PCODE_YYMM_PNNNN_translated.xlsx
-│       ├── PCODE_YYMM_PNNNN_checks.xlsx
-│       ├── glossary_PCODE_YYMM_PNNNN.csv
-│       └── *.csv  (verb/noun pairs, flag tables)
+├── projects/                     Per-project working folders — gitignored
+│   └── JOBNUM_LANGPAIR_PID/
+│       └── pre-processing/       XLF, TMX, glossary CSV, checks outputs
 │
-├── current_project.json          # Active project pointer — gitignored
-├── project_log.json              # Cross-project event history — gitignored
-└── .env                          # Credentials — gitignored
+├── current_project.json          Active project pointer — gitignored
+├── project_log.json              Cross-project event history — gitignored
+└── .env                          Credentials — gitignored (only needed for standalone runs)
 ```
+
+> **Note:** `workflow_lara.py`, `workflow_iptranslate.py`, and `workflow_review.py`
+> are legacy standalone orchestrators. They are no longer the primary way to run
+> the workflow. The FastAPI app in `patent-translation-app/` runs each script as
+> an individual subprocess. The standalone scripts remain for ad-hoc debugging.
 
 ---
 
@@ -87,13 +96,20 @@ patent-translation-agent/
 
 ### Dependencies
 
-```
-pip install requests python-dotenv openai openpyxl pandas python-docx spacy lara-sdk websocket-client
+```bash
+pip install requests python-dotenv openai openpyxl pandas python-docx spacy \
+            lara-sdk websocket-client lxml
 python -m spacy download en_core_web_sm
 python -m spacy download de_core_news_sm
 ```
 
-### .env
+`lxml` is required by `import_segments.py` and `ice_tm_creation.py` (XLF parsing).
+
+### .env (standalone runs only)
+
+When running scripts through the FastAPI app, credentials come from the app's
+`.env` — the subprocess inherits the app's environment. Only needed here for
+direct standalone execution:
 
 ```env
 # XTRF vendor portal
@@ -108,10 +124,10 @@ IPAPPIFY_API_KEY=...
 LARA_ACCESS_KEY_ID=...
 LARA_ACCESS_KEY_SECRET=...
 
-# OpenRouter (DeepSeek / LLM checks)
+# OpenRouter (DeepSeek V3 / LLM checks)
 OPENROUTER_API_KEY=...
 
-# XTM Workbench (preferred account first)
+# XTM Workbench (preferred account first; up to 6)
 XTM_WORKBENCH_USERNAME1=...
 XTM_WORKBENCH_PASSWORD1=...
 
@@ -130,53 +146,100 @@ GDRIVE_BASE_PATH=patent-translation-agent/CLIENT1
 
 ## How projects work
 
-Each project gets an isolated working folder under `projects/`:
+### Folder layout
+
+`xtrf_job_setup.py` creates a project folder under `projects/`:
 
 ```
-projects/PCODE_YYMM_PNNNN/
+projects/JOBNUM_LANGPAIR_PID/
+    pre-processing/
+        *.xlf          XTM bilingual source file
+        ICE_PID.tmx    ICE TM file (if matches found)
+        glossary_PID.csv
+        ...
 ```
 
-When `xtrf_job_setup.py` runs, it creates this folder and writes `current_project.json` at the repo root. Every downstream script calls `project_dir()` from `project_log.py` to find its input/output path — no hardcoded paths, no shared `input/` folder.
+`find_project_dir(project_id)` in `project_log.py` returns the `pre-processing/`
+subfolder (not the top-level project folder).
 
-To switch projects, run step 3/4 again. `current_project.json` is overwritten; the previous project folder stays intact.
+`current_project.json` in the repo root is overwritten by each new job setup.
+Every script that doesn't take an explicit `--pid` argument calls `project_dir()`
+from `project_log.py` to locate input/output paths.
+
+### Segment database
+
+`import_segments.py` writes segments to `workflow.db` (in the app's root directory,
+not in `agent/`). The DB path is resolved by `workflow_db.py` in the app as
+`Path(__file__).parent / "workflow.db"` — always absolute, always the same file
+regardless of cwd. Never set `DB_PATH` to a relative path in `.env`.
+
+### Lara TM and glossary registries
+
+Two JSON files act as per-project registries, written at the time of upload and
+read at translation time:
+
+| File | Key pattern | Written by | Read by |
+|---|---|---|---|
+| `lara_glossaries.json` | `{project_id}` → glossary ID | `lara_glossary_upload.py` | `lara_translate.py`, `lara_segment.py` |
+| `lara_memories.json` | `memory_{project_id}` → TM ID | `ice_tm_creation.py` | `lara_translate.py`, `lara_segment.py` |
+
+Both `lara_translate.py` and `lara_segment.py` look up the project's TM from
+`lara_memories.json` and pass it as `adapt_to` so Lara biases output toward the
+project's ICE matches and confirmed CAT segments.
 
 ---
 
-## Workflow
+## Workflow (FastAPI-managed)
 
-| Step | What | Script | Status |
-|------|------|--------|--------|
-| 3 | Fetch pending XTRF jobs | `get_XTRF_job.py` | automated |
-| 4 | XTRF job setup, folder creation, glossary | `xtrf_job_setup.py` | automated |
-| 4b | Download XTM bilingual files (xlsx + xliff) | `xtm_initial_download.py` | automated |
-| 5 | Pre-translation via Lara | `lara_translate.py` | automated |
-| 5 alt | Pre-translation via IP.appify | `ipappify_translate_apikey.py` | automated |
-| 6 | Verb + noun + capability consistency checks | `LLM_verb/noun/capability_comparison_xlsx.py` | automated |
-| 6b | Merge + clean glossaries | `merge_glossaries.py` + `llm_glossary_cleanup.py` | automated |
-| 6c | Glossary mismatch check | `glossary_compare.py` | automated |
-| 6d | Upload glossary to Lara | `lara_glossary_upload.py` | automated |
-| 7–14 | Revision of `_checks.xlsx` | — | manual |
-| 15 | Pull revised xlsx from Google Drive | `gdrive_pull_revised.py` | wired |
-| 16 | Upload xliff to XTM (via Matecat) | `Matecat/matecat_xtm_upload.py` | working locally |
-| 17 | Upload revised translation xlsx to XTM | `xtm_upload_translations.py` | wired |
-| 18 | Final XTM download | `xtm_final_download.py` | wired |
-| 19 | Upload deliverables to XTRF | `xtrf_upload.py` | working locally |
+The FastAPI app runs each step as a subprocess. Steps run in this order for a
+standard post-editing job:
 
-### Running the automated workflow
+| Step | Script | Description |
+|---|---|---|
+| `JOB_SETUP` | `xtrf_job_setup.py` | Download job metadata and source files from XTRF |
+| `XTM_FILES_DOWNLOADED` | `xtm_initial_download.py` | Download XLF/XLSX from XTM |
+| `ICE_TM_CREATION` | `ice_tm_creation.py --pid {pid}` | Extract ICE/100% matches, create Lara TM |
+| `LARA_PRETRANSLATION` | `lara_translate.py` | Pre-translate with standard glossary + ICE TM |
+| `GLOSSARY_ANALYZED` | LLM comparison scripts + merge | Verb/noun checks, merge, LLM cleanup |
+| `GLOSSARY_REVIEWED` | *(CAT UI checkpoint)* | Manual review in app UI — edit CSV, confirm |
+| `GLOSSARY_UPLOADED_TO_LARA` | `lara_glossary_upload.py` | Upload clean glossary to Lara |
+| `IMPORT_SEGMENTS` | `import_segments.py --pid {pid}` | Parse XLF → DB for CAT UI |
+| `TRANSLATION_LARA` | *(CAT UI)* | Segment-by-segment translation at `/projects/{id}/cat` |
+| `MATECAT_XLF_TO_EXCEL` | `Matecat/matecat_xlf_to_excel.py` | Convert Matecat export to Excel |
+| `TRANSLATION_CHECKS` | `linter.py` + `glossary_compare.py` | Linter and glossary compliance |
+| `XLF_XTM_UPLOAD` | `Matecat/matecat_xtm_upload.py` | Upload corrected XLF to XTM |
+| `XLSX_XTM_UPLOAD` | `xtm_upload_translations.py` | Upload revised XLSX to XTM |
+| `MATECAT_XTM_VERIFY` | `Matecat/matecat_xtm_verify.py` | Verify XTM upload segment by segment |
+| `XTM_FINAL_DOWNLOAD` | `xtm_final_download.py` | Download final deliverables from XTM |
+| `XTRF_UPLOAD` | `xtrf_upload.py` | Upload deliverables to XTRF vendor portal |
+| `DELETE_PROJECT_FILES` | `delete_project_folder.py` | Delete local job folder (confirm backup first) |
+
+### CAT UI and TM update
+
+The `TRANSLATION_LARA` step opens the CAT UI at `/projects/{id}/cat`. Each
+segment can be translated via `lara_segment.py` (calls Lara with the project ICE
+TM active via `adapt_to`). After translating a batch of segments:
+
+1. Confirm segments in the CAT UI (status = CONFIRMED)
+2. Click **Update TM** → `POST /api/projects/{id}/update-tm`
+3. Confirmed segments are uploaded to the project's Lara TM via `update_project_tm()`
+4. Future translations for this project will incorporate the confirmed choices
+
+### Legacy standalone workflow
 
 ```bash
-python workflow_lara.py            # steps 3 → 4 → 4b → 5 (Lara) → 6 → 6b → 6c → 6d
-python workflow_iptranslate.py     # steps 3 → 4 → 5 (IP.appify) → 6 → 6b
-python workflow_review.py          # post-translation review steps
+python workflow_lara.py          # steps JOB_SETUP → XTM_FILES_DOWNLOADED → LARA_PRETRANSLATION → GLOSSARY_ANALYZED
+python workflow_iptranslate.py   # same with IP.appify instead of Lara
 ```
 
-To run steps individually:
+For direct script invocation:
 
 ```bash
-python get_XTRF_job.py
-python xtrf_job_setup.py <XTRF-job-URL-or-ID>
+python xtrf_job_setup.py
 python xtm_initial_download.py
+python ice_tm_creation.py --pid PAS_2606_P0032
 python lara_translate.py
+python import_segments.py --pid PAS_2606_P0032
 python LLM_verb_comparison_xlsx.py
 python LLM_noun_comparison_xlsx.py
 python LLM_capability_comparison_xlsx.py
@@ -190,15 +253,16 @@ python lara_glossary_upload.py
 
 ## XTRF job folder
 
-Source files (downloaded in step 4) land in the local work folder:
+Source files downloaded in `JOB_SETUP` land in the local work folder (path set by
+`WORK_DIR` in app `.env`):
 
 ```
-PATH_TO_WORK_DIR\JOBNUM_LANGPAIR_PROJ_ID\
+WORK_DIR/JOBNUM_LANGPAIR_PROJ_ID/
 ```
 
-e.g. `12345678ENDE11_CC_YYMM_PNNNN\`
+e.g. `12345678ENDE11_CC_YYMM_PNNNN/`
 
-The relevant CAT file inside the zip is `*Clean_XTM.docx`. Do not modify it — it is the reference file.
+The relevant XTM bilingual file is downloaded by `XTM_FILES_DOWNLOADED`.
 
 ---
 
@@ -206,19 +270,29 @@ The relevant CAT file inside the zip is `*Clean_XTM.docx`. Do not modify it — 
 
 Login URL: `https://word.welocalize.com/project-manager-gui/login.jsp?client=CLIENT_CODE`  
 Company field: `CLIENT_CODE`  
-XTM accounts: `XTM_WORKBENCH_USERNAME1` / `XTM_WORKBENCH_PASSWORD1` (up to 6 accounts configured)
+XTM accounts: `XTM_WORKBENCH_USERNAME1` / `XTM_WORKBENCH_PASSWORD1` (up to 6 configured)
 
-**Important:** A redirect to `login.jsp` after POST = failure, even if HTTP 200. Only a redirect to `configuration-pages.action` = success.
+**Important:** A redirect back to `login.jsp` after POST = failure, even if HTTP 200.
+Only a redirect to `configuration-pages.action` = success.
 
-XTM file download is handled by `xtm_initial_download.py`.
+XTM sessions expire after ~15 WebSocket TU_UPDATED operations — `xtm_upload_translations.py`
+handles reconnection automatically.
 
 ---
 
 ## Known issues / notes
 
-- `Dictionary` field in IP.appify API is non-functional (tested 2026-04-23). Glossary enforcement is client-side in the Word plugin only. Use `ipappify_translate_apikey.py` (API key auth) rather than the older token-based variant.
-- LLM prompts must **not** say "Normalize" — causes global lowercase of both EN and DE output.
-- `glossary_compare.py` is more reliable than the LLM-based glossary check for catching systematic mismatches. Both complement each other.
-- For EN multi-word glossary entries where DE is adj.+noun (e.g. `selective co-product → selektives Co-Produkt`): either strip the EN adjective or add a bare-noun entry alongside. The LLM extracts the longest phrase present, so the full EN adjective+noun may not always be captured.
-- `XTM_FINAL_DOWNLOAD` and `XTRF_UPLOAD` are local-only steps — they use the local work folder (OneDrive). Railway support is a future TODO.
-- `MATECAT_COOKIE` is a session cookie and will expire periodically; update it from browser dev tools when `matecat_xtm_upload.py` returns 401.
+- **`MATECAT_COOKIE` expires.** Update from browser dev tools when `XLF_XTM_UPLOAD`
+  returns 401.
+- **IP.appify `Dictionary` field is non-functional** (tested 2026-04-23). Glossary
+  enforcement is client-side only. Use `ipappify_translate_apikey.py` (API key
+  auth), not the older token-based variant.
+- **LLM prompts must not say "Normalize"** — causes global lowercase of both EN
+  and DE output.
+- **`glossary_compare.py` is more reliable than the LLM check** for catching
+  systematic mismatches. Both complement each other.
+- **EN multi-word glossary entries**: for EN adj.+noun → DE adj.+noun entries,
+  either strip the EN adjective or add a bare-noun entry alongside. The LLM
+  extracts the longest matching phrase, so the full phrase may not always match.
+- **`XTM_FINAL_DOWNLOAD` and `XTRF_UPLOAD` are local-only** — they use the local
+  `WORK_DIR` (OneDrive path). Railway support is a future TODO.
