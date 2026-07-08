@@ -21,6 +21,7 @@ import argparse
 import json
 import os
 import sys
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -182,9 +183,14 @@ tmx_path.write_text(tmx_content, encoding="utf-8")
 print(f"[ice_tm] Written: {tmx_path.name}", flush=True)
 
 import_job = lara.memories.import_tmx(memory.id, str(tmx_path))
-print(f"[ice_tm] Upload started (job: {import_job.id}) — waiting...", flush=True)
-lara.memories.wait_for_import(import_job)
-print(f"[ice_tm] Upload complete.", flush=True)
+print(f"[ice_tm] Upload started (job: {import_job.id}) — waiting (max 90s)...", flush=True)
+_t = threading.Thread(target=lambda: lara.memories.wait_for_import(import_job), daemon=True)
+_t.start()
+_t.join(timeout=90)
+if _t.is_alive():
+    print(f"[ice_tm] Still processing after 90s — Lara will finish in background.", flush=True)
+else:
+    print(f"[ice_tm] Upload complete.", flush=True)
 
 # ============================================================
 # Save to lara_memories.json

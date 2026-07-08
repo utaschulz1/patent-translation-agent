@@ -166,14 +166,17 @@ job = lara.glossaries.import_csv(glossary.id, tmp.name)
 os.unlink(tmp.name)
 print(f"Uploading {len(kept)} terms (job: {job.id})...")
 
+deadline = time.time() + 90
 while True:
     status = lara.glossaries.get_import_status(job.id)
-    print(f"  {status.progress:.0%}")
+    print(f"  {status.progress:.0%}", flush=True)
     if status.progress >= 1.0:
+        print("Upload complete.")
         break
-    time.sleep(1)
-
-print("Upload complete.")
+    if time.time() > deadline:
+        print(f"  [warn] Still at {status.progress:.0%} after 90s — continuing anyway.", flush=True)
+        break
+    time.sleep(2)
 
 # ── Save glossary ID to lara_glossaries.json ─────────────────────────────────
 

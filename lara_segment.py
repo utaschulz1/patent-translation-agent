@@ -157,8 +157,7 @@ def update_project_tm(project_id: str, segments: list[tuple[str, str]]) -> dict:
 
     try:
         import_job = lara.memories.import_tmx(memory_id, tmp.name)
-        print(f"[update_tm] Upload started (job: {import_job.id}) — waiting...", flush=True)
-        lara.memories.wait_for_import(import_job)
+        print(f"[update_tm] Upload started (job: {import_job.id}) — Lara will process in background.", flush=True)
         print(f"[update_tm] Done. {len(segments)} segment(s) added to {memory_id}  ({client})", flush=True)
     finally:
         os.unlink(tmp.name)
