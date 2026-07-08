@@ -5,19 +5,20 @@
   "memory_AMIP_2605_P0028": "mem_2ASwSzT9rErROeGhj9cXjn",
   "memory_FRKE_2607_P0612": "mem_2410LsRaoKysGzFvFzOn5l",
   "client_tms": {
-    "RTC":     "mem_1Py1x3uRCxh1ziPOtmqt15",
-    "HALA":    "mem_2rbb8LXHBKFOB05n427I9R",
-    "FRKE":    "mem_1DGed3ejC7wv7PW3b8xhfK",
-    "OIL":     "mem_18uRgeSg6JYG3ALzyx8SVZ",
-    "AMIP":    "mem_1lzg9PywSwqszhygMHvzgu",
+    "RTC": "mem_1Py1x3uRCxh1ziPOtmqt15",
+    "HALA": "mem_2rbb8LXHBKFOB05n427I9R",
+    "FRKE": "mem_1DGed3ejC7wv7PW3b8xhfK",
+    "OIL": "mem_18uRgeSg6JYG3ALzyx8SVZ",
+    "AMIP": "mem_1lzg9PywSwqszhygMHvzgu",
     "SIEMENS": "mem_1cpQAeOGk3ywKGjOhjzQN0",
-    "WMP":     "mem_0ZW2oXqTjx1p30hUYCjAlW",
-    "SYITCL":  "mem_2yZPFTwgeM34HIgtTOFUkI",
-    "xFDT":    "mem_1QT4NC5EqfzzYyEMBmZlEA",
-    "MTMA":    "mem_0BK1h6BJ3zQDaWlKwYLat7",
-    "HUAW":    "mem_34BNFUhzmYTpVt0e0zyz79",
-    "CATG":    "mem_0BeHjzZRAFvzAP5sYouAZT",
-    "LABI":    "mem_32xaUgzRnCoztF6PmJBpgu",
+    "WMP": "mem_0ZW2oXqTjx1p30hUYCjAlW",
+    "SYITCL": "mem_2yZPFTwgeM34HIgtTOFUkI",
+    "xFDT": "mem_1QT4NC5EqfzzYyEMBmZlEA",
+    "MTMA": "mem_0BK1h6BJ3zQDaWlKwYLat7",
+    "HUAW": "mem_34BNFUhzmYTpVt0e0zyz79",
+    "CATG": "mem_0BeHjzZRAFvzAP5sYouAZT",
+    "LABI": "mem_32xaUgzRnCoztF6PmJBpgu",
     "NEN9140": "mem_3cmO9DDaVKxEh2pPbSmumr"
-  }
+  },
+  "client_memory_FRKE_2607_P0612": "mem_1DGed3ejC7wv7PW3b8xhfK"
 }
