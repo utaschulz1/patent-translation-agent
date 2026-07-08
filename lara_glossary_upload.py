@@ -21,6 +21,7 @@
 import argparse
 import csv
 import os
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -28,7 +29,7 @@ from dotenv import load_dotenv
 
 from lara_sdk import AccessKey, Translator
 
-from project_log import project_dir as _pdir
+from project_log import project_dir as _pdir, load_context as _load_ctx
 
 _args = argparse.ArgumentParser()
 _args.add_argument("--pid", default=None, help="Project ID (folder name under projects/). Defaults to current project context.")
@@ -56,13 +57,14 @@ lara = Translator(AccessKey(id=access_key_id, secret=access_key_secret))
 # ============================================================
 
 if _args.pid:
-    proj_dir = Path(__file__).parent / "projects" / _args.pid
+    project_id = _args.pid
+    proj_dir = Path(__file__).parent / "projects" / project_id
     if not proj_dir.exists():
         print(f"ERROR: Project folder not found: {proj_dir}")
-        exit()
+        sys.exit(1)
 else:
+    project_id = _load_ctx()["project_id"]
     proj_dir = _pdir()
-project_id = proj_dir.name
 
 # Prefer the LLM-cleaned glossary; fall back to the raw project glossary.
 clean_path = proj_dir / f"clean_glossary_{project_id}.csv"
@@ -74,7 +76,7 @@ elif raw_path.exists():
     glossary_path = raw_path
 else:
     print(f"ERROR: No glossary CSV found in '{proj_dir}'.")
-    exit()
+    sys.exit(1)
 
 print(f"Project:  {project_id}")
 print(f"Glossary: {glossary_path.name}")

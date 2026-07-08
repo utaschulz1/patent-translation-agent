@@ -52,8 +52,8 @@ def csv_to_tmx(csv_path: Path, tmx_path: Path) -> int:
         lines = [l for l in f if not l.startswith("#")]
 
     for row in csv.DictReader(lines):
-        en = row.get("EN", "").strip()
-        de = row.get("DE", "").strip()
+        en = (row.get("EN") or "").strip()
+        de = (row.get("DE") or "").strip()
 
         if not en or not de:
             continue
@@ -88,8 +88,8 @@ def csv_to_xlsx(csv_path: Path, xlsx_path: Path) -> int:
 
     count = 0
     for row in csv.DictReader(lines):
-        en = row.get("EN", "").strip()
-        de = row.get("DE", "").strip()
+        en = (row.get("EN") or "").strip()
+        de = (row.get("DE") or "").strip()
         if not en or not de or en.startswith("EPO EN:"):
             continue
         ws.append([en, de, ""])
