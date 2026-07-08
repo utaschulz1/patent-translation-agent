@@ -365,7 +365,10 @@ print(f"EPO title EN: {epo_en[:70]}" + ("..." if len(epo_en) > 70 else ""))
 
 verb_groups: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
 
-vdf = pd.read_csv(verb_pairs_path, encoding="utf-8-sig")
+try:
+    vdf = pd.read_csv(verb_pairs_path, encoding="utf-8-sig")
+except pd.errors.EmptyDataError:
+    vdf = pd.DataFrame(columns=["en_verb", "de_verb", "source_text", "target_text"])
 for _, row in vdf.iterrows():
     en  = str(row.get("en_verb",      "")).strip().lower()
     de  = str(row.get("de_verb",      "")).strip()
@@ -384,7 +387,10 @@ print(f"Verb pairs: {len(verb_groups)} EN verbs.")
 cap_groups: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
 
 if cap_pairs_path.exists():
-    cdf = pd.read_csv(cap_pairs_path, encoding="utf-8-sig")
+    try:
+        cdf = pd.read_csv(cap_pairs_path, encoding="utf-8-sig")
+    except pd.errors.EmptyDataError:
+        cdf = pd.DataFrame(columns=["en_verb", "de_verb", "source_text", "target_text"])
     for _, row in cdf.iterrows():
         en  = str(row.get("en_verb",      "")).strip().lower()
         de  = str(row.get("de_verb",      "")).strip()
@@ -404,7 +410,10 @@ else:
 noun_can: dict[str, dict[str, dict]] = defaultdict(dict)
 # noun_can[en_lower][de] = {"count": N, "total": N, "canonical": bool}
 
-ndf = pd.read_csv(noun_can_path, encoding="utf-8-sig")
+try:
+    ndf = pd.read_csv(noun_can_path, encoding="utf-8-sig")
+except pd.errors.EmptyDataError:
+    ndf = pd.DataFrame(columns=["EN Phrase", "DE Phrase", "Count", "Total EN Occurrences", "Canonical"])
 for _, row in ndf.iterrows():
     en       = str(row.get("EN Phrase",              "")).strip().lower()
     de       = str(row.get("DE Phrase",              "")).strip()
@@ -424,7 +433,10 @@ print(f"Noun canonical: {len(noun_can)} EN phrases.")
 noun_deviations: dict[str, list[dict]] = defaultdict(list)
 # one entry per unique (en, deviant_de) pair
 
-idf = pd.read_csv(noun_incon_path, encoding="utf-8-sig")
+try:
+    idf = pd.read_csv(noun_incon_path, encoding="utf-8-sig")
+except pd.errors.EmptyDataError:
+    idf = pd.DataFrame(columns=["EN Phrase", "Actual DE", "Source Text", "Target Text"])
 for _, row in idf.iterrows():
     en        = str(row.get("EN Phrase",    "")).strip().lower()
     actual_de = str(row.get("Actual DE",    "")).strip()
