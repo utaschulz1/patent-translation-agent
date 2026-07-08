@@ -190,7 +190,7 @@ print(f"[ice_tm] Upload complete.", flush=True)
 # Save to lara_memories.json
 # ============================================================
 
-MEMORIES_FILE = Path(__file__).parent / "lara_memories.json"
+MEMORIES_FILE = Path(os.environ.get("LARA_MEMORIES_PATH", str(Path(__file__).parent / "lara_memories.json")))
 registry: dict = {}
 if MEMORIES_FILE.exists():
     registry = json.loads(MEMORIES_FILE.read_text(encoding="utf-8"))

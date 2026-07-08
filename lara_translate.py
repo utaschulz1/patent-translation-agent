@@ -86,7 +86,7 @@ memory_ids = _parse_ids("LARA_MEMORY_IDS")   # Team plan required for adapt_to
 _glossaries_file = Path(__file__).parent / "lara_glossaries.json"
 _glossaries_registry: dict = json.loads(_glossaries_file.read_text(encoding="utf-8")) if _glossaries_file.exists() else {}
 
-_memories_file = Path(__file__).parent / "lara_memories.json"
+_memories_file = Path(os.environ.get("LARA_MEMORIES_PATH", str(Path(__file__).parent / "lara_memories.json")))
 _memories_registry: dict = json.loads(_memories_file.read_text(encoding="utf-8")) if _memories_file.exists() else {}
 
 # ============================================================

@@ -54,7 +54,7 @@ def _get_glossary_ids(project_id: str | None = None) -> list[str]:
 
 def _get_memory_ids(project_id: str | None = None) -> list[str]:
     """Load ICE TM and client TM memory IDs from lara_memories.json."""
-    registry_path = Path(__file__).parent / "lara_memories.json"
+    registry_path = Path(os.environ.get("LARA_MEMORIES_PATH", str(Path(__file__).parent / "lara_memories.json")))
     if not registry_path.exists() or not project_id:
         return []
     registry: dict = json.loads(registry_path.read_text(encoding="utf-8"))
@@ -118,7 +118,7 @@ def update_project_tm(project_id: str, segments: list[tuple[str, str]]) -> dict:
         raise ValueError("No segments to upload")
 
     lara = _get_lara()
-    memories_path = Path(__file__).parent / "lara_memories.json"
+    memories_path = Path(os.environ.get("LARA_MEMORIES_PATH", str(Path(__file__).parent / "lara_memories.json")))
     registry: dict = json.loads(memories_path.read_text(encoding="utf-8")) if memories_path.exists() else {}
 
     memory_key = f"client_memory_{project_id}"
