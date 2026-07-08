@@ -19,9 +19,10 @@ patent-translation-agent/
 ├── xtm_final_download.py         Final XTM download (docx/PDF/xlsx deliverables)
 ├── xtm_probe_preview_types.py    Helper: probe available XTM preview types
 │
-├── ice_tm_creation.py            Extract ICE/100% XLF matches → create Lara TM with adapt_to
+├── ice_tm_creation.py            Extract ICE/100% XLF matches → create Lara TM (no-op if no matches)
+├── add_client_tm.py              Resolve client TM by acronym → register client_memory_{pid}
 ├── import_segments.py            Parse source XLF → write segments to workflow.db for CAT UI
-├── lara_translate.py             Lara pre-translation (uses project ICE TM + glossary)
+├── lara_translate.py             Lara pre-translation (ICE TM + client TM + glossary via adapt_to)
 ├── lara_segment.py               Per-segment Lara translation for CAT UI + update_project_tm()
 ├── lara_glossary_upload.py       Upload project glossary to Lara
 ├── lara_glossary_download.py     Download glossary from Lara
@@ -50,7 +51,7 @@ patent-translation-agent/
 ├── standard_glossary.csv         Shared EN→DE terminology used by merge_glossaries.py
 │
 ├── lara_glossaries.json          Registry: project_id → Lara glossary ID (written at upload)
-├── lara_memories.json            Registry: memory_{project_id} → Lara TM ID (written by ICE_TM_CREATION)
+├── lara_memories.json            Registry: memory_{pid} (ICE TM), client_memory_{pid}, client_tms (by acronym)
 ├── DE_verb_lemma_lookup.json     DE verb lemma lookup table (spacy pre-computed)
 ├── EN_verb_lemma_lookup.json     EN verb lemma lookup table (spacy pre-computed)
 ├── linter_categories.json        Category definitions for the terminology linter
@@ -180,12 +181,15 @@ read at translation time:
 
 | File | Key pattern | Written by | Read by |
 |---|---|---|---|
-| `lara_glossaries.json` | `{project_id}` → glossary ID | `lara_glossary_upload.py` | `lara_translate.py`, `lara_segment.py` |
-| `lara_memories.json` | `memory_{project_id}` → TM ID | `ice_tm_creation.py` | `lara_translate.py`, `lara_segment.py` |
+| `lara_glossaries.json` | `glossary_{project_id}` → glossary ID | `lara_glossary_upload.py` | `lara_translate.py`, `lara_segment.py` |
+| `lara_memories.json` | `memory_{project_id}` → ICE TM ID | `ice_tm_creation.py` | `lara_translate.py`, `lara_segment.py` |
+| `lara_memories.json` | `client_memory_{project_id}` → client TM ID | `add_client_tm.py` | `lara_translate.py`, `lara_segment.py`, `update_project_tm()` |
+| `lara_memories.json` | `client_tms.{ACRONYM}` → client TM ID | `add_client_tm.py` (once per new client) | `add_client_tm.py` |
 
-Both `lara_translate.py` and `lara_segment.py` look up the project's TM from
-`lara_memories.json` and pass it as `adapt_to` so Lara biases output toward the
-project's ICE matches and confirmed CAT segments.
+`lara_translate.py` and `lara_segment.py` pass both `memory_{pid}` (ICE TM, if it
+exists) and `client_memory_{pid}` as `adapt_to`, in that order. "Update Memory" in
+the CAT UI uploads confirmed segments to the client TM (`client_memory_{pid}`), not
+the ICE TM.
 
 ---
 
@@ -198,8 +202,9 @@ standard post-editing job:
 |---|---|---|
 | `JOB_SETUP` | `xtrf_job_setup.py` | Download job metadata and source files from XTRF |
 | `XTM_FILES_DOWNLOADED` | `xtm_initial_download.py` | Download XLF/XLSX from XTM |
-| `ICE_TM_CREATION` | `ice_tm_creation.py --pid {pid}` | Extract ICE/100% matches, create Lara TM |
-| `LARA_PRETRANSLATION` | `lara_translate.py` | Pre-translate with standard glossary + ICE TM |
+| `ICE_TM_CREATION` | `ice_tm_creation.py --pid {pid}` | Extract ICE/100% matches, create Lara TM — no-op if none |
+| `ADD_CLIENT_TM` | `add_client_tm.py --pid {pid}` | Resolve client TM from acronym; create new Lara TM if unknown |
+| `LARA_PRETRANSLATION` | `lara_translate.py` | Pre-translate with standard glossary + ICE TM + client TM |
 | `GLOSSARY_ANALYZED` | LLM comparison scripts + merge | Verb/noun checks, merge, LLM cleanup |
 | `GLOSSARY_REVIEWED` | *(CAT UI checkpoint)* | Manual review in app UI — edit CSV, confirm |
 | `GLOSSARY_UPLOADED_TO_LARA` | `lara_glossary_upload.py` | Upload clean glossary to Lara |
@@ -217,13 +222,14 @@ standard post-editing job:
 ### CAT UI and TM update
 
 The `TRANSLATION_LARA` step opens the CAT UI at `/projects/{id}/cat`. Each
-segment can be translated via `lara_segment.py` (calls Lara with the project ICE
-TM active via `adapt_to`). After translating a batch of segments:
+segment is translated via `lara_segment.py`, which passes both the ICE TM
+(`memory_{pid}`, if it exists) and the client TM (`client_memory_{pid}`) as
+`adapt_to`. After translating a batch of segments:
 
 1. Confirm segments in the CAT UI (status = CONFIRMED)
-2. Click **Update TM** → `POST /api/projects/{id}/update-tm`
-3. Confirmed segments are uploaded to the project's Lara TM via `update_project_tm()`
-4. Future translations for this project will incorporate the confirmed choices
+2. Click **Update Memory** → `POST /api/projects/{id}/update-tm`
+3. Confirmed segments are uploaded to the **client TM** via `update_project_tm()`
+4. Future translations for this client will incorporate the confirmed choices
 
 ### Legacy standalone workflow
 
@@ -238,6 +244,7 @@ For direct script invocation:
 python xtrf_job_setup.py
 python xtm_initial_download.py
 python ice_tm_creation.py --pid PAS_2606_P0032
+python add_client_tm.py --pid PAS_2606_P0032
 python lara_translate.py
 python import_segments.py --pid PAS_2606_P0032
 python LLM_verb_comparison_xlsx.py
