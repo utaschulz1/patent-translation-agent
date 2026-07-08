@@ -21,7 +21,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -138,7 +138,7 @@ print(f"[ice_tm] ICE matches: {ice_count}  |  100% matches: {tm100_count}  |  to
 # Build TMX
 # ============================================================
 
-timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 tmx_parts = [
     '<?xml version="1.0" ?>\n'

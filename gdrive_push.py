@@ -20,6 +20,9 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
+APP_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(APP_DIR))
+
 load_dotenv(Path(__file__).parent / ".env")
 
 import project_log
