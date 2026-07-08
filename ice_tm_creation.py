@@ -134,6 +134,10 @@ tm100_count = len(matches) - ice_count
 
 print(f"[ice_tm] ICE matches: {ice_count}  |  100% matches: {tm100_count}  |  total: {len(matches)}", flush=True)
 
+if not matches:
+    print("[ice_tm] No ICE/100% matches — skipping Lara memory creation.", flush=True)
+    sys.exit(0)
+
 # ============================================================
 # Build TMX
 # ============================================================
@@ -165,21 +169,22 @@ for tuid, source, target in matches:
 tmx_parts.append("  </body>\n</tmx>\n")
 tmx_content = "".join(tmx_parts)
 
+# ============================================================
+# Create Lara memory and upload TMX
+# ============================================================
+
 memory_name = f"ICE_{project_id}"
 memory = lara.memories.create(memory_name)
 print(f"[ice_tm] Created Lara memory: {memory.id}  ({memory_name})", flush=True)
 
-if matches:
-    tmx_path = proj_dir / f"ICE_{project_id}.tmx"
-    tmx_path.write_text(tmx_content, encoding="utf-8")
-    print(f"[ice_tm] Written: {tmx_path.name}", flush=True)
+tmx_path = proj_dir / f"ICE_{project_id}.tmx"
+tmx_path.write_text(tmx_content, encoding="utf-8")
+print(f"[ice_tm] Written: {tmx_path.name}", flush=True)
 
-    import_job = lara.memories.import_tmx(memory.id, str(tmx_path))
-    print(f"[ice_tm] Upload started (job: {import_job.id}) — waiting...", flush=True)
-    lara.memories.wait_for_import(import_job)
-    print(f"[ice_tm] Upload complete.", flush=True)
-else:
-    print(f"[ice_tm] No matches — empty memory created, ready for Update TM.", flush=True)
+import_job = lara.memories.import_tmx(memory.id, str(tmx_path))
+print(f"[ice_tm] Upload started (job: {import_job.id}) — waiting...", flush=True)
+lara.memories.wait_for_import(import_job)
+print(f"[ice_tm] Upload complete.", flush=True)
 
 # ============================================================
 # Save to lara_memories.json

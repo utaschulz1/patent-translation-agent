@@ -115,6 +115,10 @@ _memory_key = f"memory_{proj_dir.name}"
 if _memory_key in _memories_registry:
     memory_ids = [_memories_registry[_memory_key]] + memory_ids
     print(f"ICE TM:        {_memories_registry[_memory_key]}  ({_memory_key})")
+_client_key = f"client_memory_{proj_dir.name}"
+if _client_key in _memories_registry:
+    memory_ids.append(_memories_registry[_client_key])
+    print(f"Client TM:     {_memories_registry[_client_key]}  ({_client_key})")
 if memory_ids:
     print(f"TM adaptation: {memory_ids}")
 if _args.file:

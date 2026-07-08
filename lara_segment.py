@@ -53,15 +53,19 @@ def _get_glossary_ids(project_id: str | None = None) -> list[str]:
 
 
 def _get_memory_ids(project_id: str | None = None) -> list[str]:
-    """Load project-specific ICE TM memory ID from lara_memories.json."""
+    """Load ICE TM and client TM memory IDs from lara_memories.json."""
     registry_path = Path(__file__).parent / "lara_memories.json"
     if not registry_path.exists() or not project_id:
         return []
     registry: dict = json.loads(registry_path.read_text(encoding="utf-8"))
-    key = f"memory_{project_id}"
-    if key in registry:
-        return [registry[key]]
-    return []
+    ids = []
+    ice_key = f"memory_{project_id}"
+    if ice_key in registry:
+        ids.append(registry[ice_key])
+    client_key = f"client_memory_{project_id}"
+    if client_key in registry:
+        ids.append(registry[client_key])
+    return ids
 
 
 def translate(
@@ -117,10 +121,10 @@ def update_project_tm(project_id: str, segments: list[tuple[str, str]]) -> dict:
     memories_path = Path(__file__).parent / "lara_memories.json"
     registry: dict = json.loads(memories_path.read_text(encoding="utf-8")) if memories_path.exists() else {}
 
-    memory_key = f"memory_{project_id}"
+    memory_key = f"client_memory_{project_id}"
     memory_id = registry.get(memory_key)
     if not memory_id:
-        raise ValueError(f"No Lara memory found for {project_id!r} — run ICE_TM_CREATION first")
+        raise ValueError(f"No client TM found for {project_id!r} — run ADD_CLIENT_TM first")
     print(f"[update_tm] Using Lara memory: {memory_id}", flush=True)
 
     # Build TMX
