@@ -111,7 +111,9 @@ def run(project_id: str) -> None:
 
         target_el = _find(tu, "target")
         state_qualifier = target_el.get("state-qualifier", "") if target_el is not None else ""
+        state = target_el.get("state", "") if target_el is not None else ""
 
+        revision = None
         if state_qualifier == "exact-match":
             match_quality = "exact-match"
             pretranslation = _plain_text(target_el) if target_el is not None else None
@@ -124,6 +126,11 @@ def run(project_id: str) -> None:
             match_quality = "fuzzy-match"
             pretranslation = None
             status = "PENDING"
+        elif state in ("translated", "final", "signed-off"):
+            match_quality = state
+            pretranslation = None
+            revision = _plain_text(target_el) if target_el is not None else None
+            status = "CONFIRMED"
         else:
             match_quality = state_qualifier or "mt-suggestion"
             pretranslation = None
@@ -138,6 +145,8 @@ def run(project_id: str) -> None:
             pretranslation=pretranslation,
             status=status,
         )
+        if revision:
+            db.save_segment(project_id, seg_id, revision, "CONFIRMED")
         imported += 1
 
     print(
