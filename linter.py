@@ -182,6 +182,7 @@ _REGULAR_SPACE_UNIT_RE = re.compile(
     r"\d (?:" + "|".join(re.escape(u) for u in _UNIT_LIST) + r")(?!\w)"
 )
 _Z_B_REGULAR_SPACE_RE = re.compile(r"z\. B\.")  # regular space; NBSP form is z. B.
+_ANSPRUCH_NBSP_RE      = re.compile(r"Anspr(?:uch|üche)\xa0\d")
 _NEG_TARGET_RE  = re.compile(r"\b(nicht|kein)", re.IGNORECASE)  # catches kein/keine/keinen/…
 
 _CLAIM_MARKER_RE    = re.compile(r"^\d+\.(?!\d)\s*$")   # standalone "1."  (no following text)
@@ -309,6 +310,13 @@ def z_b_nonbreaking_space(_: str, target: str) -> str | None:
     """Flag regular space in 'z. B.' — should be non-breaking space: z. B."""
     if _Z_B_REGULAR_SPACE_RE.search(target):
         return "error: use non-breaking space in \"z. B.\" not regular space — copy: [z. B.]"
+    return None
+
+
+def anspruch_nonbreaking_space(_: str, target: str) -> str | None:
+    """Flag non-breaking space between Anspruch/Ansprüche and a claim number."""
+    if _ANSPRUCH_NBSP_RE.search(target):
+        return 'error: use normal space between "Anspruch/Ansprüche" and the claim number, not non-breaking space'
     return None
 
 
@@ -579,6 +587,7 @@ CHECKS = [
     negation_not_transferred,
     regular_space_before_unit,
     z_b_nonbreaking_space,
+    anspruch_nonbreaking_space,
     hyphen_in_number_range,
     in_response_to_mistranslated,
     plurality_not_transferred,
