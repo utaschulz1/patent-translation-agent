@@ -181,6 +181,7 @@ _UNIT_LIST = sorted([
 _REGULAR_SPACE_UNIT_RE = re.compile(
     r"\d (?:" + "|".join(re.escape(u) for u in _UNIT_LIST) + r")(?!\w)"
 )
+_Z_B_REGULAR_SPACE_RE = re.compile(r"z\. B\.")  # regular space; NBSP form is z. B.
 _NEG_TARGET_RE  = re.compile(r"\b(nicht|kein)", re.IGNORECASE)  # catches kein/keine/keinen/…
 
 _CLAIM_MARKER_RE    = re.compile(r"^\d+\.(?!\d)\s*$")   # standalone "1."  (no following text)
@@ -300,14 +301,21 @@ def leading_trailing_spaces(_: str, target: str) -> str | None:
 def regular_space_before_unit(_: str, target: str) -> str | None:
     """Flag a regular space between a number and a unit; should be non-breaking space (U+00A0)."""
     if _REGULAR_SPACE_UNIT_RE.search(target):
-        return "error: use non-breaking space (Alt+0160) between number and unit, not regular space"
+        return "error: use non-breaking space between number and unit, not regular space — NBSP: [ ]"
+    return None
+
+
+def z_b_nonbreaking_space(_: str, target: str) -> str | None:
+    """Flag regular space in 'z. B.' — should be non-breaking space: z. B."""
+    if _Z_B_REGULAR_SPACE_RE.search(target):
+        return "error: use non-breaking space in \"z. B.\" not regular space — copy: [z. B.]"
     return None
 
 
 def hyphen_in_number_range(_: str, target: str) -> str | None:
     """Flag a hyphen used between digits in target; number ranges require an en dash (–)."""
     if _RANGE_HYPHEN_RE.search(target):
-        return 'error: use em dash (Alt+0150) for ranges, not hyphen'
+        return 'error: use en dash for ranges, not hyphen — en dash: [–]'
     return None
 
 
@@ -570,6 +578,7 @@ CHECKS = [
     leading_trailing_spaces,
     negation_not_transferred,
     regular_space_before_unit,
+    z_b_nonbreaking_space,
     hyphen_in_number_range,
     in_response_to_mistranslated,
     plurality_not_transferred,
