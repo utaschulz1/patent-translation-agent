@@ -646,7 +646,11 @@ if __name__ == "__main__":
         ws.insert_cols(4)
 
     ws.cell(row=2, column=4).value = "Linter"
-    ws.column_dimensions["D"].width = 55
+    ws.column_dimensions["A"].width = 8
+    ws.column_dimensions["B"].width = 20
+    ws.column_dimensions["C"].width = 20
+    ws.column_dimensions["D"].width = 35
+    ws.column_dimensions["E"].width = 35
 
     # ── Run checks over every data row ───────────────────────────────────────
 

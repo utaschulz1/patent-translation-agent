@@ -397,9 +397,10 @@ def main() -> None:
             out_ws.cell(row=row_num, column=col).value = src_ws.cell(row=row_num, column=col).value
 
     out_ws.cell(row=2, column=4).value = "Glossary Checks"
-    out_ws.column_dimensions["B"].width = 60
-    out_ws.column_dimensions["C"].width = 60
-    out_ws.column_dimensions["D"].width = 55
+    out_ws.column_dimensions["A"].width = 8
+    out_ws.column_dimensions["B"].width = 20
+    out_ws.column_dimensions["C"].width = 20
+    out_ws.column_dimensions["D"].width = 35
 
     annotated = 0
 
@@ -409,8 +410,10 @@ def main() -> None:
         de_text = src_ws.cell(row=row_num, column=3).value
 
         out_ws.cell(row=row_num, column=1).value = seg_id
-        out_ws.cell(row=row_num, column=2).value = en_text
-        out_ws.cell(row=row_num, column=3).value = de_text
+        for col, val in ((2, en_text), (3, de_text)):
+            cell = out_ws.cell(row=row_num, column=col)
+            cell.value = val
+            cell.alignment = Alignment(wrap_text=True)
 
         if not en_text or not de_text:
             continue
