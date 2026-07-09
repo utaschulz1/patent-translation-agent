@@ -22,7 +22,6 @@ import zipfile
 import random
 import re
 import string
-import sys
 import time
 import uuid
 from pathlib import Path
@@ -383,7 +382,7 @@ def _unpack_xbpkg(xbpkg: Path) -> list[Path]:
     return xliffs
 
 
-def _setup_session(project_id: str) -> tuple[requests.Session, str, str]:
+def _setup_session(project_id: str, file_filter: str | None = None) -> tuple[requests.Session, str, str]:
     """Login, find task, open workbench. Returns (session, session_token, csrf_token)."""
     username, password = _load_creds()
 
@@ -401,7 +400,7 @@ def _setup_session(project_id: str) -> tuple[requests.Session, str, str]:
     tasks = _get_tasks(session)
     print(f"  {len(tasks)} task(s) in progress")
 
-    task = _find_task(tasks, project_id)
+    task = _find_task(tasks, project_id, file_filter=file_filter)
     ad = task["additionalData"]
     print(f"  Found: {ad.get('projectName', '?')}  (file {ad.get('fileId', '?')})")
 
@@ -432,9 +431,9 @@ def _download_preview(
     return out_path
 
 
-def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | list[Path]]:
+def run(project_id: str, dest_folder: Path | None = None, file_filter: str | None = None) -> dict[str, Path | list[Path]]:
     """Login once, download both the bilingual Excel and the XLIFF. Returns dict with both paths."""
-    session, session_token, csrf_token = _setup_session(project_id)
+    session, session_token, csrf_token = _setup_session(project_id, file_filter=file_filter)
     folder = dest_folder if dest_folder is not None else _find_pre_folder(project_id)
 
     print("Step 4 — Downloading bilingual Excel...")
@@ -447,7 +446,7 @@ def run(project_id: str, dest_folder: Path | None = None) -> dict[str, Path | li
     return {"xlsx": xlsx, "xliff": xliffs}
 
 
-def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
+def run_workflow(project_id: str, msg_id: str | None = None, file_filter: str | None = None) -> bool:
     """Download originals to pre-processing, copy trimmed xlsx + xliff to project folder.
 
     msg_id: Gmail message ID used to write log events; pass None for the manual path.
@@ -462,7 +461,7 @@ def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
     # 1. Try XTM API: download xlsx + xliff directly into pre-processing, trim xlsx in place
     try:
         print("Downloading XTM Excel + XLIFF via API...")
-        result = run(project_id)  # dest_folder=None → _find_pre_folder → pre-processing
+        result = run(project_id, file_filter=file_filter)  # dest_folder=None → _find_pre_folder → pre-processing
         xlsx_path = result["xlsx"]
         xliff_paths = result["xliff"]
 
@@ -494,10 +493,13 @@ def run_workflow(project_id: str, msg_id: str | None = None) -> bool:
 
 def main():
     """CLI entry point: read project_id from argv and call run_workflow()."""
-    if len(sys.argv) < 2:
-        print("Usage: python xtm_initial_download.py <project_id>")
-        raise SystemExit(1)
-    ok = run_workflow(sys.argv[1])
+    import argparse
+    parser = argparse.ArgumentParser(description="Download XTM files for a project.")
+    parser.add_argument("project_id", help="XTM project ID, e.g. RTC_2604_P0732")
+    parser.add_argument("--file", dest="file_filter", default=None,
+                        help="Substring to match against file name (for multi-file projects)")
+    args = parser.parse_args()
+    ok = run_workflow(args.project_id, file_filter=args.file_filter)
     if not ok:
         raise SystemExit(1)
 
