@@ -26,7 +26,7 @@ Checks:
   welche_relativpronomen              — "welche*" in target flagged; use der/die/das instead
   werden_dynamic                      — "wird/wurde*/werden/geworden*" flagged; double-check static vs. dynamic
   preposition_contraction             — German im/vom/am/beim/zum/zur contractions in target
-  betraegt_stative                    — "beträgt/betragen" in target flagged; use "ist/sind" instead
+  betraegt_stative                    — "beträgt/betragen/liegt/liegen" in target flagged; use "ist/sind" instead
   same_selbe                          — "dieselbe*/derselbe*/dasselbe*/demselbe*/denselbe*/desselbe*" in target when source has "same"
   same_gleich_missing                 — "gleich*" absent from target when source has "same"
   comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
@@ -98,7 +98,7 @@ _IN_RESPONSE_TO_RE  = re.compile(r"\bin response to\b", re.IGNORECASE)
 _IN_REAKTION_RE     = re.compile(r"\bin Reaktion\b", re.IGNORECASE)
 _RANGE_HYPHEN_RE    = re.compile(r"\d\s*-\s*\d")  # digit-hyphen-digit, with optional spaces
 
-_BETRAEGT_RE        = re.compile(r"\b(beträgt|betragen)\b", re.IGNORECASE)
+_BETRAEGT_RE        = re.compile(r"\b(beträgt|betragen|liegt|liegen)\b", re.IGNORECASE)
 
 # ── New checks ────────────────────────────────────────────────────────────────
 _FOLGENDES_UMFASST_OK_RE    = re.compile(r"\bFolgendes\s+umfass\w*\s*:", re.IGNORECASE)
@@ -416,10 +416,10 @@ def same_gleich_missing(source: str, target: str) -> str | None:
 
 
 def betraegt_stative(_: str, target: str) -> str | None:
-    """Flag 'beträgt/betragen' in target; static values should use 'ist/sind'."""
+    """Flag 'beträgt/betragen/liegt/liegen' in target; static values should use 'ist/sind'."""
     m = _BETRAEGT_RE.search(target)
     if m:
-        return f'error: "{m.group()}" in target — beträgt = ist'
+        return f'error: "{m.group()}" in target — beträgt/liegt = ist'
     return None
 
 
