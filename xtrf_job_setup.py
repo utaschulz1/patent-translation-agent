@@ -112,7 +112,7 @@ def _extract_job_id(raw: str) -> str | None:
 
 def _find_job_id_by_project(session: requests.Session, project_id: str) -> str:
     """Search the job list for a job whose project name contains project_id."""
-    statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS,PENDING"
+    statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS"
     r = session.get(f"{BASE_URL}/jobs", params={"statuses": statuses})
     r.raise_for_status()
     for job in r.json():
@@ -120,7 +120,7 @@ def _find_job_id_by_project(session: requests.Session, project_id: str) -> str:
         if project_id in name:
             return str(job["id"])
     raise ValueError(
-        f"No IN_PROGRESS/PENDING job found for project '{project_id}'. "
+        f"No IN_PROGRESS job found for project '{project_id}'. "
         "Check XTRF or verify the project ID."
     )
 

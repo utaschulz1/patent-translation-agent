@@ -126,7 +126,7 @@ def run(project_id: str) -> None:
             match_quality = "fuzzy-match"
             pretranslation = None
             status = "PENDING"
-        elif state in ("translated", "final", "signed-off"):
+        elif state in ("final", "signed-off"):
             match_quality = state
             pretranslation = None
             revision = _plain_text(target_el) if target_el is not None else None
