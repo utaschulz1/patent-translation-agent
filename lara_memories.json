@@ -19,9 +19,13 @@
     "CATG": "mem_0BeHjzZRAFvzAP5sYouAZT",
     "LABI": "mem_32xaUgzRnCoztF6PmJBpgu",
     "NEN9140": "mem_3cmO9DDaVKxEh2pPbSmumr",
-    "MCCP": "mem_2iCIgAwWteuIX111AqI1xW"
+    "MCCP": "mem_0sJQaFlqxEkfZgQcYOniOy",
+    "BMF": "mem_0COSghLC5kzpvJysD5ubtK",
+    "CHEP": "mem_2WhfdKIxcr4pcEnUYQKg51"
   },
   "client_memory_FRKE_2607_P0612": "mem_1DGed3ejC7wv7PW3b8xhfK",
   "memory_FRKE_2607_P0634": "mem_3ix9eehwq72lFtxM2UzJrq",
-  "client_memory_FRKE_2607_P0634": "mem_1DGed3ejC7wv7PW3b8xhfK"
+  "client_memory_FRKE_2607_P0634": "mem_1DGed3ejC7wv7PW3b8xhfK",
+  "memory_MCCP_2604_P0007": "mem_1KLEkfrdDM6nv2JJ558S5T",
+  "client_memory_MCCP_2604_P0007": "mem_0sJQaFlqxEkfZgQcYOniOy"
 }
