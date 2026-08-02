@@ -28,13 +28,27 @@ from project_log import project_dir as _pdir
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
+# DE-only: German inflection (case/number/agreement endings) is exactly what
+# lemmatization should normalize away before the majority-vote comparison —
+# without it, "Systems"/"System" or "extrahierte"/"extrahiert" would count as
+# different DE phrases and spuriously fragment the vote.
+#
+# EN lemmatization was removed (2026-08-02) — it does more harm than good on
+# short, decontextualized noun phrases. spaCy's EN tokenizer splits hyphenated
+# compounds into a separate "-" token ("ligand-metal" -> "ligand", "-", "metal"),
+# which the naive " ".join() then re-spaces ("ligand - metal"); the EN source
+# is already lowercased at extraction time, so no lowercasing step is lost.
+# Its POS tagger is also unreliable on isolated phrases at telling an
+# adjectival participle from a verb ("extracted data" -> VERB -> "extract
+# data", "connected device" -> VERB -> "connect device") — a decision that
+# needs sentence context this pipeline no longer has once the LLM has already
+# pulled the phrase out of its sentence.
 try:
-    nlp_en = spacy.load("en_core_web_sm")
     nlp_de = spacy.load("de_core_news_sm")
     SPACY_AVAILABLE = True
 except OSError:
-    print("WARNING: spaCy models not found — lemmatization skipped. "
-          "Run: python -m spacy download en_core_web_sm de_core_news_sm")
+    print("WARNING: spaCy DE model not found — lemmatization skipped. "
+          "Run: python -m spacy download de_core_news_sm")
     SPACY_AVAILABLE = False
 
 
@@ -260,17 +274,17 @@ if not all_pairs:
     exit(1)
 
 # ============================================================
-# PHASE 1b — Lemmatize extracted noun phrase forms
+# PHASE 1b — Lemmatize extracted noun phrase forms (DE side only — see note
+# above the spaCy model loading for why EN is intentionally skipped)
 # ============================================================
 
 if SPACY_AVAILABLE:
-    print("\nPhase 1b: lemmatizing extracted noun phrase forms...")
+    print("\nPhase 1b: lemmatizing extracted noun phrase forms (DE only)...")
     for p in all_pairs:
-        p["en_phrase"] = _lemmatize_phrase(p["en_phrase"], nlp_en, keep_case=False)
         p["de_phrase"] = _lemmatize_phrase(p["de_phrase"], nlp_de, keep_case=True)
     print(f"  Done ({len(all_pairs)} pairs normalized).")
 else:
-    print("\nPhase 1b: skipped (spaCy models unavailable).")
+    print("\nPhase 1b: skipped (spaCy DE model unavailable).")
 
 pairs_csv = str(proj_dir / "noun_segment_pairs.csv")
 current_ids = {s["id"] for s in segments}
