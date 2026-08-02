@@ -525,11 +525,38 @@ def mindestens_at_least(source: str, target: str) -> str | None:
 
 
 def hyphen_in_long_compound(_: str, target: str) -> str | None:
-    """Flag a hyphen between two words of 10+ characters — likely an unnecessary compound hyphen (Style Guide §3.10)."""
+    """Flag a hyphen between two words of 10+ characters — likely an unnecessary compound hyphen (Style Guide §3.10).
+
+    Glossary-unaware fallback used when no project glossary is available.
+    See make_hyphen_in_long_compound() for the glossary-aware version.
+    """
     m = _LONG_COMPOUND_HYPHEN_RE.search(target)
     if m:
         return f'error: unnecessary hyphen in compound "{m.group()}" — merge into one word (Style Guide §3.10)'
     return None
+
+
+def make_hyphen_in_long_compound(all_de_noun_terms: list[str] | None):
+    """Return a hyphen_in_long_compound check bound to a project's glossary DE terms.
+
+    A flagged compound is suppressed when it matches — or is a substring of, or
+    contains as a substring — an approved glossary compound term. This covers both
+    directions: the flagged span itself may be the full glossary term (e.g.
+    "Heteroatom-Ligandteil"), or it may be embedded inside a longer approved
+    compound (e.g. "Heteroatom-Ligandteil" inside "Chrom-Heteroatom-Ligandteil").
+    """
+    terms_lower = [t.lower() for t in (all_de_noun_terms or [])]
+
+    def _check(_: str, target: str) -> str | None:
+        m = _LONG_COMPOUND_HYPHEN_RE.search(target)
+        if not m:
+            return None
+        compound = m.group().lower()
+        if any(compound in term or term in compound for term in terms_lower):
+            return None
+        return f'error: unnecessary hyphen in compound "{m.group()}" — merge into one word (Style Guide §3.10)'
+
+    return _check
 
 
 def acronym_in_compound(_: str, target: str) -> str | None:
@@ -625,6 +652,16 @@ if __name__ == "__main__":
     else:
         proj_dir = project_log.project_dir()
 
+    # Bind hyphen_in_long_compound to the project glossary when one is available,
+    # so approved compound terms (e.g. "Heteroatom-Ligandteil") aren't flagged.
+    checks = list(CHECKS)
+    try:
+        from glossary_compare_revised_translation import build_glossary_lookups
+        _, _, _, all_de_noun_terms = build_glossary_lookups(proj_dir)
+        checks[checks.index(hyphen_in_long_compound)] = make_hyphen_in_long_compound(all_de_noun_terms)
+    except FileNotFoundError:
+        pass  # no glossary for this project — fall back to the glossary-unaware check
+
     src_files = [
         f for f in glob.glob(str(proj_dir / "*_revised_translation_checks.xlsx"))
         if not Path(f).name.startswith("~$")
@@ -677,7 +714,7 @@ if __name__ == "__main__":
 
         issues = [
             result
-            for check in CHECKS
+            for check in checks
             for result in (check(src_str, tgt_str),)
             if result is not None
         ]
