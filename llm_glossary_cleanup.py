@@ -29,12 +29,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 import project_log
+from config import LLM_MODEL
 
 HERE = Path(__file__).parent
 load_dotenv(dotenv_path=HERE / ".env")
 
-MODEL              = "deepseek/deepseek-chat-v3-0324"
-# MODEL              = "deepseek/deepseek-v4-flash"
+MODEL              = LLM_MODEL
 
 MAX_INSTANCES      = 1   # max example sentences per (en, de) pair in prompt
 
@@ -251,7 +251,6 @@ No explanation, no prose, no markdown fences.
 ]
 """
 
-
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
@@ -429,6 +428,11 @@ print(f"Noun canonical: {len(noun_can)} EN phrases.")
 # ── Read noun_inconsistency_table ─────────────────────────────────────────────
 # columns: Segment ID, EN Phrase, Expected DE, Actual DE,
 #          Expected Count, Actual Count, Total Occurrences, Source Text, Target Text
+# Optional columns (only present when LLM_noun_comparison_xlsx.py's Phase 5
+# evaluator ran — RUN_EVALUATOR there defaults to False): False Positive, Reason.
+# A row judged a false positive is excluded here the same way Phase 4 already
+# excludes it from the _checks.xlsx annotation — so turning the evaluator on
+# actually changes what reaches this LLM, instead of being computed and ignored.
 
 noun_deviations: dict[str, list[dict]] = defaultdict(list)
 # one entry per unique (en, deviant_de) pair
@@ -437,7 +441,12 @@ try:
     idf = pd.read_csv(noun_incon_path, encoding="utf-8-sig")
 except pd.errors.EmptyDataError:
     idf = pd.DataFrame(columns=["EN Phrase", "Actual DE", "Source Text", "Target Text"])
+
+skipped_false_positives = 0
 for _, row in idf.iterrows():
+    if str(row.get("False Positive", "")).strip().lower() == "true":
+        skipped_false_positives += 1
+        continue
     en        = str(row.get("EN Phrase",    "")).strip().lower()
     actual_de = str(row.get("Actual DE",    "")).strip()
     src       = str(row.get("Source Text",  "")).strip()
@@ -447,7 +456,9 @@ for _, row in idf.iterrows():
         if actual_de not in existing_de:
             noun_deviations[en].append({"de": actual_de, "source": src, "target": tgt})
 
-print(f"Noun inconsistencies: {len(noun_deviations)} EN phrases with deviations.")
+print(f"Noun inconsistencies: {len(noun_deviations)} EN phrases with deviations."
+      + (f" ({skipped_false_positives} evaluator-judged false positive(s) excluded.)"
+         if skipped_false_positives else ""))
 
 
 # ── Classify verbs ────────────────────────────────────────────────────────────
@@ -780,4 +791,15 @@ with open(clean_glossary_path, "w", newline="", encoding="utf-8-sig") as f:
 total = len(clean_rows) + len(extra_standard)
 print(f"\nGlossary written → {clean_glossary_path.name}  "
       f"({len(clean_rows)} project terms + {len(extra_standard)} extra standard terms = {total} total)")
+
+
+# ── Grow the shared verb lemma tables with any new verbs from this project ────
+# See verb_lemma_sync.py — detects verb pairs (from the *cleaned* rows above,
+# never raw spaCy output) not yet covered by EN_verb_lemma_lookup.json /
+# DE_verb_lemma_lookup.json, and requests+merges their inflected forms.
+
+from verb_lemma_sync import sync_verb_lemma_tables
+
+sync_verb_lemma_tables(clean_rows, consistent_verbs, inconsistent_verbs, client, MODEL)
+
 print("Next step: lara_glossary_upload.py")

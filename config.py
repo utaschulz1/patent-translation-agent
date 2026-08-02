@@ -8,6 +8,8 @@ Optional .env key:
     WORK_DIR   Absolute path to the job storage root. Defaults to agent/projects/.
                Windows+OneDrive:  C:\\Users\\you\\OneDrive\\ArbeitNEU\\Comunica DK
                Linux+GDrive:      /home/you/GoogleDrive/ArbeitNEU/Comunica DK
+    LLM_MODEL  OpenRouter model id used by the LLM glossary/verb-cleanup
+               scripts. Defaults to "deepseek/deepseek-chat-v3-0324".
 """
 
 import os
@@ -25,6 +27,9 @@ PROJECTS_DIR = Path(os.environ.get("PROJECTS_DIR", str(HERE / "projects")))
 # Storage root — the only value that differs between machines/backends
 WORK_DIR      = Path(os.environ.get("WORK_DIR", str(HERE / "projects")))
 SCORECARD_DIR = WORK_DIR / "scorecards"
+
+# OpenRouter model id shared by the LLM glossary/verb-cleanup scripts.
+LLM_MODEL = os.environ.get("LLM_MODEL", "deepseek/deepseek-chat-v3-0324")
 
 # Client code (2-6 uppercase letters) + YYMM + "P" + job number, e.g.
 # "HUAW_2606_P1200". XTRF job type prefixes/suffixes around this core ID
