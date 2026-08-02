@@ -35,7 +35,13 @@ patent-translation-agent/
 ├── LLM_noun_comparison_xlsx.py   Noun consistency check → noun_inconsistency_table.csv
 ├── LLM_capability_comparison_xlsx.py  Capability consistency check
 ├── merge_glossaries.py           Merge verb/noun/standard glossaries → project glossary
-├── llm_glossary_cleanup.py       LLM-based cleanup of merged glossary (DeepSeek V3 via OpenRouter)
+├── llm_glossary_cleanup.py       LLM-based cleanup of merged glossary (DeepSeek V3 via OpenRouter);
+│                                 also grows the verb lemma tables via verb_lemma_sync.py
+├── verb_lemma_sync.py            Detects verb pairs the lemma tables don't cover yet and fills them in
+├── llm_glossary_revise.py        Optional second-pass LLM review of the cleaned glossary — triggered
+│                                 on demand from the "Use LLM" button, GLOSSARY_REVIEWED step only
+├── glossary_revise_prompt.md     Shared default prompt for llm_glossary_revise.py (project overrides
+│                                 saved as glossary_revise_prompt_override.md in the project folder)
 ├── glossary_compare.py           Rule-based glossary mismatch check on translated output
 ├── glossary_compare_revised_translation.py  Glossary check on revised translation
 ├── linter.py                     Terminology linter — detects forbidden patterns in DE text
@@ -206,7 +212,7 @@ standard post-editing job:
 | `ADD_CLIENT_TM` | `add_client_tm.py --pid {pid}` | Resolve client TM from acronym; create new Lara TM if unknown |
 | `LARA_PRETRANSLATION` | `lara_translate.py` | Pre-translate with standard glossary + ICE TM + client TM |
 | `GLOSSARY_ANALYZED` | LLM comparison scripts + merge | Verb/noun checks, merge, LLM cleanup |
-| `GLOSSARY_REVIEWED` | *(CAT UI checkpoint)* | Manual review in app UI — edit CSV, confirm |
+| `GLOSSARY_REVIEWED` | *(CAT UI checkpoint)* | Manual review in app UI — edit CSV, confirm; optional "Use LLM" second pass (`llm_glossary_revise.py`, on demand only) |
 | `GLOSSARY_UPLOADED_TO_LARA` | `lara_glossary_upload.py` | Upload clean glossary to Lara |
 | `IMPORT_SEGMENTS` | `import_segments.py --pid {pid}` | Parse XLF → DB for CAT UI |
 | `TRANSLATION_LARA` | *(CAT UI)* | Segment-by-segment translation at `/projects/{id}/cat` |
@@ -230,6 +236,40 @@ segment is translated via `lara_segment.py`, which passes both the ICE TM
 2. Click **Update Memory** → `POST /api/projects/{id}/update-tm`
 3. Confirmed segments are uploaded to the **client TM** via `update_project_tm()`
 4. Future translations for this client will incorporate the confirmed choices
+
+### Optional LLM glossary revise (GLOSSARY_REVIEWED step)
+
+The "Use LLM" button in the glossary review panel runs a second, optional LLM
+pass over the already-cleaned glossary (`llm_glossary_revise.py`) — never
+automatic, only on explicit click. It reviews three patterns a human catches
+by eye but the first consolidation pass doesn't specifically look for:
+ordinal-duplicate entries ("first X"/"second X", which break the glossary
+checker's contiguous-phrase matching), generic modifiers fused into a
+noun-phrase entry (losing consistency coverage for the bare noun elsewhere),
+and impractical verb-form assignments (a low-frequency verb got the clean
+German form, a high-frequency one got the awkward form). Rules live in
+`glossary_revise_prompt.md` — no examples, only rules/goals, since few-shot
+examples were observed to leak into DeepSeek V3's output on other prompts in
+this pipeline (see the EPO-title echo bug). Input context is deliberately
+minimal: the current glossary list plus structured occurrence counts from
+`verb_canonical_glossary.csv`/`noun_canonical_glossary.csv` — no raw
+source/target sentences, both to limit echo risk and because manual review
+experience suggested sentence-level context wasn't adding much for these
+particular judgments.
+
+The EPO title row is cleaned separately in plain Python (strip the
+`EPO EN:`/`EPO DE:` label, remove inner commas) — a mechanical transform,
+not a judgement call, so it never goes through the LLM. The trailing
+standard-glossary section is left untouched.
+
+The prompt is editable per-project from the same panel (saved as
+`glossary_revise_prompt_override.md` in the project folder; falls back to
+the shared `glossary_revise_prompt.md` default when no override exists) and
+the model is a free-text OpenRouter model id — both meant to make the prompt
+easy to experiment with across models without a code change. The endpoint
+(`POST /glossary/llm-revise`) only ever returns revised text; it never
+writes to the glossary file itself — you still Save/Confirm same as any
+manual edit.
 
 ### Legacy standalone workflow
 
