@@ -409,7 +409,7 @@ class TestPrepositionContraction:
         ("am",   "am Ende"),
         ("beim", "beim Verbinden"),
         ("zum",  "zum Einsatz"),
-        ("zur",  "zur Verfügung"),
+        ("zur",  "zur Steuerung"),
     ])
     def test_contractions_flagged(self, contraction, context):
         result = preposition_contraction("", context)
@@ -424,6 +424,9 @@ class TestPrepositionContraction:
 
     def test_zum_beispiel_exception(self):
         assert preposition_contraction("", "zum Beispiel ein Gerät") is None
+
+    def test_zur_verfuegung_exception(self):
+        assert preposition_contraction("", "zur Verfügung gestellt") is None
 
     def test_no_contraction(self):
         assert preposition_contraction("", "in dem Gehäuse") is None
@@ -446,7 +449,7 @@ class TestBetraegt:
 
     def test_message_contains_hint(self):
         result = betraegt_stative("", "die Länge beträgt 10 mm")
-        assert "beträgt = ist" in result
+        assert "beträgt/liegt = ist" in result
 
     def test_no_match(self):
         assert betraegt_stative("", "die Länge ist 10 mm") is None
@@ -911,7 +914,7 @@ class TestUnterVerwendung:
             "Durchführen einer Prognose unter Verwendung von Verkehrsdaten",
         )
         assert result is not None
-        assert "verwendend" in result
+        assert "mithilfe" in result
 
     def test_verwendend_not_flagged(self):
         assert unter_verwendung(
