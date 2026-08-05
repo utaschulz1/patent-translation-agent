@@ -33,7 +33,7 @@ Checks:
   vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
   folgendes_umfasst                   — finite "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:"); participial "umfassend:" is correct without "Folgendes"
   folgendes_konfiguriert              — "konfiguriert ist:" before a list without "zu Folgendem"
-  dazu_konfiguriert                   — "konfiguriert" in target without "dazu" (→ "dazu konfiguriert")
+  dazu_konfiguriert                   — "dazu konfiguriert" found; standard is "konfiguriert" without "dazu", unless "zu Folgendem konfiguriert ist:" also occurs in the segment
   abbreviation_not_in_source          — d. h./z. B./bzw. in target when EN uses the spelled-out form
   jeweilig_not_respective             — "jeweilig*" in target when EN source has no "respective"
   german_quotation_marks              — straight "..." in target; use German „..." (Alt+0132/Alt+0147)
@@ -106,8 +106,6 @@ _UMFASST_COLON_RE           = re.compile(r"\bumfass(?!end)\w*\s*:", re.IGNORECAS
 _FOLGENDES_KONFIG_OK_RE     = re.compile(r"\bzu\s+Folgendem\s+konfiguriert\s+ist\s*:", re.IGNORECASE)
 _KONFIGURIERT_COLON_RE      = re.compile(r"\bkonfiguriert\s+ist\s*:", re.IGNORECASE)
 _DAZU_KONFIGURIERT_RE       = re.compile(r"\bdazu\s+konfiguriert\b", re.IGNORECASE)
-_KONFIGURIERT_IST_COMMA_RE  = re.compile(r"\bkonfiguriert\s+ist\s*,", re.IGNORECASE)  # "konfiguriert ist, zu [verb]" — valid relative clause
-_KONFIGURIERT_RE            = re.compile(r"\bkonfiguriert\b", re.IGNORECASE)
 _DE_ABBREV_PAIRS = [
     (re.compile(r"\bd\.\s*h\.", re.IGNORECASE), re.compile(r"\bi\.e\.", re.IGNORECASE), "d. h.", "i.e."),
     (re.compile(r"\bz\.\s*B\.", re.IGNORECASE), re.compile(r"\be\.g\.", re.IGNORECASE), "z. B.", "e.g."),
@@ -453,12 +451,10 @@ def folgendes_konfiguriert(_: str, target: str) -> str | None:
 
 
 def dazu_konfiguriert(_: str, target: str) -> str | None:
-    """Flag 'konfiguriert' in target without 'dazu' — correct: 'dazu konfiguriert'.
-    Excludes 'konfiguriert ist, [zu-infinitive]' (valid relative-clause form)."""
-    stripped = _DAZU_KONFIGURIERT_RE.sub("", target)
-    stripped = _KONFIGURIERT_IST_COMMA_RE.sub("", stripped)
-    if _KONFIGURIERT_RE.search(stripped):
-        return "'konfiguriert' ohne 'dazu' verwenden. Nur 'dazu konfiguriert' verwenden, wenn auch 'zu Folgendem konfiguriert(ist):' verwendet wird."
+    """Flag 'dazu konfiguriert' — standard form is 'konfiguriert' without 'dazu'.
+    Exception: 'dazu' may stay if 'zu Folgendem konfiguriert ist:' also occurs in the segment."""
+    if _DAZU_KONFIGURIERT_RE.search(target) and not _FOLGENDES_KONFIG_OK_RE.search(target):
+        return "'dazu konfiguriert' gefunden — 'dazu' ggf. löschen. Nur zulässig, wenn im Segment auch 'zu Folgendem konfiguriert ist:' verwendet wird."
     return None
 
 

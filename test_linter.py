@@ -673,26 +673,26 @@ class TestFolgendesKonfiguriert:
 # ── dazu_konfiguriert ─────────────────────────────────────────────────────────
 
 class TestDazuKonfiguriert:
-    def test_konfiguriert_without_dazu_flagged(self):
-        result = dazu_konfiguriert("", "die Schaltung ist konfiguriert, den Sensor zu steuern")
+    def test_konfiguriert_without_dazu_not_flagged(self):
+        # standard form — no "dazu" needed
+        assert dazu_konfiguriert("", "die Schaltung ist konfiguriert, den Sensor zu steuern") is None
+
+    def test_dazu_konfiguriert_flagged(self):
+        result = dazu_konfiguriert("", "die Schaltung ist dazu konfiguriert, den Sensor zu steuern")
         assert result is not None
         assert "dazu" in result
 
-    def test_dazu_konfiguriert_ok(self):
-        assert dazu_konfiguriert("", "die Schaltung ist dazu konfiguriert, den Sensor zu steuern") is None
-
-    def test_multiple_konfiguriert_all_with_dazu_ok(self):
-        assert dazu_konfiguriert("", "A ist dazu konfiguriert und B ist dazu konfiguriert") is None
-
-    def test_mixed_one_missing_dazu_flagged(self):
-        result = dazu_konfiguriert("", "A ist dazu konfiguriert und B ist konfiguriert")
-        assert result is not None
+    def test_dazu_konfiguriert_with_folgendes_ok(self):
+        # "dazu" may stay when the segment also has "zu Folgendem konfiguriert ist:"
+        assert dazu_konfiguriert(
+            "", "die Schaltung ist dazu konfiguriert, zu Folgendem konfiguriert ist: X, Y"
+        ) is None
 
     def test_no_konfiguriert_not_flagged(self):
         assert dazu_konfiguriert("", "die Schaltung steuert den Sensor") is None
 
     def test_konfiguriert_ist_comma_not_flagged(self):
-        # relative clause: "…der konfiguriert ist, ein Kühlfluid zu führen" — valid, no "dazu" needed
+        # relative clause without "dazu" — standard form
         assert dazu_konfiguriert("", "einen Kühlkanal (60), der konfiguriert ist, ein Kühlfluid zu führen") is None
 
 
