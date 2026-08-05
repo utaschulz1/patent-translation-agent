@@ -1,0 +1,19 @@
+﻿EN Phrase,DE Phrase,Count,Total EN Occurrences,Canonical
+central programming unit,zentrale Programmiereinheit,3,3,yes
+cooking/heating time,Gar-/Erhitzungszeit,5,5,yes
+door,Tür,4,4,yes
+meal card,Speisekarte,2,3,yes
+meal card,Speisenkarte,1,3,no
+meal carrier,Speisenträger,2,2,yes
+memory,Speicher,2,2,yes
+menu settings,Menüeinstellungen,2,2,yes
+method,Verfahren,6,6,yes
+oven,Ofen,8,8,yes
+rfid reader,RFID-Lesegerät,6,7,yes
+rfid reader,RFID-Leser,1,7,no
+rfid tag,RFID-Tag,5,5,yes
+system,System,3,3,yes
+temperature,Temperatur,2,2,yes
+temperature setting,Temperatureinstellung,3,3,yes
+type of meal,Art der Speise,2,4,yes
+type of meal,Art der Mahlzeit,2,4,no

@@ -1,29 +1,30 @@
 """
 test_llm_glossary_cleanup.py
 
-Unit tests for helper functions and a pipeline integration test using the real
-HALA_2605_P0418 CSV files with a mocked LLM response.
+Unit tests for helper functions and a pipeline integration test using real
+RTC_2606_P1098 CSV files (copied into test_fixtures/, never the live
+projects/ folder — see test_fixtures/RTC_2606_P1098/) with a mocked LLM
+response.
 
 Run with:  pytest test_llm_glossary_cleanup.py -v
 """
 import json
-import os
 import sys
+import os
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 # ── Pre-import mocks ──────────────────────────────────────────────────────────
-# The module runs top-level code (reads CSVs, calls the LLM API) on import.
-# All external dependencies must be patched before the import statement.
+# llm_glossary_cleanup imports `openai`/`dotenv` and calls load_dotenv() at
+# module import time, so those must be faked before the import statement.
+# The actual pipeline (reading CSVs, calling the LLM) only runs when
+# clean_glossary() is called explicitly — see the cleanup_result fixture below.
 
-HERE     = Path(__file__).parent
-PROJ_DIR = HERE / "projects" / "HALA_2605_P0418"
-
-_mock_project_log = MagicMock()
-_mock_project_log.project_dir.return_value = PROJ_DIR
-sys.modules.setdefault("project_log", _mock_project_log)
+HERE       = Path(__file__).parent
+PROJ_DIR   = HERE / "test_fixtures" / "RTC_2606_P1098"
+PROJECT_ID = "RTC_2606_P1098"
 
 _mock_client     = MagicMock()
 _mock_openai_mod = MagicMock()
@@ -33,77 +34,47 @@ sys.modules.setdefault("openai", _mock_openai_mod)
 sys.modules.setdefault("dotenv", MagicMock())
 os.environ.setdefault("OPENROUTER_API_KEY", "test-key")
 
-# Minimal valid LLM response built from the known-good DeepSeek V3 output.
-# "analyze" is deliberately omitted to exercise the consistent-term fill-in.
+# Response built from RTC_2606_P1098's real classification (verb/noun/capability
+# CSVs in test_fixtures/RTC_2606_P1098/) — an oven-configuration patent, not a
+# fabricated example. Covers all 5 consistent verbs + 2 consistent capabilities
+# + 12 consistent nouns except "oven" (omitted deliberately to exercise the
+# consistent-term fill-in), plus one resolved DE per inconsistent verb/noun.
+# "configure" and "include" have standard_glossary entries for this project
+# (konfigurieren / einschließen) — resolved to match, per the prompt's rule
+# that standard_glossary overrides the observed majority.
 _LLM_RESPONSE = json.dumps([
-    {"en": "adjust",      "de": "anpassen"},
-    # "analyze" omitted — fill-in step must restore it
-    {"en": "carry",       "de": "ausführen"},
-    {"en": "cluster",     "de": "Cluster"},
-    {"en": "compare",     "de": "vergleichen"},
-    {"en": "comprise",    "de": "umfassen"},
-    {"en": "comprising",  "de": "umfassend"},
-    {"en": "compute",     "de": "berechnen"},
-    {"en": "connect",     "de": "verbinden"},
-    {"en": "decompose",   "de": "zerlegen"},
-    {"en": "define",      "de": "definieren"},
-    {"en": "detect",      "de": "detektieren"},
-    {"en": "determine",   "de": "bestimmen"},
-    {"en": "estimate",    "de": "schätzen"},
-    {"en": "generate",    "de": "erzeugen"},
-    {"en": "have",        "de": "aufweisen"},
-    {"en": "having",      "de": "aufweisen"},
-    {"en": "include",     "de": "beinhalten"},
-    {"en": "indicate",    "de": "angeben"},
-    {"en": "at least",    "de": "mindestens"},
-    {"en": "obtain",      "de": "erhalten"},
-    {"en": "occur",       "de": "auftreten"},
-    {"en": "perform",     "de": "durchführen"},
-    {"en": "predict",     "de": "prognostizieren"},
-    {"en": "select",      "de": "auswählen"},
-    {"en": "use",         "de": "verwenden"},
-    {"en": "anomaly",                  "de": "Anomalie"},
-    {"en": "anomaly threshold",        "de": "Anomalieschwelle"},
-    {"en": "average emission",         "de": "durchschnittliche Emission"},
-    {"en": "average speed",            "de": "Durchschnittsgeschwindigkeit"},
-    {"en": "correlation",              "de": "Korrelation"},
-    {"en": "deviation",                "de": "Abweichung"},
-    {"en": "emission",                 "de": "Emission"},
-    {"en": "emission amount",          "de": "Emissionsmenge"},
-    # ordinal variants filtered when base exists: first/second noise component,
-    # first/second traffic forecast, other geographical region, other seasonal *
-    {"en": "first seasonal component", "de": "erste Saisonkomponente"},   # kept: base absent
-    {"en": "first time period",        "de": "erster Zeitraum"},          # kept: base absent
-    {"en": "geographical area",        "de": "geografischer Bereich"},
-    {"en": "geographical region",      "de": "geografisches Gebiet"},
-    {"en": "mobility flow",            "de": "Mobilitätsfluss"},
-    {"en": "noise component",          "de": "Rauschkomponente"},
-    {"en": "number of vehicle",        "de": "Anzahl von Fahrzeugen"},
-    {"en": "plurality of vehicle",     "de": "Vielzahl von Fahrzeugen"},
-    {"en": "region",                   "de": "Region"},
-    {"en": "regressor",                "de": "Regressor"},
-    {"en": "representative set of traffic data", "de": "repräsentativer Satz von Verkehrsdaten"},
-    {"en": "seasonal aspect",          "de": "saisonaler Aspekt"},
-    {"en": "seasonal forecast",        "de": "saisonale Prognose"},
-    {"en": "seasonal traffic forecast","de": "saisonale Verkehrsprognose"},
-    {"en": "second seasonal component","de": "zweite Saisonkomponente"},  # kept: base absent
-    {"en": "second time period",       "de": "zweiter Zeitraum"},         # kept: base absent
-    {"en": "sensor",                   "de": "Sensor"},
-    {"en": "set of traffic data",      "de": "Verkehrsdatenmenge"},
-    {"en": "speed",                    "de": "Geschwindigkeit"},
-    {"en": "target geographical region","de": "geografisches Zielgebiet"},
-    {"en": "target region",            "de": "Zielgebiet"},
-    {"en": "traffic",                  "de": "Verkehr"},
-    {"en": "traffic data",             "de": "Verkehrsdaten"},
-    {"en": "traffic forecast",         "de": "Verkehrsprognose"},
-    {"en": "traffic forecasting process","de": "Verkehrsprognosevorgang"},
-    {"en": "trend component",          "de": "Trendkomponente"},
-    {"en": "vehicle",                  "de": "Fahrzeug"},
-    {"en": "additional time period",   "de": "weiterer Zeitraum"},
-    {"en": "impact",                   "de": "Auswirkung"},
-    {"en": "computer-implement method","de": "computerimplementiertes Verfahren"},
-    {"en": "number of each of a plurality of type of vehicle",
-     "de": "Anzahl jedes Fahrzeugtyps aus einer Vielzahl von Fahrzeugtypen"},
+    # consistent verbs
+    {"en": "alter",    "de": "verändert"},
+    {"en": "identify", "de": "identifizieren"},
+    {"en": "read",     "de": "lesen"},
+    {"en": "set",      "de": "einstellen"},
+    {"en": "store",    "de": "speichern"},
+    # consistent capabilities
+    {"en": "arrange",   "de": "anordnen"},
+    {"en": "configure", "de": "konfigurieren"},
+    # consistent nouns ("oven" omitted — fill-in step must restore it)
+    {"en": "door",                      "de": "Tür"},
+    {"en": "memory",                    "de": "Speicher"},
+    {"en": "method",                    "de": "Verfahren"},
+    {"en": "system",                    "de": "System"},
+    {"en": "rfid tag",                  "de": "RFID-Tag"},
+    {"en": "temperature",               "de": "Temperatur"},
+    {"en": "meal carrier",              "de": "Speisenträger"},
+    {"en": "menu settings",             "de": "Menüeinstellungen"},
+    {"en": "temperature setting",       "de": "Temperatureinstellung"},
+    {"en": "cooking/heating time",      "de": "Gar-/Erhitzungszeit"},
+    {"en": "central programming unit",  "de": "zentrale Programmiereinheit"},
+    # resolved inconsistent verbs
+    {"en": "comprise",  "de": "umfassen"},
+    {"en": "determine", "de": "bestimmen"},
+    {"en": "include",   "de": "einschließen"},   # standard_glossary override
+    {"en": "locate",    "de": "angeordnet"},
+    {"en": "provide",   "de": "bereitgestellt"},
+    {"en": "receive",   "de": "empfangen"},
+    # resolved inconsistent nouns
+    {"en": "meal card",    "de": "Speisekarte"},
+    {"en": "rfid reader",  "de": "RFID-Lesegerät"},
+    {"en": "type of meal", "de": "Art der Speise"},
 ])
 
 _mock_api_resp = MagicMock()
@@ -111,6 +82,16 @@ _mock_api_resp.choices[0].message.content = _LLM_RESPONSE
 _mock_client.chat.completions.create.return_value = _mock_api_resp
 
 import llm_glossary_cleanup as glc  # noqa: E402 — must follow mock setup
+
+
+@pytest.fixture(scope="module")
+def cleanup_result():
+    """Run the real pipeline once (LLM call mocked) and share the result
+    across every TestPipeline assertion — same cost profile as the old
+    run-once-at-import approach, but as an explicit call instead of an
+    import side effect. Writes clean_glossary_RTC_2606_P1098.csv into
+    test_fixtures/RTC_2606_P1098/ (gitignored) — never touches projects/."""
+    return glc.clean_glossary(PROJ_DIR, PROJECT_ID)
 
 
 # ── _appears_in ───────────────────────────────────────────────────────────────
@@ -174,81 +155,73 @@ class TestParseResponse:
         raw = '```\n[{"en": "detect", "de": "detektieren"}]\n```'
         assert glc.parse_response(raw) == [{"en": "detect", "de": "detektieren"}]
 
-    def test_invalid_json_exits(self):
-        with pytest.raises(SystemExit):
+    def test_invalid_json_raises(self):
+        with pytest.raises(ValueError):
             glc.parse_response("not valid json {{ }")
 
-    def test_non_list_response_exits(self):
-        with pytest.raises(SystemExit):
+    def test_non_list_response_raises(self):
+        with pytest.raises(ValueError):
             glc.parse_response('{"en": "detect", "de": "detektieren"}')
 
 
 # ── validate_result ───────────────────────────────────────────────────────────
 
 class TestValidateResult:
-    def test_clean_input_no_errors(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_clean_input_no_errors(self):
         items = [
             {"en": "detect",  "de": "detektieren"},
             {"en": "include", "de": "beinhalten"},
         ]
-        rows, errors = glc.validate_result(items)
+        rows, errors = glc.validate_result(items, {})
         assert errors == []
         assert len(rows) == 2
 
-    def test_de_duplicate_flagged(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_de_duplicate_flagged(self):
         items = [
             {"en": "area",   "de": "Gebiet"},
             {"en": "region", "de": "Gebiet"},
         ]
-        _, errors = glc.validate_result(items)
+        _, errors = glc.validate_result(items, {})
         assert any("DE duplicate" in e for e in errors)
 
-    def test_allowed_shared_de_not_flagged(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_allowed_shared_de_not_flagged(self):
         items = [
             {"en": "have",   "de": "aufweisen"},
             {"en": "having", "de": "aufweisen"},
         ]
-        _, errors = glc.validate_result(items)
+        _, errors = glc.validate_result(items, {})
         assert errors == []
 
-    def test_true_duplicate_silently_dropped(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_true_duplicate_silently_dropped(self):
         items = [
             {"en": "connect", "de": "verbinden"},
             {"en": "connect", "de": "verbinden"},  # exact repeat
         ]
-        rows, errors = glc.validate_result(items)
+        rows, errors = glc.validate_result(items, {})
         assert errors == []
         assert len(rows) == 1
 
-    def test_en_duplicate_different_de_flagged(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_en_duplicate_different_de_flagged(self):
         items = [
             {"en": "connect", "de": "verbinden"},
             {"en": "connect", "de": "verknüpfen"},
         ]
-        _, errors = glc.validate_result(items)
+        _, errors = glc.validate_result(items, {})
         assert any("EN duplicate" in e for e in errors)
 
-    def test_standard_conflict_flagged(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {"include": "beinhalten"})
+    def test_standard_conflict_flagged(self):
         items = [{"en": "include", "de": "enthalten"}]
-        _, errors = glc.validate_result(items)
+        _, errors = glc.validate_result(items, {"include": "beinhalten"})
         assert any("Standard glossary conflict" in e for e in errors)
 
-    def test_standard_match_no_error(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {"include": "beinhalten"})
+    def test_standard_match_no_error(self):
         items = [{"en": "include", "de": "beinhalten"}]
-        _, errors = glc.validate_result(items)
+        _, errors = glc.validate_result(items, {"include": "beinhalten"})
         assert errors == []
 
-    def test_empty_entry_reported(self, monkeypatch):
-        monkeypatch.setattr(glc, "relevant_standard", {})
+    def test_empty_entry_reported(self):
         items = [{"en": "", "de": ""}, {"en": "detect", "de": "detektieren"}]
-        rows, errors = glc.validate_result(items)
+        rows, errors = glc.validate_result(items, {})
         assert len(rows) == 1
         assert any("Skipped empty" in e for e in errors)
 
@@ -287,62 +260,46 @@ class TestIsOrdinalVariant:
         assert not glc._is_ordinal_variant("first", self.KNOWN)
 
 
-# ── Integration: pipeline state after module execution ────────────────────────
+# ── Integration: full pipeline via clean_glossary() ────────────────────────────
 
 class TestPipeline:
-    def test_analyze_restored_by_fill_in(self):
-        """'analyze' was omitted from the mock LLM response; fill-in must add it."""
-        filled_en = {en.lower() for en, _ in glc.filled}
-        assert "analyze" in filled_en
+    def test_oven_restored_by_fill_in(self, cleanup_result):
+        """'oven' was omitted from the mock LLM response; fill-in must add it."""
+        filled_en = {en.lower() for en, _ in cleanup_result.filled}
+        assert "oven" in filled_en
 
-    def test_no_en_duplicates_in_output(self):
-        en_list = [en.lower() for en, _ in glc.clean_rows]
+    def test_no_en_duplicates_in_output(self, cleanup_result):
+        en_list = [en.lower() for en, _ in cleanup_result.clean_rows]
         assert len(en_list) == len(set(en_list)), "Duplicate EN terms in clean_rows"
 
-    def test_no_de_duplicates_in_output(self):
-        de_list = [de.lower() for _, de in glc.clean_rows
+    def test_no_de_duplicates_in_output(self, cleanup_result):
+        de_list = [de.lower() for _, de in cleanup_result.clean_rows
                    if de.lower() != "aufweisen"]   # allowed shared DE excluded
         assert len(de_list) == len(set(de_list)), "Duplicate DE terms in clean_rows"
 
-    def test_extra_standard_does_not_overlap_clean_rows(self):
-        clean_en = {en.lower() for en, _ in glc.clean_rows}
-        for en, _ in glc.extra_standard:
+    def test_extra_standard_does_not_overlap_clean_rows(self, cleanup_result):
+        clean_en = {en.lower() for en, _ in cleanup_result.clean_rows}
+        for en, _ in cleanup_result.extra_standard:
             assert en.lower() not in clean_en
 
-    def test_have_having_both_map_to_aufweisen(self):
-        output = {en.lower(): de for en, de in glc.clean_rows}
-        assert output.get("have")   == "aufweisen"
-        assert output.get("having") == "aufweisen"
+    # Note: the "have"/"having" shared-DE case and ordinal-modifier noun
+    # filtering (first/second/other/additional ...) don't occur in this
+    # project's real data, so they aren't re-tested at the pipeline level
+    # here — both are already covered directly against validate_result and
+    # _is_ordinal_variant in TestValidateResult/TestIsOrdinalVariant above.
 
-    def test_llm_received_only_relevant_standard(self):
+    def test_llm_received_only_relevant_standard(self, cleanup_result):
         """LLM input must be a strict subset of the full standard glossary."""
-        data = json.loads(glc.input_json_str)
+        data = json.loads(cleanup_result.input_json_str)
         llm_en = {item["en"] for item in data["standard_glossary"]}
-        assert llm_en <= set(glc.standard.keys())
-        assert len(llm_en) < len(glc.standard)
+        assert llm_en <= set(cleanup_result.standard.keys())
+        assert len(llm_en) < len(cleanup_result.standard)
 
-    def test_output_csv_written(self):
-        assert glc.clean_glossary_path.exists()
+    def test_output_csv_written(self, cleanup_result):
+        assert cleanup_result.path.exists()
 
-    def test_output_csv_has_header(self):
+    def test_output_csv_has_header(self, cleanup_result):
         import csv
-        with open(glc.clean_glossary_path, newline="", encoding="utf-8-sig") as f:
+        with open(cleanup_result.path, newline="", encoding="utf-8-sig") as f:
             header = next(csv.reader(f))
         assert header == ["EN", "DE"]
-
-    def test_ordinal_variants_with_base_not_in_consistent_nouns(self):
-        # These have bases in noun_can → must be filtered before LLM input.
-        filtered = {"other geographical region", "other seasonal forecast",
-                    "other seasonal traffic forecast",
-                    "first noise component", "second noise component",
-                    "first traffic forecast", "second traffic forecast"}
-        assert filtered.isdisjoint(glc.consistent_nouns)
-        assert all(
-            e["en"] not in filtered for e in glc.inconsistent_nouns
-        )
-
-    def test_ordinal_variants_without_base_survive(self):
-        # "time period" not in noun_can → first/second/additional time period kept.
-        all_nouns = set(glc.consistent_nouns) | {e["en"] for e in glc.inconsistent_nouns}
-        assert "first time period"  in all_nouns
-        assert "second time period" in all_nouns

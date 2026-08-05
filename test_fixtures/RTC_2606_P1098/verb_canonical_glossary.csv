@@ -1,0 +1,26 @@
+﻿EN Verb,DE Verb,Count,Total EN Occurrences,Canonical
+alter,verändert,4,4,yes
+comprise,umfassend,2,4,yes
+comprise,umfassen,1,4,no
+comprise,umfasst,1,4,no
+configure,konfigurieren,4,5,yes
+configure,konfiguriert,1,5,no
+determine,bestimmen,2,4,yes
+determine,bestimmung,2,4,no
+identify,identifizieren,2,2,yes
+include,einschließt,4,10,yes
+include,beinhaltet,2,10,no
+include,einschließlich,2,10,no
+include,aufweist,1,10,no
+include,umfasst,1,10,no
+locate,befindet,2,3,yes
+locate,angeordnet,1,3,no
+provide,bereitstellen,3,7,yes
+provide,bereitzustellen,2,7,no
+provide,bereitgestellt,1,7,no
+provide,vorgesehen,1,7,no
+read,lesen,2,2,yes
+receive,empfangen,1,2,yes
+receive,empfangenen,1,2,no
+set,einstellen,2,2,yes
+store,speichern,2,2,yes

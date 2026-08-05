@@ -1,0 +1,134 @@
+﻿# CLEAN-UP: For EN multi-word terms where DE is adj.+noun (e.g. 'selective co-product' -> 'selektives Co-Produkt'), strip the EN adjective or add a bare-noun entry — glossary_compare.py only matches exact EN keys.
+EN,DE
+EPO EN: SYSTEM FOR AUTOMATED OVEN CONFIGURATION,EPO DE: SYSTEM FÜR AUTOMATISIERTE OFENKONFIGURATION
+
+system,system
+automated oven configuration,automatisierte ofenkonfiguration
+oven configuration,ofenkonfiguration
+configuration,konfiguration
+oven,ofen
+alter,verändert,yes,4,4
+comprise,umfassend,yes,2,4
+comprise,umfassen,no,1,4
+comprise,umfasst,no,1,4
+configure,konfigurieren,yes,4,5
+configure,konfiguriert,no,1,5
+determine,bestimmen,yes,2,4
+determine,bestimmung,no,2,4
+identify,identifizieren,yes,2,2
+include,einschließt,yes,4,10
+include,beinhaltet,no,2,10
+include,einschließlich,no,2,10
+include,aufweist,no,1,10
+include,umfasst,no,1,10
+locate,befindet,yes,2,3
+locate,angeordnet,no,1,3
+provide,bereitstellen,yes,3,7
+provide,bereitzustellen,no,2,7
+provide,bereitgestellt,no,1,7
+provide,vorgesehen,no,1,7
+read,lesen,yes,2,2
+receive,empfangen,yes,1,2
+receive,empfangenen,no,1,2
+set,einstellen,yes,2,2
+store,speichern,yes,2,2
+central programming unit,zentrale Programmiereinheit,yes,3,3
+cooking/heating time,Gar-/Erhitzungszeit,yes,5,5
+door,Tür,yes,4,4
+meal card,Speisekarte,yes,2,3
+meal card,Speisenkarte,no,1,3
+meal carrier,Speisenträger,yes,2,2
+memory,Speicher,yes,2,2
+menu settings,Menüeinstellungen,yes,2,2
+method,Verfahren,yes,6,6
+oven,Ofen,yes,8,8
+rfid reader,RFID-Lesegerät,yes,6,7
+rfid reader,RFID-Leser,no,1,7
+rfid tag,RFID-Tag,yes,5,5
+system,System,yes,3,3
+temperature,Temperatur,yes,2,2
+temperature setting,Temperatureinstellung,yes,3,3
+type of meal,Art der Speise,yes,2,4
+type of meal,Art der Mahlzeit,no,2,4
+arrange,anordnen,yes,1,1
+configure,konfigurieren,yes,5,5
+BACKGROUND,ALLGEMEINER STAND DER TECHNIK,,,
+apparatus,Einrichtung,,,
+e.g.,z. B.,,,
+less than,weniger als,,,
+one of,eines von,,,
+comprise,umfassen,,,
+comprising,umfassend,,,
+configure,konfigurieren,,,
+include,einschließen,,,
+including,einschließlich,,,
+have,aufweisen,,,
+having,aufweisen,,,
+use,verwenden,,,
+using,mithilfe,,,
+surface,Oberfläche,,,
+at least,mindestens,,,
+consist,bestehen,,,
+contain,enthalten,,,
+obtain,erhalten,,,
+connect,verbinden,,,
+operatively connected,wirkverbunden,,,
+attach,befestigen,,,
+produce,erzeugen,,,
+associate,verknüpfen,,,
+map,zuordnen,,,
+assign,zuweisen,,,
+form,ausbilden,,,
+return,zurückgeben,,,
+detect,detektieren,,,
+transmissive,durchlässig,,,
+type,Art,,,
+portion,Abschnitt,,,
+process,Vorgang,,,
+processing,Verarbeiten,,,
+perform,durchführen,,,
+enable,in die Lage versetzen,,,
+so that,so dass,,,
+different,verschieden,,,
+upstream,stromaufwärts gelegen,,,
+downstream,stromabwärts gelegen,,,
+according to claim,nach Anspruch,,,
+feature,Merkmal,,,
+characteristic,Merkmal,,,
+subsequent,anschließend,,,
+method for producing,Verfahren zum Herstellen,,,
+correspond,entsprechen,,,
+in a case,in einem Fall,,,
+under,unterhalb,,,
+slot,slot,,,
+continuous wave,ungedämpfte Welle,,,
+interleaved,verschachtelt,,,
+plurality,Vielzahl,,,
+based on,basierend auf,,,
+such that,derart dass,,,
+such as,wie,,,
+any,beliebig,,,
+given,gegeben,,,
+a same,ein gleiches,,,
+via,über,,,
+multiple,multiple,,,
+disease,Erkrankung,,,
+disorder,Störung,,,
+region,Region,,,
+threshold,Schwellenwert,,,
+optionally,optional,,,
+score,Punktzahl,,,
+evaluation,Evaluierung,,,
+range,Bereich,,,
+domain,Raum,,,
+distance,Distanz,,,
+grant,erteilen,,,
+composition,Zusammensetzung,,,
+FIG.,FIG.,,,
+% by weight,Gew.-%,,,
+component,Komponente,,,
+component,Bauteil,,,
+by,durch,,,
+independent claim,Hauptanspruch,,,
+dependent claim,Nebenanspruch,,,
+via hole,Durchkontaktierung,,,

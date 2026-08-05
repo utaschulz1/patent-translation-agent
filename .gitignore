@@ -11,3 +11,4 @@ __pycache__/
 *.pyo
 term-extract/input/
 term-extract/output/
+test_fixtures/*/clean_glossary_*.csv
