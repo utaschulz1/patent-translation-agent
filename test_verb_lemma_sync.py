@@ -74,24 +74,91 @@ def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-class TestFindNewVerbPairs:
+class TestFindUnknownVerbs:
     def test_invented_verb_detected_as_new(self, tmp_lemma_tables):
         en_path, de_path = tmp_lemma_tables
         en_table, de_table = _load(en_path), _load(de_path)
         assert TEST_EN_VERB not in en_table, "test verb must not already be in the real table"
         assert TEST_DE_VERB not in de_table, "test verb must not already be in the real table"
 
-        new_pairs = vls.find_new_verb_pairs(
+        unknown_en, unknown_de = vls.find_unknown_verbs(
             clean_rows=[(TEST_EN_VERB, TEST_DE_VERB), ("comprise", "umfassen")],
             consistent_verbs={TEST_EN_VERB: TEST_DE_VERB, "comprise": "umfassen"},
             inconsistent_verbs=[],
             en_lemma_table=en_table,
             de_lemma_table=de_table,
         )
-        assert new_pairs == [(TEST_EN_VERB, TEST_DE_VERB)], (
-            "comprise/umfassen is already fully covered and must not be flagged; "
+        assert unknown_en == [TEST_EN_VERB], (
+            "comprise is already fully covered and must not be flagged; "
             "only the invented verb should come back as new"
         )
+        assert unknown_de == [TEST_DE_VERB], (
+            "umfassen is already fully covered and must not be flagged; "
+            "only the invented verb should come back as new"
+        )
+
+    def test_known_verb_recognized_via_de_adjective_truncation(self, tmp_lemma_tables):
+        """A DE surface form need not be an exact key — if the checker would
+        resolve it by stripping an adjective suffix (_count_lemmas'
+        strip_de_adj fallback), find_unknown_verbs must recognize it as
+        already-known too, without ever calling the LLM for it."""
+        en_path, de_path = tmp_lemma_tables
+        en_table, de_table = _load(en_path), _load(de_path)
+        assert "eingerichtet" in de_table, "fixture assumption: base participle already registered"
+        assert "eingerichtete" not in de_table, "fixture assumption: adjective-inflected form is NOT a key"
+
+        unknown_en, unknown_de = vls.find_unknown_verbs(
+            clean_rows=[("establish", "eingerichtete")],
+            consistent_verbs={"establish": "eingerichtete"},
+            inconsistent_verbs=[],
+            en_lemma_table=en_table,
+            de_lemma_table=de_table,
+        )
+        assert unknown_en == ["establish"]
+        assert unknown_de == [], (
+            "eingerichtete strips to eingerichtet, an existing key — must not be "
+            "treated as a new verb needing derivation"
+        )
+
+    def test_non_verb_de_term_excluded(self, tmp_lemma_tables):
+        en_path, de_path = tmp_lemma_tables
+        en_table, de_table = _load(en_path), _load(de_path)
+
+        unknown_en, unknown_de = vls.find_unknown_verbs(
+            clean_rows=[("know", "bekannt")],
+            consistent_verbs={"know": "bekannt"},
+            inconsistent_verbs=[],
+            en_lemma_table=en_table,
+            de_lemma_table=de_table,
+        )
+        assert unknown_en == ["know"], "know is a real verb and should still get EN forms"
+        assert unknown_de == [], "bekannt is a fixed non-verb patent term, must never reach the LLM"
+
+
+class TestMergeDerivationsDeFormCleanup:
+    """merge_derivations must reduce two-word DE forms to a single matchable
+    token — and must not confuse a separable-prefix split ("spart ein") with
+    a free zu-infinitive ("zu verblüffen"), where the meaningful word is on
+    the opposite side. Getting this backwards for the zu-case would register
+    the bare particle "zu" as a lemma key and misfire on every occurrence of
+    that word in running text — caught by the live round-trip test below."""
+
+    def test_separable_prefix_split_keeps_first_word(self):
+        table: dict[str, str] = {}
+        vls.merge_derivations(
+            {"en": [], "de": [{"infinitive": "einsparen", "forms": ["spart ein"]}]},
+            {}, table,
+        )
+        assert table == {"spart": "einsparen"}
+
+    def test_zu_infinitive_keeps_second_word(self):
+        table: dict[str, str] = {}
+        vls.merge_derivations(
+            {"en": [], "de": [{"infinitive": "verblüffen", "forms": ["zu verblüffen"]}]},
+            {}, table,
+        )
+        assert table == {"verblüffen": "verblüffen"}
+        assert "zu" not in table, "must never register the bare particle 'zu' as a lemma key"
 
 
 class TestLiveRoundTrip:
