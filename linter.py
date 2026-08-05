@@ -43,6 +43,7 @@ Checks:
   durch_verwendung                    — "durch Verwendung" in target; should be "durch Verwenden" (nominalized verb)
   schritt_zum                         — "Schritt zum [Infinitiv]" in target; should be "Schritt eines [Genitiv-Infinitiv]"
   mindestens_at_least                 — "mindestens" in target but "at least" absent from source
+  alphanumeric_label_mismatch         — alphanumeric identifier/acronym labels (I1, TSY, GSAp…) in source must match target
 
 Input / output: same *_revised_translation_checks.xlsx file (in-place,
 collision-safe on PermissionError).
@@ -54,6 +55,7 @@ Usage: python linter.py [--pid <project_id>]
 import argparse
 import glob
 import re
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -588,7 +590,6 @@ def numeric_mismatch(source: str, target: str) -> str | None:
     tgt_nums = _extract_numbers(target)
     if src_nums == tgt_nums:
         return None
-    from collections import Counter
     src_c, tgt_c = Counter(src_nums), Counter(tgt_nums)
     missing = sorted((src_c - tgt_c).elements())
     added   = sorted((tgt_c - src_c).elements())
@@ -598,6 +599,50 @@ def numeric_mismatch(source: str, target: str) -> str | None:
     if added:
         parts.append(f"added in target: {added}")
     return f'error: numeric mismatch — {"; ".join(parts)}'
+
+
+_ALNUM_LABEL_RE = re.compile(r"\b[A-Z]{1,3}(?:\d+(?:\.\d+)?|[a-zA-Z])\b")
+
+
+def _extract_alnum_labels(text: str) -> Counter:
+    """Return a Counter of alphanumeric identifier/acronym tokens (e.g. I1, TSAm, GSX)."""
+    return Counter(_ALNUM_LABEL_RE.findall(text))
+
+
+def alphanumeric_label_mismatch(source: str, target: str) -> str | None:
+    """Flag when alphanumeric identifier/acronym labels (I1, TSY, GSAp…) present in
+    source are absent from target, or vice versa.
+
+    Catches two failure classes seen in practice on this project:
+      • OCR/glyph-confusable character swaps — capital "I" rendered as lowercase "l"
+        (I1 -> l1) — invisible to the eye in most UI fonts.
+      • CAT-tool fuzzy-match/leverage propagation that carries a variable letter over
+        from a different, similarly-worded segment without adapting it to the current
+        segment's source (TSY -> TSX).
+    Both were invisible to Xbench's Alphanumeric Mismatch check because the source XLIFF
+    splits the letter from its digit/suffix across an inline tag boundary (subscript
+    formatting), so "I2" never exists as one string for Xbench to compare. This check
+    runs on the plain-text *_checks.xlsx export instead, where tags are already stripped
+    and the full token is one contiguous string.
+
+    Known false-positive source: a bare two-letter token that happens to spell a real
+    word capitalized at the start of a clause (e.g. German "In Kontakt bringen...") can
+    register as an added/missing label. Rare in practice (only affects single-letter
+    prefixes with no digit) — left as a manual-review flag rather than suppressed,
+    consistent with this linter's other heuristic checks.
+    """
+    src_c = _extract_alnum_labels(source)
+    tgt_c = _extract_alnum_labels(target)
+    if src_c == tgt_c:
+        return None
+    missing = sorted((src_c - tgt_c).elements())
+    added   = sorted((tgt_c - src_c).elements())
+    parts = []
+    if missing:
+        parts.append(f"missing in target: {missing}")
+    if added:
+        parts.append(f"added in target: {added}")
+    return f'error: alphanumeric label mismatch — {"; ".join(parts)}'
 
 
 CHECKS = [
@@ -637,6 +682,7 @@ CHECKS = [
     schritt_zum,
     mindestens_at_least,
     numeric_mismatch,
+    alphanumeric_label_mismatch,
 ]
 
 
