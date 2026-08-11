@@ -44,6 +44,7 @@ from lxml import etree
 
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 W14 = "http://schemas.microsoft.com/office/word/2010/wordml"
+W15 = "http://schemas.microsoft.com/office/word/2012/wordml"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 RELS = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -161,6 +162,75 @@ def extract_comments(docx_path: Path) -> tuple[list[dict], dict[str, bytes]]:
         results.append(info)
 
     return results, images
+
+
+def get_comment_reply_status(docx_path: Path) -> dict[str, dict]:
+    """Returns, for every ROOT comment (one that is not itself a reply to
+    another comment), its author and the list of replies it has.
+
+    {"0": {"author": "hll", "replies": [{"id": "6", "author": "Uta Schulz"}]}}
+
+    Threading uses the same w14:paraId / w15:paraIdParent linkage
+    reply_docx_comments.py writes when it injects a reply: a comment (by its
+    own w14:paraId, from comments.xml) is a reply to whichever other comment's
+    paraId equals its own commentsExtended.xml entry's w15:paraIdParent.
+
+    If the docx has no reply-threading parts at all (no commentsExtended.xml
+    — an older docx, or one with plain top-level comments only), every
+    comment is reported as root with zero replies: with no threading
+    metadata to prove otherwise, "unresolved" is the safe assumption, not
+    "resolved."
+    """
+    z = zipfile.ZipFile(docx_path)
+    if "word/comments.xml" not in z.namelist():
+        return {}
+
+    comments_xml = etree.fromstring(z.read("word/comments.xml"))
+    author_by_id: dict[str, str] = {}
+    para_id_by_comment_id: dict[str, str] = {}
+    comment_id_by_para_id: dict[str, str] = {}
+    for c in comments_xml.findall(qn("comment"), NS):
+        cid = c.get(qn("id"))
+        author_by_id[cid] = c.get(qn("author"))
+        p = c.find(qn("p"))
+        if p is not None:
+            para_id = p.get(qn("paraId", W14))
+            if para_id:
+                para_id_by_comment_id[cid] = para_id
+                comment_id_by_para_id[para_id] = cid
+
+    para_id_parent: dict[str, str] = {}  # this comment's paraId -> parent comment's paraId
+    if "word/commentsExtended.xml" in z.namelist():
+        ext = etree.fromstring(z.read("word/commentsExtended.xml"))
+        for entry in ext.findall(qn("commentEx", W15)):
+            pid = entry.get(qn("paraId", W15))
+            parent_pid = entry.get(qn("paraIdParent", W15))
+            if pid and parent_pid:
+                para_id_parent[pid] = parent_pid
+
+    reply_comment_ids = {
+        comment_id_by_para_id[pid]
+        for pid in para_id_parent
+        if pid in comment_id_by_para_id
+    }
+
+    threads: dict[str, dict] = {
+        cid: {"author": author, "replies": []}
+        for cid, author in author_by_id.items()
+        if cid not in reply_comment_ids
+    }
+
+    for reply_cid in reply_comment_ids:
+        reply_pid = para_id_by_comment_id.get(reply_cid)
+        parent_pid = para_id_parent.get(reply_pid)
+        parent_cid = comment_id_by_para_id.get(parent_pid)
+        if parent_cid in threads:
+            threads[parent_cid]["replies"].append({
+                "id": reply_cid,
+                "author": author_by_id.get(reply_cid),
+            })
+
+    return threads
 
 
 def main():
