@@ -31,6 +31,11 @@ SCORECARD_DIR = WORK_DIR / "scorecards"
 # OpenRouter model id shared by the LLM glossary/verb-cleanup scripts.
 LLM_MODEL = os.environ.get("LLM_MODEL", "deepseek/deepseek-chat-v3-0324")
 
+# Name the docx-comment-reply skill authors Issue Resolution reply comments
+# as — check_docx_resolved.py uses this to tell "we replied" from "someone
+# else's pre-existing reply" when checking whether a comment is resolved.
+TRANSLATOR_NAME = os.environ.get("TRANSLATOR_NAME", "Uta Schulz")
+
 # Client code (2-6 uppercase letters) + YYMM + "P" + job number, e.g.
 # "HUAW_2606_P1200". XTRF job type prefixes/suffixes around this core ID
 # (e.g. "MT Light of HUAW_2606_P1200", "HBAS_2606_P0022 Issues resolution")
