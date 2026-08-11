@@ -307,45 +307,73 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
                             task_type=task_type,
                             xtrf_job_id=job_id)
 
-    # 4.2  Download + unzip source files
-    if source_files:
-        downloaded = _download_source_files(session, job_id, source_files, project_folder)
-        zip_files = [p for p in downloaded if p.suffix.lower() == ".zip"]
-        if zip_files:
-            extracted = _unzip_all(zip_files, project_folder)
-            cat_files = [p for p in extracted if "Clean_XTM" in p.name and p.suffix.lower() == ".docx"]
-            if cat_files:
-                print(f"  CAT file: {cat_files[0].name}")
-            else:
-                print(f"  Extracted {len(extracted)} file(s) — no Clean_XTM.docx found, check manually")
-    else:
-        print("No source files attached to this job.")
+    en_title, de_title = "", ""
 
-    # 4.3  EPO title → DeepSeek term extraction → glossary CSV
-    en_title, de_title = _parse_epo_title(instructions)
-    if en_title:
-        print(f"EPO title found — extracting terms with DeepSeek...")
-        pairs = _llm_extract_terms(en_title, de_title)
-        csv_path = _write_glossary(project_id, pairs, pre_folder, en_title, de_title)
-        print(f"Glossary written: {csv_path}  ({len(pairs)} term(s))")
-        for en, de in pairs:
-            print(f"  {en}  →  {de}")
+    if "issue" in task_type.lower():
+        # Issue Resolution jobs: no glossary, no Clean_XTM.docx — just the
+        # DTP-produced deliverable zip, downloaded into pre_folder (not
+        # project_folder, unlike the post-editing path below) so it unpacks
+        # directly into the working area preserving its real nested tree
+        # ({project}/{lang pair}/Task Files/Work Files/..., etc.) for
+        # ISSUE_RESOLUTION_LOCATE to walk with rglob.
+        zip_source_files = [sf for sf in source_files if sf.get("name", "").lower().endswith(".zip")]
+        if not zip_source_files:
+            print("  WARNING: no .zip file found among source files for this Issue Resolution job — check manually.")
+        else:
+            if len(zip_source_files) > 1:
+                print(f"  WARNING: multiple .zip files found, downloading all: {[sf['name'] for sf in zip_source_files]}")
+            downloaded = _download_source_files(session, job_id, zip_source_files, pre_folder)
+            extracted = _unzip_all(downloaded, pre_folder)
+            print(f"  Extracted {len(extracted)} file(s) into {pre_folder}")
     else:
-        print("EPO title not found in instructions — create glossary manually.")
+        # 4.2  Download + unzip source files
+        if source_files:
+            downloaded = _download_source_files(session, job_id, source_files, project_folder)
+            zip_files = [p for p in downloaded if p.suffix.lower() == ".zip"]
+            if zip_files:
+                extracted = _unzip_all(zip_files, project_folder)
+                cat_files = [p for p in extracted if "Clean_XTM" in p.name and p.suffix.lower() == ".docx"]
+                if cat_files:
+                    print(f"  CAT file: {cat_files[0].name}")
+                else:
+                    print(f"  Extracted {len(extracted)} file(s) — no Clean_XTM.docx found, check manually")
+        else:
+            print("No source files attached to this job.")
+
+        # 4.3  EPO title → DeepSeek term extraction → glossary CSV
+        en_title, de_title = _parse_epo_title(instructions)
+        if en_title:
+            print(f"EPO title found — extracting terms with DeepSeek...")
+            pairs = _llm_extract_terms(en_title, de_title)
+            csv_path = _write_glossary(project_id, pairs, pre_folder, en_title, de_title)
+            print(f"Glossary written: {csv_path}  ({len(pairs)} term(s))")
+            for en, de in pairs:
+                print(f"  {en}  →  {de}")
+        else:
+            print("EPO title not found in instructions — create glossary manually.")
 
     # Summary
     print()
     print("=" * 50)
     print(f"Job:        {id_number}")
     print(f"Project:    {project_id}")
-    print(f"Task type:  {task_type}  ({'1/1 translation' if 'edit' in task_type.lower() or 'translat' in task_type.lower() else '1/2 review'})")
+    if "issue" in task_type.lower():
+        task_type_label = "Issue Resolution"
+    elif "edit" in task_type.lower() or "translat" in task_type.lower():
+        task_type_label = "1/1 translation"
+    else:
+        task_type_label = "1/2 review"
+    print(f"Task type:  {task_type}  ({task_type_label})")
     print(f"Folder:     {folder_name}")
     if en_title:
         print(f"EPO EN:     {en_title}")
         print(f"EPO DE:     {de_title}")
     print("=" * 50)
-    print("Step 4 complete. Next: open XTM link from the XTRF job page (step 5).")
-    print(f"XTM login: https://word.welocalize.com/project-manager-gui/login.jsp?client=IP#!/login")
+    if "issue" in task_type.lower():
+        print("Step 4 complete. Next: run ISSUE_RESOLUTION_LOCATE.")
+    else:
+        print("Step 4 complete. Next: open XTM link from the XTRF job page (step 5).")
+        print(f"XTM login: https://word.welocalize.com/project-manager-gui/login.jsp?client=IP#!/login")
     return {"project_id": project_id, "project_folder": str(pre_folder)}
 
 

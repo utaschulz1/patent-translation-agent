@@ -136,11 +136,12 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
         print(f"XTRF job {job_id} ({project_id}) — deadline: {dl_str}" +
               (f" — job type: {stype}" if stype else ""))
 
-        # Proceed silently if jobType is absent or is post-editing.
+        # Proceed silently if jobType is absent, post-editing, or Issue Resolution
+        # (both have their own WORKFLOWS entry — see workflow_definitions.py).
         # Prompt for anything else (translation, review, proofreading, etc.).
-        is_post_edit = stype is None or "post" in stype.lower()
+        is_known_type = stype is None or "post" in stype.lower() or "issue" in stype.lower()
 
-        if not is_post_edit:
+        if not is_known_type:
             answer = input(
                 f"  '{stype}' is not post-editing. Proceed with standard translation workflow? [Y/N]: "
             ).strip().upper()
