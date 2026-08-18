@@ -106,6 +106,7 @@ When in doubt, prefer stative passive.
 | according to (in preamble) | **nach** | "nach Anspruch 1" — always "nach" in preambles (conventional patent phrasing) |
 | according to (elsewhere) | nach / gemäß | both accepted |
 | and/or | **und/oder** | NOT: "mindestens eines von" |
+| any | **beliebig** | Exception: not translated (omitted) when "any" appears in a claim's own preamble referring back to other claims — e.g. "of any preceding claim" → "nach einem der vorhergehenden Ansprüche" (NOT "einem beliebigen"); "of any of claims 11 to 12" → "nach einem der Ansprüche 11 bis 12". Elsewhere in a claim (not the preamble), "any" → "beliebig" as normal. |
 | at least | **mindestens** | NOT: "zumindest" |
 | at the / in the / from the / to the | **bei dem / in dem / von dem / zu dem** | Avoid contracted forms: beim/im/vom/zum etc. — see §5.1 |
 | based on | **basierend auf** | |
@@ -177,6 +178,8 @@ Do **not** use contracted preposition+article forms in patent translations:
 | zur | zu der |
 
 Exceptions: fixed expressions only where contraction is part of the standardized term — e.g., "im Wesentlichen", "zur Verwendung", "zum Beispiel".
+
+**Nominalized-verb exception (method claims):** "zum"/"zur" contractions are allowed in front of a nominalized verb (Verbalsubstantiv, e.g. "zum Testen", "zum Zählen", "zum Erleichtern des Zählens") — this is distinct from a contraction in front of a regular noun referring to a part/instance of something, or the word "Verfahren" itself, which remains disallowed. In practice this exception fires often in method claims (method preambles, purpose clauses), so most "zum/zur" linter hits there are false positives — but not all; check each one individually.
 
 ### 5.2 Relative pronouns
 Use **der/die/das** for relative clauses. **Avoid "welche/welcher/welches"** in patent text.
