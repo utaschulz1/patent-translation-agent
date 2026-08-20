@@ -54,3 +54,36 @@ def extract_project_id(project_name: str) -> str:
     candidate = project_name.split("|")[-1].strip()
     m = _PROJECT_ID_RE.search(candidate)
     return m.group(0) if m else candidate
+
+
+def is_issue_resolution_job(overview: dict) -> bool:
+    """True if an XTRF job overview is Issue Resolution / Issues Resolution work.
+
+    XTRF's overview.type label for this isn't consistent — seen as "Issue
+    Resolution" and, confirmed live against XTRF job #374882, "Hourly tasks"
+    (case varies on both). A keyword match on the type field alone would have
+    silently misrouted #374882 through the normal post-editing path instead
+    of the Issue Resolution one. The one constant across every label variant
+    seen so far is that these jobs are priced at 0 — job #374882's
+    overview.jobValue was {"value": 0, "currency": 1, "currencyISOCode": "EUR"}.
+
+    Checked as an OR with the "issue" keyword match, not a replacement for
+    it: the price is the more reliable signal (doesn't depend on guessing
+    XTRF's label of the day), but keeping the keyword match too means a
+    clearly-labeled "Issue Resolution" job still gets caught even if a future
+    job of that type is priced above 0 for some reason. The failure mode to
+    avoid is a real Issue Resolution job going undetected, not the reverse —
+    so either signal alone is enough.
+
+    Args:
+        overview: an XTRF job's overview dict (job["overview"] from
+            GET /vendors/jobs/classic/{job_id}, or one entry of GET
+            /vendors/jobs).
+
+    Returns:
+        True if the job's type label mentions "issue", or its jobValue is 0.
+    """
+    task_type = (overview.get("type") or "").lower()
+    keyword_match = "issue" in task_type
+    zero_value = (overview.get("jobValue") or {}).get("value") == 0
+    return keyword_match or zero_value

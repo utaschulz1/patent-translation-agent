@@ -18,7 +18,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 import project_log
-from config import extract_project_id
+from config import extract_project_id, is_issue_resolution_job
 
 _ENV = Path(__file__).parent / ".env"
 BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
@@ -131,15 +131,18 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
         if dl is None:
             print(f"WARNING: deadline not found. Overview keys: {list(overview.keys())}")
 
-        stype = overview.get("jobType")  # e.g. "Post-editing"
+        # overview["type"], not "jobType" — that key doesn't exist in the real
+        # API response, so this was silently always None (every job treated as
+        # "known type", the prompt below never actually fired) until fixed here.
+        stype = overview.get("type")
         dl_str = dl.strftime('%d-%m-%Y %H:%M') if dl else 'unknown'
         print(f"XTRF job {job_id} ({project_id}) — deadline: {dl_str}" +
               (f" — job type: {stype}" if stype else ""))
 
-        # Proceed silently if jobType is absent, post-editing, or Issue Resolution
+        # Proceed silently if type is absent, post-editing, or Issue Resolution
         # (both have their own WORKFLOWS entry — see workflow_definitions.py).
         # Prompt for anything else (translation, review, proofreading, etc.).
-        is_known_type = stype is None or "post" in stype.lower() or "issue" in stype.lower()
+        is_known_type = stype is None or "post" in stype.lower() or is_issue_resolution_job(overview)
 
         if not is_known_type:
             answer = input(

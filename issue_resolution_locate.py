@@ -39,8 +39,13 @@ from extract_docx_comments import get_comment_reply_status  # noqa: E402
 ISSUES_RE = re.compile(r"\(\s*([\w-]+)[\s_]+(Issues|No[\s_]+Changes)\s*\)", re.IGNORECASE)
 
 # Excludes names already containing "_checked" so re-running this script
-# (e.g. after a partial failure) doesn't pick up its own prior output.
-XBENCH_XLSX_RE = re.compile(r"^Xbench_QA_Report(?!.*_checked).*\.xlsx$", re.IGNORECASE)
+# (e.g. after a partial failure) doesn't pick up its own prior output. The
+# optional trailing (\.\w+)? tolerates a double extension like ".xlsx.xls" —
+# confirmed on a live job (FRKE_2608_P0736, "Xbench_QA_Report_German.xlsx.xls"),
+# apparently from the report being re-saved through an older Excel format
+# after Xbench generated it. Still requires the real ".xlsx" component, so
+# this doesn't loosen the match to accept an unrelated ".xls"-only file.
+XBENCH_XLSX_RE = re.compile(r"^Xbench_QA_Report(?!.*_checked).*\.xlsx(\.\w+)?$", re.IGNORECASE)
 XBENCH_TXT_RE = re.compile(r"^No error found in Xbench report.*\.txt$", re.IGNORECASE)
 
 
@@ -183,14 +188,16 @@ def locate(pre_folder: Path) -> dict:
         xbench_upload_name = str(xbench_file)
         print(f"  Xbench: {xbench_file.name} (no error report — uploaded as-is, not renamed)")
     else:
-        raise FileNotFoundError(
-            f"No Xbench_QA_Report*.xlsx or 'No error found in Xbench report*.txt' found in: "
-            f"{', '.join(str(d) for d in task_work_dirs)}"
-        )
+        # Not every Issue Resolution deliverable includes an Xbench report —
+        # proceed without one rather than failing the whole step over it.
+        # xbench_file/xbench_kind/xbench_upload_name stay at their None
+        # defaults; xtrf_upload.py skips the upload step when they're None.
+        print(f"  Xbench: no Xbench_QA_Report*.xlsx or 'No error found in Xbench report*.txt' "
+              f"found in {', '.join(str(d) for d in task_work_dirs)} — proceeding without one.")
 
     return {
         "parts": parts_out,
-        "xbench_file": str(xbench_file),
+        "xbench_file": str(xbench_file) if xbench_file else None,
         "xbench_kind": xbench_kind,
         "xbench_upload_name": xbench_upload_name,
     }

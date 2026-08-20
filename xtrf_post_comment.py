@@ -18,15 +18,19 @@ input for the common case:
 
 Pass --outcome explicitly only to override this.
 
-THE POST ENDPOINT AND PAYLOAD ARE GENUINELY UNKNOWN AND NOT GUESSED HERE.
---dry-run defaults to True and is the only implemented path: it prints the
-template, the job id, and what *would* be posted, then exits 0 without
-making a network write. Real posting requires the endpoint to be found
-first (capture a real note submission's network request through the XTRF
-web UI, or find it in API docs if any exist) and recorded in
-.claude/commands/xtrf.md — and even once known, the first live call needs
-explicit user approval, same as any other first-time live write in this
-codebase.
+POST ENDPOINT (confirmed live via a captured browser request, 2026-08-20 —
+see .claude/commands/xtrf.md):
+
+    PUT {BASE_URL}/jobs/classic/{job_id}/comments
+    Content-Type: text/plain; charset=utf-8
+    body: the raw comment text itself — no JSON wrapping, no field name.
+    (Confirmed by an exact Content-Length match: a real 17-character
+    comment produced Content-Length: 17.)
+
+--dry-run still defaults to True. Real posting (--live) is now implemented,
+but every first live call in this codebase needs explicit user approval
+before being run for real — this one is no exception just because the
+endpoint is now known.
 
 Usage:
     python xtrf_post_comment.py --pid <project_id>                        # auto-detect outcome
@@ -39,7 +43,7 @@ import sys
 from pathlib import Path
 
 import project_log
-from xtrf_upload import _load_creds, _make_session, _login, _find_job_id
+from xtrf_upload import BASE_URL, _load_creds, _make_session, _login, _find_job_id
 
 TEMPLATES = {
     "no_action": "No comments, no tracked changes, no action required.",
@@ -89,17 +93,24 @@ def run(project_id: str, outcome: str | None = None, dry_run: bool = True) -> No
     print(f"  Found job ID: {job_id}")
     print(f"  Comment: {comment!r}")
 
+    url = f"{BASE_URL}/jobs/classic/{job_id}/comments"
+
     if dry_run:
-        print(f"[DRY RUN] would POST to <unknown endpoint> — comment-post endpoint not yet researched. "
-              f"See xtrf_post_comment.py's module docstring.")
+        print(f"[DRY RUN] would PUT to {url}")
+        print(f"  body (text/plain, {len(comment.encode('utf-8'))} bytes): {comment!r}")
         return
 
-    raise NotImplementedError(
-        "Live comment posting is not implemented — the XTRF endpoint/payload for this "
-        "is unresearched. Run with --dry-run (the default) until that's found and "
-        "recorded in .claude/commands/xtrf.md, and get explicit approval before the "
-        "first live call."
+    # No JSON wrapping — confirmed via a captured browser request (2026-08-20):
+    # the body is the raw comment text itself, sent as text/plain. Also mirrors
+    # xtrf_job_setup.py's _get_job in sending time-zone-offset-in-minutes, since
+    # that's present on the real browser request too and costs nothing to match.
+    r = session.put(
+        url,
+        data=comment.encode("utf-8"),
+        headers={"Content-Type": "text/plain; charset=utf-8", "time-zone-offset-in-minutes": "60"},
     )
+    r.raise_for_status()
+    print(f"Posted comment to job {job_id}.")
 
 
 def main():
@@ -109,7 +120,7 @@ def main():
                          help="Override auto-detection (see module docstring for the default logic)")
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=True)
     parser.add_argument("--live", dest="dry_run", action="store_false",
-                         help="Attempt a real post instead of dry-run (not implemented — see docstring)")
+                         help="Actually post the comment instead of dry-running it")
     args = parser.parse_args()
     try:
         run(args.pid, args.outcome, dry_run=args.dry_run)

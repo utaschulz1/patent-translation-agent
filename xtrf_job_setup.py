@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 import project_log
-from config import WORK_DIR, extract_project_id
+from config import WORK_DIR, extract_project_id, is_issue_resolution_job
 
 BASE_URL = "https://comunicadk.s.xtrf.eu/vendors"
 MODEL = "deepseek/deepseek-chat-v3-0324"
@@ -285,7 +285,8 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
 
     id_number = overview["idNumber"]       # "2026/4545/EN » DE/1/1"
     project_name = overview["projectName"] # "Patents | RTC_2604_P0732"
-    task_type = overview["type"]           # "Post-editing" or "Revision"
+    task_type = overview["type"]           # e.g. "Post-editing", "Revision", "Hourly tasks"
+    is_ir = is_issue_resolution_job(overview)
     source_files = job.get("sourceFiles") or []
     instructions = job.get("instructions") or ""
 
@@ -301,15 +302,21 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     pre_folder.mkdir(exist_ok=True)
     print(f"Created XTRF folder: {project_folder}")
 
-    # 4.1b  Set active project context (pre-processing folder is the working area)
+    # 4.1b  Set active project context (pre-processing folder is the working area).
+    # is_issue_resolution is the already-correct detection result (task_type
+    # label match OR jobValue==0, see config.is_issue_resolution_job) — app.py's
+    # fetch_job route reads this directly rather than re-deriving job_type from
+    # the raw task_type string itself, which has no way to see jobValue and
+    # would misclassify labels like "Hourly tasks" that don't contain "issue".
     project_log.set_context(project_id, pre_folder,
                             xtrf_job_folder=str(project_folder),
                             task_type=task_type,
+                            is_issue_resolution=is_ir,
                             xtrf_job_id=job_id)
 
     en_title, de_title = "", ""
 
-    if "issue" in task_type.lower():
+    if is_ir:
         # Issue Resolution jobs: no glossary, no Clean_XTM.docx — just the
         # DTP-produced deliverable zip, downloaded into pre_folder (not
         # project_folder, unlike the post-editing path below) so it unpacks
@@ -357,7 +364,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
     print("=" * 50)
     print(f"Job:        {id_number}")
     print(f"Project:    {project_id}")
-    if "issue" in task_type.lower():
+    if is_ir:
         task_type_label = "Issue Resolution"
     elif "edit" in task_type.lower() or "translat" in task_type.lower():
         task_type_label = "1/1 translation"
@@ -369,7 +376,7 @@ def run(job_url_or_id: str, project_id_override: str | None = None) -> dict:
         print(f"EPO EN:     {en_title}")
         print(f"EPO DE:     {de_title}")
     print("=" * 50)
-    if "issue" in task_type.lower():
+    if is_ir:
         print("Step 4 complete. Next: run ISSUE_RESOLUTION_LOCATE.")
     else:
         print("Step 4 complete. Next: open XTM link from the XTRF job page (step 5).")

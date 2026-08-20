@@ -210,7 +210,8 @@ def _find_files_issue_resolution(folder: Path, part: str | None) -> list[Path]:
             raise ValueError(f"No part named '{part}' in manifest. Available: {available}")
 
     files = [Path(p["renamed_docx"]) for p in parts]
-    files.append(Path(manifest["xbench_upload_name"]))
+    if manifest.get("xbench_upload_name"):
+        files.append(Path(manifest["xbench_upload_name"]))
     return files
 
 

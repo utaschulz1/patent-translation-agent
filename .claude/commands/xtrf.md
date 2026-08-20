@@ -29,6 +29,32 @@ Credentials from `.env`: `COMUNICA_JOBLIST_USERNAME` / `COMUNICA_JOBLIST_PASSWOR
 | GET | `/vendors/jobs/classic/{job_id}/source-files/{file_id}` | xtrf_job_setup.py |
 | POST | `/vendors/jobs/classic/{job_id}/target-files` | xtrf_upload.py |
 | GET | `/vendors/jobs/classic/{job_id}/target-files` | xtrf_upload.py (verify) |
+| PUT | `/vendors/jobs/classic/{job_id}/comments` | xtrf_post_comment.py |
+
+### Posting a job comment (xtrf_post_comment.py)
+
+Confirmed live 2026-08-20 via a captured browser request (Firefox DevTools,
+posting a real comment through the XTRF web UI):
+
+```
+PUT /vendors/jobs/classic/{job_id}/comments
+Content-Type: text/plain; charset=utf-8
+Time-Zone-Offset-In-Minutes: 60
+
+<raw comment text, no JSON wrapping, no field name>
+```
+
+`GET` on the same path returns 200 with an empty body when a job has no
+comments yet (tried on 3 different live jobs, all empty) — there was no
+existing comment to inspect the read-side shape from, only the write side
+was confirmed. `POST` to the same path returns 404 (not a valid route) —
+writing is done via `PUT`, which is easy to miss since it's an unusual verb
+choice for "add a comment" (more commonly modeled as POST-to-collection).
+An empty/garbage `PUT` body was tried first as a safe probe and returned 200
+without visibly changing anything (confirmed via a follow-up GET) — but
+don't rely on that leniency for anything other than initial discovery; the
+real payload is untyped raw text, so a wrong-shaped write is a real risk to
+what appears on a live job's comment thread.
 
 Note: the job-detail endpoint uses singular `/job/classic/` while the jobs-list and target-files
 endpoints use plural `/jobs/classic/`. This asymmetry is intentional and matches the live API.
