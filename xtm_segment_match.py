@@ -81,7 +81,9 @@ def _load_rows(xlsx_path: Path) -> list[tuple]:
 
 
 def match_corrections(rows: list[tuple], corrections: list[dict]) -> list[tuple[int, str]]:
-    """Returns [(segment_id, new_target_text), ...]. Raises on 0 or >1 matches for any pair."""
+    """Returns [(segment_id, new_target_text), ...]. Raises if any pair matches 0 or >1
+    segments, or if old_text occurs more than once within the one matched segment's
+    Target — an in-segment repeat is just as ambiguous as a cross-segment one."""
     matched = []
     for correction in corrections:
         old_text = correction["old_text"]
@@ -93,6 +95,12 @@ def match_corrections(rows: list[tuple], corrections: list[dict]) -> list[tuple[
             ids = [h[0] for h in hits]
             raise ValueError(f"Multiple segments ({ids}) contain: {old_text!r} — need a more specific old_text")
         seg_id, target = hits[0]
+        occurrences = target.count(old_text)
+        if occurrences > 1:
+            raise ValueError(
+                f"Segment {seg_id}'s Target contains {old_text!r} {occurrences} times — "
+                "ambiguous which occurrence to correct, need a more specific old_text"
+            )
         new_target = target.replace(old_text, new_text)
         matched.append((seg_id, new_target))
     return matched

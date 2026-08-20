@@ -52,3 +52,17 @@ def test_locate_proceeds_without_an_xbench_report(tmp_path):
     assert result["xbench_kind"] is None
     assert result["xbench_upload_name"] is None
     assert len(result["parts"]) == 1
+
+
+def test_locate_refuses_to_overwrite_existing_renamed_file(tmp_path):
+    """Re-running locate() must not silently clobber an already-edited
+    "(Issue Resolution)" working copy with a fresh, unedited original."""
+    work_dir = tmp_path / "FRKE_0000_P0000" / "EN to DE" / "Task Files" / "Work Files"
+    work_dir.mkdir(parents=True)
+
+    docx.Document().save(work_dir / "Document_German (UT Issues).docx")
+
+    locate(tmp_path)  # first run: creates "Document_German (Issue Resolution).docx"
+
+    with pytest.raises(FileExistsError):
+        locate(tmp_path)  # second run: must refuse, not overwrite

@@ -107,6 +107,9 @@ def locate(pre_folder: Path) -> dict:
         FileNotFoundError: no Task Files/Work Files directory found, or no
             docx matching the "(<initials> Issues/No Changes)" pattern.
         ValueError: more than one candidate docx for the same part.
+        FileExistsError: the "(Issue Resolution)"-renamed working copy
+            already exists — re-running this would silently overwrite it
+            with a fresh, unedited copy of the original DTP file.
     """
     task_work_dirs = _task_work_dirs(pre_folder)
     if not task_work_dirs:
@@ -160,6 +163,13 @@ def locate(pre_folder: Path) -> dict:
         _, m = match_by_path[docx_path]
         renamed_name = _renamed_name(docx_path.stem, m, docx_path.suffix)
         renamed_path = docx_path.with_name(renamed_name)
+        if renamed_path.exists():
+            raise FileExistsError(
+                f"{renamed_path.name} already exists — refusing to overwrite it with a "
+                "fresh copy of the original DTP file, which would silently discard any "
+                "review work already done on it. Delete it first if you really intend to "
+                "re-locate from scratch (e.g. after fixing an ambiguous multi-candidate error)."
+            )
         renamed_path.write_bytes(docx_path.read_bytes())
         had_comments, had_tracked_changes = _original_state(renamed_path)
         print(f"  {part}: {docx_path.name}")
