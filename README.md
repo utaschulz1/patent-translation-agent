@@ -46,9 +46,15 @@ patent-translation-agent/
 ├── glossary_compare_revised_translation.py  Glossary check on revised translation
 ├── linter.py                     Terminology linter — detects forbidden patterns in DE text
 │
-├── xtrf_upload.py                Upload deliverables to XTRF vendor portal
+├── xtrf_upload.py                Upload deliverables to XTRF vendor portal (post-editing + issue-resolution profiles)
+├── xtrf_post_comment.py          Issue Resolution: post the final-outcome comment to the XTRF job
 ├── delete_project.py             Remove project from workflow.db
 ├── delete_project_folder.py      Delete local project folder (confirm backup first)
+│
+├── issue_resolution_locate.py    Issue Resolution: locate part docx + Xbench report, write manifest
+├── check_docx_resolved.py        Issue Resolution: deterministic clean/unresolved gate
+├── xtm_segment_match.py          Issue Resolution: match resolved text fixes to XTM segments
+├── xtm_verify_correction.py      Issue Resolution: round-trip verify after XTM correction upload
 │
 ├── project_log.py                Shared: project context, find_project_dir(), event log
 ├── config.py                     Shared configuration
@@ -141,6 +147,11 @@ XTM_WORKBENCH_PASSWORD1=...
 # Matecat
 MATECAT_API_KEY=...
 MATECAT_COOKIE=...
+
+# Issue Resolution — author name check_docx_resolved.py looks for when
+# confirming a comment reply is ours (default is a generic placeholder —
+# set your real name here for the matching to actually work)
+TRANSLATOR_NAME=...
 
 # Google Drive
 GDRIVE_CLIENT_ID=...
@@ -278,6 +289,79 @@ python workflow_lara.py          # steps JOB_SETUP → XTM_FILES_DOWNLOADED → 
 python workflow_iptranslate.py   # same with IP.appify instead of Lara
 ```
 
+---
+
+## Workflow (Issue Resolution job type)
+
+A separate, much shorter job type for post-delivery correction work: the
+client (via the vendor portal, DTP-produced) sends back a docx per part with
+tracked changes and/or reviewer comments to address, plus a QA report. Many
+of these jobs turn out to need no changes at all — the fixed pipeline is
+built to make that "nothing to do" case fully automatic, and to only pull a
+human into an interactive review when there's actually something to resolve.
+
+| Step | Script | Description |
+|---|---|---|
+| `JOB_SETUP` | `xtrf_job_setup.py` | Download the Issue Resolution deliverable zip from XTRF, unzip preserving its nested folder structure |
+| `ISSUE_RESOLUTION_LOCATE` | `issue_resolution_locate.py` | Locate each part's docx + the job's QA report, create `(Issue Resolution)`-renamed copies, write `issue_resolution_manifest.json` |
+| `ISSUE_RESOLUTION_REVIEW_CHECK` | `check_docx_resolved.py` | Deterministic gate: 0 remaining tracked changes and every comment replied, across all parts — writes `issue_resolution_status.json` |
+| `ISSUE_RESOLUTION_XTRF_UPLOAD` | `xtrf_upload.py --profile issue-resolution` | Upload the renamed docx(es) + QA report to the XTRF job |
+| `XTM_SEGMENTS_DOWNLOAD` | `xtm_final_download.py --only xlsx` | Download current segment data from XTM (for matching, next step) |
+| `XTM_SEGMENT_MATCH` | `xtm_segment_match.py` | Match any resolved text-content fixes against XTM segments; produces a corrections xlsx, or no-ops if nothing needed correcting |
+| `XTM_CORRECTION_UPLOAD` | `xtm_upload_translations.py` | Push identified segment corrections to XTM; no-ops if `XTM_SEGMENT_MATCH` found nothing to push |
+| `XTM_CORRECTION_VERIFY` | `xtm_verify_correction.py` | Re-download and diff each corrected segment (+ its neighbors) against a pre-upload snapshot |
+| `XTRF_COMMENT_POST` | `xtrf_post_comment.py` | Post a final-outcome comment to the XTRF job, auto-picked from a fixed template |
+| `DELETE_PROJECT_FILES` | `delete_project_folder.py` | Delete local job folder (confirm backup first) |
+
+### Detecting an Issue Resolution job
+
+XTRF's job-type label for this work isn't consistent — it's shown up as both
+"Issue Resolution" and "Hourly tasks" (casing varies on both), so a keyword
+match on the label alone isn't reliable. The one constant observed across
+every label variant is that these jobs are priced at 0 — `config.py`'s
+`is_issue_resolution_job()` checks the label keyword OR a zero job value,
+either signal alone being enough (a real Issue Resolution job going
+undetected is the failure mode to avoid, not the reverse).
+
+### `issue_resolution_manifest.json` and `issue_resolution_status.json`
+
+Two small JSON files, written once each per project, that every downstream
+step reads instead of re-deriving or guessing:
+
+- **`issue_resolution_manifest.json`** (written by `ISSUE_RESOLUTION_LOCATE`)
+  — per part: the original docx path, the renamed copy, and the *original*
+  `had_comments`/`had_tracked_changes` ground truth, captured once before any
+  editing happens (tracked changes disappear from a docx once accepted, so
+  this is the only point that fact can ever be captured).
+- **`issue_resolution_status.json`** (written by `ISSUE_RESOLUTION_REVIEW_CHECK`,
+  re-run after any interactive resolution work) — per part `clean`/`problems`,
+  plus overall `all_clean` (gates the XTRF upload — refuses to upload
+  unresolved work) and `any_needed_work` (lets the XTM steps no-op cleanly
+  when nothing needed correcting, and picks the right `XTRF_COMMENT_POST`
+  template automatically).
+
+### Interactive resolution work
+
+When a part isn't clean, a third Claude Code skill,
+`.claude/skills/issue-resolution-review/`, orchestrates the existing
+`docx-comment-reply` and `resolve-tracked-changes` skills across every
+unresolved part in one invocation, and can draft
+`issue_resolution_xtm_corrections.json` (a list of `{old_text, new_text}`
+text-content fixes for `XTM_SEGMENT_MATCH` to propagate) from the resolution
+work it just did — always shown for confirmation, never written silently.
+Designed to be run via Claude Code's Remote Control from a phone, since
+these jobs tend to be urgent and time-sensitive.
+
+### Posting the outcome comment
+
+`xtrf_post_comment.py` auto-picks one of three fixed templates from
+`issue_resolution_status.json` (`any_needed_work` plus whether a corrections
+xlsx was produced) — no manual input needed for the common case. The XTRF
+comment endpoint takes the raw comment text as the request body (no JSON
+wrapping) via an HTTP verb that's easy to miss since it's an unusual choice
+for "add a comment" — see the script's module docstring for specifics.
+`--dry-run` is available for testing without posting for real.
+
 For direct script invocation:
 
 ```bash
@@ -343,3 +427,8 @@ handles reconnection automatically.
   extracts the longest matching phrase, so the full phrase may not always match.
 - **`XTM_FINAL_DOWNLOAD` and `XTRF_UPLOAD` are local-only** — they use the local
   `WORK_DIR` (OneDrive path). Railway support is a future TODO.
+- **`XTM_SEGMENTS_DOWNLOAD` (Issue Resolution) always performs a real XTM
+  download**, even when nothing ends up needing correction — unlike the three
+  steps after it, it doesn't check `issue_resolution_status.json` first. Not
+  harmful (the download just sits unused), but wasteful; a possible future
+  cleanup, not yet done.

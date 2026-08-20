@@ -883,8 +883,31 @@ def _upload_via_stomp(
 # Orchestrator
 # ---------------------------------------------------------------------------
 
+def _issue_resolution_nothing_to_upload(project_id: str) -> bool:
+    """True if this is an Issue Resolution job whose ISSUE_RESOLUTION_REVIEW_CHECK
+    found nothing needing resolution — in which case there's nothing to push to
+    XTM and this script should just no-op rather than fail looking for a
+    corrections Excel that was never (and never needed to be) written.
+    Ordinary post-editing jobs have no issue_resolution_status.json at all, so
+    this is always False for them — no behaviour change there."""
+    try:
+        pre_folder = _find_pre_folder(project_id)
+    except Exception:
+        return False
+    status_path = pre_folder / "issue_resolution_status.json"
+    if not status_path.exists():
+        return False
+    status = json.loads(status_path.read_text(encoding="utf-8"))
+    return not status.get("any_needed_work", True)
+
+
 def run(project_id: str) -> None:
     """Open XTM Workbench in write mode and upload revised translations."""
+    if _issue_resolution_nothing_to_upload(project_id):
+        print("issue_resolution_status.json: nothing needed resolving for this job — "
+              "no XTM correction to push, skipping.")
+        return
+
     # Fail fast before spending time on XTM login
     excel_path = _find_excel(project_id)
 
