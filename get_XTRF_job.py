@@ -12,6 +12,7 @@ The job_id_str replaces the Gmail message ID as the project_log key.
 """
 
 import os
+import sys
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -145,6 +146,14 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
         is_known_type = stype is None or "post" in stype.lower() or is_issue_resolution_job(overview)
 
         if not is_known_type:
+            if not sys.stdin.isatty():
+                # No terminal attached (e.g. Railway running this as a subprocess
+                # of the "Fetch next job" button) — input() would just hit EOF and
+                # crash. Auto-skip instead of blocking; same outcome as answering
+                # "N" by hand. Fetch by URL directly to force-process this job type.
+                print(f"  Skipping {project_id} — '{stype}' has no dedicated workflow yet "
+                      "(non-interactive, auto-skipping instead of prompting).")
+                continue
             answer = input(
                 f"  '{stype}' is not post-editing. Proceed with standard translation workflow? [Y/N]: "
             ).strip().upper()

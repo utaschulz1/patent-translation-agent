@@ -12,9 +12,17 @@ guarantees the pair is genuinely new to both lemma tables, so the test
 exercises the exact "having"-class gap this module exists to catch
 (2026-07-31), without depending on the tables' current contents.
 
-All reads/writes go through tmp_path copies of the real lemma tables —
-this test must never modify the real, shared EN_verb_lemma_lookup.json /
-DE_verb_lemma_lookup.json.
+TestFindUnknownVerbs uses a small frozen fixture table (not the real,
+shared one) — the real EN/DE lemma tables keep growing via
+verb_lemma_sync.py's own auto-growth, so a test asserting some verb like
+"establish" or "know" is "not yet known" would silently start failing
+whenever that verb later got added for real.
+
+TestLiveRoundTrip still copies the real tables into tmp_path (it needs to
+prove sync_verb_lemma_tables() never writes back to the real, shared
+EN_verb_lemma_lookup.json / DE_verb_lemma_lookup.json — see its
+real_en_before/after assertions) — but always writes through the tmp_path
+copy, never the real files.
 
 Run with:  pytest test_verb_lemma_sync.py -v -s
 (-s to see the sync_verb_lemma_tables() progress prints)
@@ -52,9 +60,30 @@ TEST_EN_VERB = "flabbergast"
 TEST_DE_VERB = "verblüffen"
 
 
+_SYNTHETIC_EN_TABLE = {"comprise": "comprise"}
+_SYNTHETIC_DE_TABLE = {"umfassen": "umfassen", "eingerichtet": "einrichten"}
+
+
 @pytest.fixture
 def tmp_lemma_tables(tmp_path):
-    """Isolated copies of the real lemma tables — safe to read AND write."""
+    """Small frozen tables, not the real ever-growing ones — see the module
+    docstring. Covers exactly what TestFindUnknownVerbs needs: "comprise"/
+    "umfassen" already known (must not be flagged), "eingerichtet" known as
+    the base participle with "eingerichtete" deliberately absent (exercises
+    the adjective-suffix-stripping fallback), and none of the verbs any test
+    treats as "not yet known" (flabbergast/verblüffen, establish, know)."""
+    en_path = tmp_path / "EN_verb_lemma_lookup.json"
+    de_path = tmp_path / "DE_verb_lemma_lookup.json"
+    en_path.write_text(json.dumps(_SYNTHETIC_EN_TABLE), encoding="utf-8")
+    de_path.write_text(json.dumps(_SYNTHETIC_DE_TABLE, ensure_ascii=False), encoding="utf-8")
+    return en_path, de_path
+
+
+@pytest.fixture
+def tmp_real_lemma_tables(tmp_path):
+    """Isolated copies of the real, shared lemma tables — for
+    TestLiveRoundTrip, which needs to prove sync_verb_lemma_tables() never
+    writes back to them."""
     en_path = tmp_path / "EN_verb_lemma_lookup.json"
     de_path = tmp_path / "DE_verb_lemma_lookup.json"
     shutil.copy(HERE / "EN_verb_lemma_lookup.json", en_path)
@@ -165,9 +194,9 @@ class TestLiveRoundTrip:
     """Makes a real LLM call. Requires OPENROUTER_API_KEY."""
 
     def test_sync_adds_plausible_forms_without_touching_real_files(
-        self, tmp_lemma_tables, real_client
+        self, tmp_real_lemma_tables, real_client
     ):
-        en_path, de_path = tmp_lemma_tables
+        en_path, de_path = tmp_real_lemma_tables
         real_en_before = (HERE / "EN_verb_lemma_lookup.json").read_text(encoding="utf-8")
         real_de_before = (HERE / "DE_verb_lemma_lookup.json").read_text(encoding="utf-8")
 
@@ -207,10 +236,10 @@ class TestLiveRoundTrip:
         assert TEST_EN_VERB not in real_en_after
         assert TEST_DE_VERB not in real_de_after
 
-    def test_second_sync_is_idempotent_no_llm_call_needed(self, tmp_lemma_tables, real_client, capsys):
+    def test_second_sync_is_idempotent_no_llm_call_needed(self, tmp_real_lemma_tables, real_client, capsys):
         """Once a verb is covered, re-running sync must not re-request it —
         this also verifies find_new_verb_pairs recognizes forms just added."""
-        en_path, de_path = tmp_lemma_tables
+        en_path, de_path = tmp_real_lemma_tables
 
         # First sync — establishes coverage (real LLM call).
         vls.sync_verb_lemma_tables(
