@@ -232,6 +232,19 @@ def _upload_file(session: requests.Session, job_id: int, path: Path) -> dict:
 
 
 def run(project_id: str, profile: str = "post-editing", part: str | None = None) -> None:
+    """Logs in, finds the job and files for the given profile, uploads them,
+    then verifies via a GET that they're now on XTRF.
+
+    Args:
+        project_id: the project to upload deliverables for.
+        profile: "post-editing" (default) or "issue-resolution" — see the
+            module docstring for what each profile uploads.
+        part: issue-resolution profile only — upload just this part's files
+            instead of every part in the manifest.
+
+    Raises:
+        ValueError: unknown profile.
+    """
     if profile not in FILE_PROFILES:
         raise ValueError(f"Unknown profile {profile!r}. Known: {FILE_PROFILES}")
 
@@ -279,6 +292,7 @@ def run(project_id: str, profile: str = "post-editing", part: str | None = None)
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description="Upload deliverables to XTRF vendor portal")
     parser.add_argument("project_id", help="Project ID, e.g. PLPA_2605_P0021")
     parser.add_argument("--profile", choices=FILE_PROFILES, default="post-editing",

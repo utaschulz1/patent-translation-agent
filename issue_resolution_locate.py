@@ -41,7 +41,7 @@ ISSUES_RE = re.compile(r"\(\s*([\w-]+)[\s_]+(Issues|No[\s_]+Changes)\s*\)", re.I
 # Excludes names already containing "_checked" so re-running this script
 # (e.g. after a partial failure) doesn't pick up its own prior output. The
 # optional trailing (\.\w+)? tolerates a double extension like ".xlsx.xls" —
-# confirmed on a live job (FRKE_2608_P0736, "Xbench_QA_Report_German.xlsx.xls"),
+# confirmed on a real live job ("Xbench_QA_Report_German.xlsx.xls"),
 # apparently from the report being re-saved through an older Excel format
 # after Xbench generated it. Still requires the real ".xlsx" component, so
 # this doesn't loosen the match to accept an unrelated ".xls"-only file.
@@ -90,6 +90,24 @@ def _original_state(docx_path: Path) -> tuple[bool, bool]:
 
 
 def locate(pre_folder: Path) -> dict:
+    """Finds every part's docx and the job's Xbench report, renames the docx
+    copies, and captures each part's original had_comments/had_tracked_changes
+    state before any editing happens.
+
+    Args:
+        pre_folder: the project's pre-processing folder (the unzipped Issue
+            Resolution deliverable).
+
+    Returns:
+        {"parts": [...], "xbench_file": str|None, "xbench_kind": str|None,
+        "xbench_upload_name": str|None} — see the module docstring for what
+        each part entry and xbench_kind value means.
+
+    Raises:
+        FileNotFoundError: no Task Files/Work Files directory found, or no
+            docx matching the "(<initials> Issues/No Changes)" pattern.
+        ValueError: more than one candidate docx for the same part.
+    """
     task_work_dirs = _task_work_dirs(pre_folder)
     if not task_work_dirs:
         raise FileNotFoundError(
@@ -204,6 +222,15 @@ def locate(pre_folder: Path) -> dict:
 
 
 def run(project_id: str) -> dict:
+    """Runs locate() for a project and writes the result to
+    pre-processing/issue_resolution_manifest.json.
+
+    Args:
+        project_id: the project to locate files for.
+
+    Returns:
+        The manifest dict (same shape as locate(), plus "project_id").
+    """
     pre_folder = project_log.find_project_dir(project_id)
     print(f"Pre-processing folder: {pre_folder}")
 
@@ -218,6 +245,7 @@ def run(project_id: str) -> dict:
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", required=True, help="Project ID, e.g. HALA_2607_P0624")
     args = parser.parse_args()

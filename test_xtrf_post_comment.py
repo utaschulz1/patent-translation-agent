@@ -52,13 +52,13 @@ def test_dry_run_does_not_call_put(tmp_path, monkeypatch, capsys):
     with patch.object(xpc, "_load_creds", return_value={}), \
          patch.object(xpc, "_make_session", return_value=fake_session), \
          patch.object(xpc, "_login"), \
-         patch.object(xpc, "_find_job_id", return_value=374882):
+         patch.object(xpc, "_find_job_id", return_value=999999):
         xpc.run("PID", dry_run=True)
 
     fake_session.put.assert_not_called()
     out = capsys.readouterr().out
     assert "[DRY RUN]" in out
-    assert "374882" in out
+    assert "999999" in out
 
 
 def test_live_put_sends_raw_text_body_no_json_wrapping(tmp_path, monkeypatch):
@@ -76,11 +76,11 @@ def test_live_put_sends_raw_text_body_no_json_wrapping(tmp_path, monkeypatch):
     with patch.object(xpc, "_load_creds", return_value={}), \
          patch.object(xpc, "_make_session", return_value=fake_session), \
          patch.object(xpc, "_login"), \
-         patch.object(xpc, "_find_job_id", return_value=374882):
+         patch.object(xpc, "_find_job_id", return_value=999999):
         xpc.run("PID", dry_run=False)
 
     fake_session.put.assert_called_once()
     args, kwargs = fake_session.put.call_args
-    assert args[0] == f"{xpc.BASE_URL}/jobs/classic/374882/comments"
+    assert args[0] == f"{xpc.BASE_URL}/jobs/classic/999999/comments"
     assert kwargs["data"] == xpc.TEMPLATES["no_action"].encode("utf-8")
     assert kwargs["headers"]["Content-Type"] == "text/plain; charset=utf-8"

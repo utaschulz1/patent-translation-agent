@@ -9,7 +9,7 @@ from config import is_issue_resolution_job
 
 
 def test_hourly_tasks_zero_value_is_issue_resolution():
-    # Real overview shape confirmed live against XTRF job #374882 — the case
+    # Real overview shape confirmed live against a real XTRF job — the case
     # the old "issue" in type.lower() check would have missed entirely.
     overview = {
         "type": "Hourly tasks",

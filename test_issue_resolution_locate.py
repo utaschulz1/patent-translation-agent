@@ -15,7 +15,7 @@ from issue_resolution_locate import XBENCH_XLSX_RE, XBENCH_TXT_RE, locate
 @pytest.mark.parametrize("name", [
     "Xbench_QA_Report_German.xlsx",
     "Xbench_QA_Report.xlsx",
-    # Real filename confirmed on a live job (FRKE_2608_P0736) — a double
+    # Real filename confirmed on a real live job — a double
     # extension left over from the report being re-saved through an older
     # Excel format after Xbench generated it.
     "Xbench_QA_Report_German.xlsx.xls",

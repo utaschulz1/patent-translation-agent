@@ -48,6 +48,12 @@ def _load_id_target_rows(xlsx_path: Path) -> list[tuple[int, str]]:
 
 
 def _find_one(folder: Path, pattern: str, label: str) -> Path:
+    """Globs pattern in folder, requiring exactly one match.
+
+    Raises:
+        FileNotFoundError: no match.
+        ValueError: more than one match.
+    """
     matches = list(folder.glob(pattern))
     if not matches:
         raise FileNotFoundError(f"No {label} ({pattern}) in {folder}")
@@ -100,6 +106,19 @@ def verify(checks_path: Path, snapshot_path: Path, current_path: Path) -> list[d
 
 
 def run(project_id: str) -> bool:
+    """Re-downloads current XTM segment state and verifies every corrected
+    segment (plus its immediate neighbors) against the pre-upload snapshot.
+
+    Short-circuits (trivially True, no XTM call) if no corrections checks
+    xlsx exists — nothing was corrected, so there's nothing to verify.
+
+    Args:
+        project_id: the project to verify.
+
+    Returns:
+        True if every corrected segment and its neighbors passed all checks
+        (or there was nothing to verify), False if anything failed.
+    """
     pre_folder = project_log.find_project_dir(project_id)
     project_folder = pre_folder.parent
 
@@ -140,6 +159,7 @@ def run(project_id: str) -> bool:
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", required=True)
     args = parser.parse_args()

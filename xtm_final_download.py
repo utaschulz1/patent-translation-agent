@@ -85,6 +85,18 @@ ONLY_CHOICES = ("all", "docx", "pdf", "xlsx")
 
 
 def run(project_id: str, only: str = "all") -> None:
+    """Downloads the requested end-of-workflow file(s) from XTM Workbench.
+
+    Args:
+        project_id: the project to download for — its ComunicaDK delivery
+            folder must already exist.
+        only: "all" (default) or one of "docx"/"pdf"/"xlsx" to skip the
+            others' preview-generation round-trips.
+
+    Raises:
+        ValueError: unknown `only` value.
+        RuntimeError: no ComunicaDK folder found for project_id.
+    """
     if only not in ONLY_CHOICES:
         raise ValueError(f"Unknown --only value {only!r}. Known: {ONLY_CHOICES}")
 
@@ -135,6 +147,7 @@ def run(project_id: str, only: str = "all") -> None:
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description="Download end-of-workflow files from XTM Workbench")
     parser.add_argument("project_id")
     parser.add_argument("--only", choices=ONLY_CHOICES, default="all",

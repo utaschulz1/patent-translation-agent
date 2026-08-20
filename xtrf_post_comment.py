@@ -55,6 +55,19 @@ CORRECTIONS_XLSX_GLOB = "*_revised_translation_checks_issue_resolution.xlsx"
 
 
 def determine_outcome(project_id: str) -> str:
+    """Auto-picks a TEMPLATES key from issue_resolution_status.json — see the
+    module docstring for the exact decision table.
+
+    Args:
+        project_id: the project to determine the outcome for.
+
+    Returns:
+        One of "no_action", "resolved_no_xtm", "resolved_with_xtm".
+
+    Raises:
+        FileNotFoundError: ISSUE_RESOLUTION_REVIEW_CHECK hasn't been run yet.
+        ValueError: not all parts are resolved yet.
+    """
     pre_folder = project_log.find_project_dir(project_id)
     status_path = pre_folder / "issue_resolution_status.json"
     if not status_path.exists():
@@ -76,6 +89,16 @@ def determine_outcome(project_id: str) -> str:
 
 
 def run(project_id: str, outcome: str | None = None, dry_run: bool = True) -> None:
+    """Posts (or dry-runs) the outcome comment to the matching XTRF job.
+
+    Args:
+        project_id: the project whose Issue Resolution job to comment on.
+        outcome: one of TEMPLATES' keys, or None to auto-detect (see
+            determine_outcome).
+        dry_run: if True (the default), prints what would be posted and
+            makes no network write. If False, actually PUTs the comment —
+            see the module docstring for the confirmed endpoint/payload.
+    """
     if outcome is None:
         outcome = determine_outcome(project_id)
         print(f"Auto-detected outcome: {outcome}")
@@ -114,6 +137,7 @@ def run(project_id: str, outcome: str | None = None, dry_run: bool = True) -> No
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", required=True)
     parser.add_argument("--outcome", default=None, choices=list(TEMPLATES),

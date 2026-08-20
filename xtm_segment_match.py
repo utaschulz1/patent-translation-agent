@@ -48,6 +48,13 @@ CORRECTIONS_FILENAME = "issue_resolution_xtm_corrections.json"
 
 
 def _find_final_xlsx(project_folder: Path) -> Path:
+    """Finds the Final_*.xlsx written by XTM_SEGMENTS_DOWNLOAD, excluding any
+    pre-upload snapshot copy.
+
+    Raises:
+        FileNotFoundError: none found.
+        ValueError: more than one found.
+    """
     matches = list(project_folder.glob("Final_*.xlsx"))
     matches = [p for p in matches if "_preupload_snapshot" not in p.stem]
     if not matches:
@@ -92,6 +99,9 @@ def match_corrections(rows: list[tuple], corrections: list[dict]) -> list[tuple[
 
 
 def _write_checks_xlsx(path: Path, matched: list[tuple[int, str]], source_stem: str) -> None:
+    """Writes the matched corrections in the exact format
+    xtm_upload_translations.py's _read_translations() expects (3-row header,
+    Column A = id, Column C = target)."""
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Issue Resolution corrections"
@@ -111,6 +121,26 @@ def _write_checks_xlsx(path: Path, matched: list[tuple[int, str]], source_stem: 
 
 
 def run(project_id: str) -> Path | None:
+    """Matches issue_resolution_xtm_corrections.json against XTM segments and
+    writes the corrections checks xlsx, if any correction is actually needed.
+
+    Short-circuits (no-op, returns None) if issue_resolution_status.json says
+    any_needed_work is False — see the module docstring — without requiring
+    the corrections file to exist in that case.
+
+    Args:
+        project_id: the project to match corrections for.
+
+    Returns:
+        Path to the written checks xlsx, or None if nothing needed matching
+        (either because the job needed no resolution at all, or the human
+        reviewer's corrections list was empty).
+
+    Raises:
+        FileNotFoundError: issue_resolution_xtm_corrections.json is missing
+            (and any_needed_work wasn't False), or no Final_*.xlsx exists yet.
+        ValueError: a correction's old_text matches zero or multiple segments.
+    """
     pre_folder = project_log.find_project_dir(project_id)
     project_folder = pre_folder.parent
 
@@ -155,6 +185,7 @@ def run(project_id: str) -> Path | None:
 
 
 def main():
+    """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", required=True)
     args = parser.parse_args()

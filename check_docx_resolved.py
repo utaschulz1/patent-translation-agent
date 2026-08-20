@@ -64,7 +64,16 @@ from extract_docx_comments import get_comment_reply_status  # noqa: E402
 
 
 def check_part(docx_path: Path, reply_author: str) -> list[str]:
-    """Returns a list of human-readable problem descriptions; empty = clean."""
+    """Checks one part's docx for unresolved tracked changes and unreplied comments.
+
+    Args:
+        docx_path: the renamed "(Issue Resolution)" docx for this part.
+        reply_author: only a reply from this author counts as resolving a comment.
+
+    Returns:
+        Human-readable problem descriptions, one per unresolved item — empty
+        list means the part is clean.
+    """
     problems = []
 
     with zipfile.ZipFile(docx_path) as z:
@@ -93,6 +102,19 @@ def check_part(docx_path: Path, reply_author: str) -> list[str]:
 
 
 def run(project_id: str, reply_author: str) -> dict:
+    """Checks every part in the manifest and writes issue_resolution_status.json.
+
+    Args:
+        project_id: the project to check.
+        reply_author: only replies from this author count as "resolved" —
+            see the module docstring for why.
+
+    Returns:
+        The status dict written to issue_resolution_status.json.
+
+    Raises:
+        FileNotFoundError: if ISSUE_RESOLUTION_LOCATE hasn't been run yet.
+    """
     pre_folder = project_log.find_project_dir(project_id)
     manifest_path = pre_folder / "issue_resolution_manifest.json"
     if not manifest_path.exists():
@@ -135,6 +157,7 @@ def run(project_id: str, reply_author: str) -> dict:
 
 
 def main():
+    """CLI entry point — see the module docstring for exit-code semantics."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pid", required=True)
     parser.add_argument("--reply-author", default=TRANSLATOR_NAME,
