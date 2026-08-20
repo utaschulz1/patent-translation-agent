@@ -115,7 +115,7 @@ When in doubt, prefer stative passive.
 | characterized by | **gekennzeichnet durch** | |
 | comprising | **umfassend** | see §2.2 |
 | comprise | **umfassen** | |
-| configured to | **konfiguriert, um** | NOT: "so/dazu konfiguriert ist/sind, dass" |
+| configured to | **konfiguriert ist, ... zu [Infinitiv]** (main clauses) | NOT: "so/dazu konfiguriert ist/sind, dass". "konfiguriert ist, um ... zu [Infinitiv]" or "dazu konfiguriert ist, (um) ... zu [Infinitiv]" is optional/either acceptable — but the construction must be used consistently across the patent. |
 | consist of | **bestehen aus** | NOT: "enthalten" |
 | contain | **enthalten** | NOT: "bestehen aus" |
 | device | **Vorrichtung** | |
@@ -266,7 +266,7 @@ Place the acronym so the compound makes sense without it, using hyphens:
 ## 9. Consistency
 
 - **One source term = one target term** throughout the patent, especially in claims.
-- Consistency applies to syntactic constructions too: "configured to" → always "konfiguriert, um"; "for + infinitive" → always "zum + Infinitiv", etc.
+- Consistency applies to syntactic constructions too: "configured to" → pick one accepted variant ("konfiguriert ist, ... zu [Infinitiv]" / "konfiguriert ist, um ... zu [Infinitiv]" / "dazu konfiguriert ist, (um) ... zu [Infinitiv]") and use it throughout the patent, don't mix variants — see §4.1; "for + infinitive" → always "zum + Infinitiv", etc.
 - **Consistency with previously published claims:** Use the translated terminology from published claims in the description. If a term from the claims is not ideal but not objectively wrong, use it in the description with a "beziehungsweise" bridge on first mention:
   - Example: "Störgeräusch beziehungsweise Rauschen" (first instance); "Rauschen" thereafter.
 - **Consistency with previously translated segments** in the same project: adopt and adhere to existing terminology; correct genuine errors but notify the PM.

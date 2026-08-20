@@ -670,7 +670,11 @@ CHECKS = [
     vielzahl_plurality,
     folgendes_umfasst,
     folgendes_konfiguriert,
-    dazu_konfiguriert,
+    # dazu_konfiguriert disabled 2026-08-20: contradicted actual accepted usage —
+    # scorecard evidence (see agent/_styleguide.md §4.1 "configured to") shows
+    # "dazu konfiguriert ist" is a reviewer-preferred house pattern, not an
+    # error. Was a constant source of disputed flags. May need reinstating
+    # in a narrower form later.
     abbreviation_not_in_source,
     jeweilig_not_respective,
     german_quotation_marks,
