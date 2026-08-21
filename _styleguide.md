@@ -129,7 +129,8 @@ When in doubt, prefer stative passive.
 | form (verb) | **bilden** | NOT: "formen" or "verlaufen" |
 | have | **aufweisen** | |
 | having | **aufweisend** | |
-| include | **aufweisen** or **beinhalten** | NOT: "umfassen" (reserved for "comprise") |
+| include | **einschließen** or **beinhalten** | NOT: "aufweisen" (reserved for "have"), NOT: "umfassen" (reserved for "comprise"). **Exception:** if "including" appears anywhere in the same patent (→ "einschließlich"/"schließt ein", see next row), translate every instance of "include" in that patent as **einschließen** instead — same stem as "including," for document-wide consistency. Check the whole patent for "including" before locking in "beinhalten" for "include." |
+| including | **einschließlich** or **schließt ein** | Triggers the "einschließen" stem requirement for "include" above |
 | in response to | **als Reaktion auf** | NOT: "in Reaktion auf" |
 | less than | **weniger als** | Alt: "kleiner als" |
 | method | **Verfahren** | |

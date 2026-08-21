@@ -165,6 +165,48 @@ class TestCountNounInDeSingleWord:
         assert _count_noun_in_de("SL-Kanal", "den SL-Kanals Ende") == 1
 
 
+class TestCountNounInDeCompoundHead:
+    """German compounds are head-final: the last component is what the whole
+    word "is". A glossary term appearing as a compound's tail (System ->
+    Subsystem) is the same concept, compounded, and must match. A term
+    appearing only as a *leading* modifier before a different head noun
+    (Beleuchtung -> Beleuchtungsquelle, covered by TestCountNounInDeSingleWord
+    above) is a different, more specific concept and must not.
+
+    Regression case: "system,System" flagged ~84 false "missing" positives on
+    a real DRAM patent (MICTCH_2608_P0124, 2026-08-20) because every
+    occurrence was embedded in Speichersubsystem/Hostsystem/Rechensystem —
+    all real, correctly-translated compounds the old prefix+length heuristic
+    could not see since it only recognized the term at a token's start.
+    """
+
+    def test_term_as_compound_tail_no_prefix(self):
+        # "Subsystem" = "sub" + "System" — term is the head noun (no linking element)
+        assert _count_noun_in_de("System", "ein Subsystem") == 1
+
+    def test_term_as_compound_tail_long_prefix(self):
+        assert _count_noun_in_de("System", "das Speichersubsystem") == 1
+
+    def test_term_as_compound_tail_plural(self):
+        # Trailing inflection of the whole compound (+1 char) still counts
+        assert _count_noun_in_de("System", "die Speichersubsysteme") == 1
+
+    def test_term_as_leading_modifier_still_excluded(self):
+        # System is the modifier, Steuerung ("control") is the head — must
+        # NOT match, same principle as the existing Beleuchtungsquelle test.
+        assert _count_noun_in_de("System", "die Systemsteuerung") == 0
+
+    def test_multiple_compound_tail_occurrences(self):
+        text = "ein Subsystem und ein weiteres Speichersubsystem"
+        assert _count_noun_in_de("System", text) == 2
+
+    def test_other_de_terms_still_excludes_longer_compound_tail_match(self):
+        # If a longer glossary entry's word is itself a compound-tail match
+        # for that longer term, a shorter term's tail-match on the same token
+        # must defer to it, same as the existing prefix-based exclusion did.
+        assert _count_noun_in_de("System", "ein Subsystem", ["Subsystem"]) == 0
+
+
 class TestCountNounInDeMultiWord:
     def test_base_form_matched(self):
         assert _count_noun_in_de("interne Feldblende", "die interne Feldblende ist") == 1

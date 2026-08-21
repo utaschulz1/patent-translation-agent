@@ -164,7 +164,7 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
 
     # Words longer than de_term drawn from other glossary DE entries (both
     # single-word entries and individual words of multi-word entries).  A token
-    # that stem-matches one of these belongs to that glossary pair, not to
+    # that matches one of these belongs to that glossary pair, not to
     # de_term.  Example: "Vorrichtungsabdeckung" is a word inside the multi-word
     # entry "dielektrische Vorrichtungsabdeckung", so it must not be counted
     # toward "Vorrichtung".
@@ -185,23 +185,39 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     tokens = [t.strip('.,;:()[]!?"\'') for t in text_lower.split()]
     tokens = [t for t in tokens if t]
 
+    def _term_matches_token(term: str, token: str) -> bool:
+        """True if token is term with a short inflectional suffix, or a German
+        compound with term as its final component (the semantic head — German
+        compounds are head-final, so a term appearing as a compound's tail is
+        "the same concept, compounded": System -> Subsystem/Speichersubsystem.
+        A term appearing only as a *leading* modifier before a different head
+        noun is a different, more specific concept and must not match:
+        Beleuchtung ("illumination") must not match inside Beleuchtungsquelle
+        ("illumination source") — Quelle, not Beleuchtung, is the head there.
+        """
+        idx = token.find(term)
+        if idx == -1:
+            return False
+        # term starts the token, only a short suffix follows → plain inflection
+        # (System -> Systems/Systeme; NOT Systemsteuerung, tail is too long).
+        if idx == 0 and len(token) <= len(term) + 3:
+            return True
+        # term ends the token (allowing a short trailing inflection of the
+        # compound itself, e.g. plural "-e" on "Speichersubsysteme") → term is
+        # the compound's head noun.
+        if idx + len(term) >= len(token) - 3:
+            return True
+        return False
+
     count = 0
     for token in tokens:
         if len(token) < len(de_lower):
             continue    # token shorter than glossary term → different word, not an inflected form
-        if len(token) > len(de_lower) + 3:
-            continue    # token much longer than glossary term → German compound word, not an inflection
-        min_len = min(len(de_lower), len(token))
-        if min_len < 5:
+        if not _term_matches_token(de_lower, token):
             continue
-        if de_lower[: min_len - 1] == token[: min_len - 1]:
-            if longer_de and len(token) > len(de_lower):
-                if any(
-                    len(token) >= len(ol) and token[: len(ol) - 1] == ol[: len(ol) - 1]
-                    for ol in longer_de
-                ):
-                    continue    # token matches a longer glossary entry — skip
-            count += 1
+        if longer_de and any(_term_matches_token(ol, token) for ol in longer_de):
+            continue    # token also matches a longer, more specific glossary entry — skip
+        count += 1
     return count
 
 
