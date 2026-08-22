@@ -1,17 +1,21 @@
 # Glossary Range Audit Skill
 
 QA pass on an already-LLM-cleaned `clean_glossary_<PID>.csv` (post
-`GLOSSARY_ANALYZED` step), in three parts, both tools used across all of them:
+`GLOSSARY_ANALYZED` step), to reason over the term choices that were
+calculated by majority vote; in three parts, both tools used across all of
+them:
 
 - **Content curation (Steps 1-6)** — verify every entry against a narrow,
   authoritative segment-ID range (typically the claims): is the chosen DE
-  term actually correct there, cross-checked against the pipeline's raw
-  frequency/vote tables, cleaned of structural issues (ordinals,
-  duplicates, case artifacts). This range is deliberately narrow because it
-  becomes the terminology *benchmark* — the claims are where a patent's
-  language must be strictly consistent, and analyzing the looser,
-  more-varied description text here would clutter that benchmark with
-  noise. Its output is the glossary's *content*.
+  term actually correct there, cross-checked against the provided context
+  in `*_translated.xlsx`, considering the domain, `standard_glossary.csv`,
+  and `_styleguide.md`. The chosen terms must make sense in the given
+  context and be consistent/unique from source to target *and* from target
+  to source. This range is deliberately narrow because it becomes the
+  terminology *benchmark* — the claims are where a patent's language must
+  be strictly consistent, and analyzing the looser, more-varied description
+  text here would clutter that benchmark with noise. Its output is the
+  glossary's *content*.
 - **Whole-document artifact & gap-finding (Step 7)** — once the glossary is
   in production use (checked against the *complete* patent, not just the
   claims), find places where the glossary *machinery itself* — an entry's
@@ -27,7 +31,22 @@ QA pass on an already-LLM-cleaned `clean_glossary_<PID>.csv` (post
   see Step 8 for exactly which is which.
 
 All three are manual/LLM-judgment reviews, not mechanical: the scripts here
-only gather evidence, they never decide anything on their own.
+only gather evidence, they never decide anything on their own — that
+evidence (frequency/canonical tables especially) is consulted *after* you've
+formed a domain-reasoned judgment from the actual segment context, never as
+a shortcut that replaces one. A majority vote in a canonical table only
+tells you what the raw MT happened to produce most often, which can be
+systematically wrong in exactly the same way for every occurrence — see the
+bidirectional-consistency rule in Step 3.
+
+**Do not consult scorecard-consolidation tooling (e.g.
+`consolidate_scorecards.py`'s comment-classification rules) as a source for
+term decisions.** It's a frozen snapshot of historical QA comments and can
+silently diverge from the current `_styleguide.md`. If this skill surfaces
+a real hard-requirement gap missing from `standard_glossary.csv` /
+`_styleguide.md`, propose adding it there directly — that's where the
+authoritative, currently-maintained answer belongs, not in scorecard
+history.
 
 See [[project-patent-llm-glossary]] for how the glossary was built in the
 first place, and [[project-patent-glossary-checker]] for how it's *used*
@@ -39,10 +58,14 @@ downstream (`glossary_compare_revised_translation.py`).
 |---|---|
 | `audit_glossary.py` | Cross-checks every glossary row against a segment-ID range: is the EN term attested in the source, is the DE value attested in the target, and does it appear in any `*_canonical_glossary.csv` / `*_inconsistency_table.csv` / `*_flags.csv` sitting next to the glossary. Omit `--min-id`/`--max-id` entirely to run it against the whole document instead of a range (used by Step 7). Never prints the corpus or full report to stdout — writes two files instead. |
 | `dump_checks.py` (in the sibling `patent-check-review` skill folder) | Dumps a full-patent `*_checks.xlsx` (glossary + linter flags per segment) to JSON for Step 7 — see [[patent-check-review]]. |
-| `<name>_<PID>.docx.xlf.xlsx` (`*_translated.xlsx`) | Bilingual segment table — `Id`, `Source`, `Target` columns. The ground-truth corpus for this audit. |
-| `clean_glossary_<PID>.csv` | The file being audited/amended. |
+| `*_translated.xlsx` | Bilingual segment table — `Id`, `Source`, `Target` columns. The ground-truth corpus for this audit. |
+| `clean_glossary_<PID>.csv` | The file being audited/amended. Its header row normally carries the EPO title ("EPO EN: ..."/"EPO DE: ...") — see Step 1b. |
+| `glossary_<PID>.csv` | Upstream source for the EPO title (same "EPO EN:"/"EPO DE:" prefixed row convention) — check here if the title is missing or garbled in `clean_glossary_<PID>.csv`, see Step 1b. |
 | `noun_canonical_glossary.csv` / `verb_canonical_glossary.csv` / `capability_canonical_glossary.csv` | Raw majority-vote tables from before LLM cleanup — `EN`, `DE`, `Count`, `Total EN Occurrences`, `Canonical` (yes/no). Corroborating evidence, not a verdict — see Step 3. |
 | `noun_inconsistency_table.csv` / `*_flags.csv` | Per-segment detail of every deviation from the majority form, with source/target sentence context. |
+| `standard_glossary.csv` (in `agent/`, shared across all projects) | The client's default terms. A single, uncommented row is usually a hard requirement, not just a suggestion — check here *before* trusting whatever this document's raw MT output happened to converge on. Fix real gaps here (not in scorecard tooling) when found. |
+| `_styleguide.md` (in `agent/`, shared across all projects) | Documented house rules (e.g. the `any`→`beliebig` claim-preamble exception, the `include`/`including` stem-consistency rule). Check alongside `standard_glossary.csv` before making any content judgment call. |
+| `<name>_<PID>.docx_GERMAN.xlf` (bare or translated, either works) | Optional — only needed to verify exact tag-stripped source text when a term's spelling/word-boundary is ambiguous in the XLSX (inline formatting tags are stripped there). Only ever read its `<source>` side; if the XLF happens to reflect a later proofread pass, that target text is out of scope for this skill. Skip this entirely if no XLF is present. |
 
 ## Workflow
 
@@ -54,6 +77,18 @@ This is a consequential edit to a file other pipeline steps depend on — always
 
 ### Step 1 — Confirm the segment range with the user if it's not obvious
 Ask which `Id` range to use as the reference corpus if the user hasn't given exact numbers (e.g. "the claims" needs an actual `369-430`-style range — get it from the xlsx, don't guess from the document structure). Sanity-check the range once loaded: a "claims" range that includes a stray `ABSTRACT` header or similar section boundary is normal (patent claims sections often run right up against the abstract) — note it, don't silently exclude it, but don't treat it as part of "the claims" either when reasoning about what a term's presence there proves.
+
+**Job type determines what "the benchmark range" even means — check this first.** Most jobs are claims-only: the translated document contains nothing but the claims, so the narrow range and the whole document are the same thing, and Steps 1-6 and Step 7 collapse into a single pass (don't go looking for a separate whole-document step that doesn't exist here — see the note at the top of Step 7). Full-patent jobs (claims + description) are the case Step 7 was written for: narrow range = claims, whole document = everything, and Step 7 has real, separate work to do checking the description against the claims-established glossary. Description-only jobs (no claims in scope at all) need a different reference range entirely — either a defined span from the start of the patent, or an externally-supplied, already-existing set of claims (e.g. from a parent application or prior filing) if one exists; ask the user which applies rather than guessing.
+
+### Step 1b — Check the EPO title: fix extraction, judge quality, apply if sound
+
+The EPO title is meant to be the authoritative anchor for a patent's domain terminology — `llm_glossary_cleanup.py`'s own prompt already tells the LLM to treat it that way ("Key terms in the title set the translation family for the whole patent") — but nothing downstream actually *verifies* that this happened. Worked example, RTC_2608_P1331 (2026-08-22): the raw MT's own majority vote chose `Prüfvorrichtung`/`prüfen` for "testing device"/"test," and a first pass through Steps 3-4 accepted that majority — even though the EPO title itself is "FREQUENCY-BASED BUILT-IN-**TEST**" / "...EINGEBAUTER **TEST**...". The final professional translation systematically used `Testvorrichtung`/`testen` instead, throughout the whole document. The title was right there the whole time; nothing in the audit checked the chosen terms against it.
+
+**1. Fix a missing or malformed EPO title extraction — never invent one.** The title normally lives as an "EPO EN:"/"EPO DE:" prefixed row in `glossary_<PID>.csv` (and gets carried into `clean_glossary_<PID>.csv`'s own header row by `llm_glossary_cleanup.py`). If it's garbled (wrong field swapped, stray HTML/XML escaping), try to reconstruct it from the text block that is present or from `glossary_<PID>.csv`. If it is missing completely, try to find it in the original PDF under "Annex to EPO Form 2004, Communication pursuant to Rule 71(3) EPC" which is located in the folder projects/JobNo_<PID>/<PID>/Task Files/Work Files — never write a title translation yourself, and never guess at what the EN or DE should say. If neither the EN nor the DE title text can be found anywhere in the project, skip this entire step — don't substitute placeholder text for a missing title (a real failure mode seen in practice: the "EPO EN" field held onboarding/Notion-instructions copy pasted in by mistake, not the actual title). A future pre-research step could fetch the real title from the EPO register directly when it's missing; this skill doesn't do that lookup itself.
+
+**2. Judge whether the title translation is actually usable before trusting it as an anchor.** The DE title is machine-translated too, and can carry the same kind of domain-blind, false-friend, or register-wrong errors as the rest of the raw MT — sometimes worse, since a title has no surrounding sentence context to disambiguate. Read it critically the same way you'd read any other segment: does the German actually match the patent's technical domain? Known failure patterns to watch for: "Anhang" (an attachment/appendix) used for what should be "Gliedmaße" (an anatomical/mechanical limb) — a dictionary-plausible but domain-wrong sense of the EN word; "Airbag" used for what should be "Manschette"/"Luftkissen" (cuff/air cushion) — MT overfitting to an unrelated but more frequent everyday sense. If the title is nonsense like this, don't treat it as an anchor at all — report it as a translation error (title errata is handled separately from claims, see `_styleguide.md` §10) and fall back to ordinary Steps 3-4 majority/context reasoning for those terms instead.
+
+**3. If the title (or specific terms in it) is sound, verify it's actually attested in the document before enforcing it — see the title-priority rule in Step 3.** Note there may already be upstream extraction of title-derived terms sitting in the pipeline (check `glossary_<PID>.csv` and what `llm_glossary_cleanup.py`'s `epo_title` handling already attempted) — this step is a verification/backstop on that existing attempt, not necessarily starting from zero.
 
 ### Step 2 — Run the audit script
 ```
@@ -70,13 +105,30 @@ counts = _count_lemmas(claims_text, en_lookup)   # claims_text = concatenated EN
 ```
 Diff the resulting lemma list against the current glossary's EN keys. Any lemma present in the claims but missing from the glossary is a real gap — per the verb rule below, that's sufficient justification to add it, no further judgment call needed. Filter out lemmas that only ever occur embedded inside an already-tracked multi-word compound (`address` inside `command address (CA) bus`, `select`/`terminate` inside the SCE/SCT packet names, `process` inside `processing device/logic`, `enable` inside `chip enable pin`) — check a few of that lemma's actual segment hits before concluding it's a real standalone-verb gap versus compound noise. This sweep is what caught two real gaps in MICTCH_2608_P0124 on 2026-08-21: `perform` (attested, segments 373/430, dropped between the initial audit and the final write with no actual decision behind it — a plain oversight) and `write` (attested, segments 381/400/423 — see Step 3 for how it had been wrongly removed based on an unverified claim that it didn't appear in the claims).
 
+**Separately check lemma-table completeness for every verb entry — attestation in the document isn't the same as recognizability in production.** `audit_glossary.py` and the sweep above only tell you whether a term is attested; they don't tell you whether `glossary_compare_revised_translation.py` can actually recognize it once the glossary ships. For every verb-shaped row, confirm both `EN_verb_lemma_lookup.json` (EN surface-form → lemma) and `DE_verb_lemma_lookup.json` (DE surface-form → lemma) actually contain it:
+```python
+import json
+en = json.load(open("EN_verb_lemma_lookup.json"))
+de = json.load(open("DE_verb_lemma_lookup.json"))
+en.get("dissolve"), de.get("auflösen")   # None means it's missing
+```
+A missing EN entry silently downgrades that row from robust lemma-matching to a weaker literal noun-style fallback that cannot handle German separable-prefix verbs at all — `freisetzen`→`freizusetzen`/`freisetzt`, `ausbilden`→`ausgebildet`: the `zu`/`ge` infix breaks any contiguous-substring match, so the entry misfires on *every* occurrence in production regardless of what DE value is stored. This is common on domains the lookup tables haven't seen before (14 of ~24 verbs were missing on a first pharma patent, FRKE_2608_P0736, 2026-08-22). Add the missing base + inflected/conjugated forms to both files when found — back them up first, since they're shared across every project, and only ever add, never overwrite an existing mapping.
+
+**If an XLF sits next to the glossary, use it only to verify exact tag-stripped source text — never to compare target-translation choices.** The `*_translated.xlsx` strips inline formatting tags (e.g. subscript spans like `Cmax,0-24`) from both source and target; if a term's exact spelling or word-boundary is ambiguous because of that, check the XLF's raw `<source>` content for the trans-unit in question (bare or translated XLF both work — only the source side matters here). At the point this skill normally runs there usually isn't a proofread version yet, so a target-text mismatch generally isn't something you'll encounter — but if it does happen to reflect a later proofread pass, that target text is still out of scope for this skill regardless (downstream human QA, not the first-round output being audited). If no XLF is present, skip this step entirely.
+
 ### Step 3 — Judge every row, don't mechanically apply the report
+
+**Reason about domain fit first — the frequency/canonical tables already did the calculating; your job is judgment, not recomputation.** Before touching any table, read the term in its actual claim context and ask whether it reads as correct, idiomatic patent-claim German for this specific domain (pharma dosing/dissolution-testing language reads differently than electronics-claim language). Cross-check against `standard_glossary.csv` and `_styleguide.md` *before* looking at the canonical/frequency tables — those tables are supporting evidence for attestation, consulted after you've formed a judgment, never a substitute for one.
+
+**Check bidirectional consistency — the same DE term must not do double duty for two different EN concepts.** Consistency runs both directions: not only must one EN term always render as the same DE term, but a German reader must be able to trace any DE term in the glossary back to a unique EN source. Before accepting a candidate DE value, search this glossary (and `standard_glossary.csv`) for whether that DE value, or its lemma, is already assigned to a *different* EN entry — if so, the candidate is wrong regardless of how well it reads in isolation, and needs a different, still-domain-appropriate word instead. Worked example, FRKE_2608_P0736 (2026-08-22): a pharma patent's raw MT rendered both `exhibit` ("exhibits a Cmax of X") and `provide` ("provides an elimination rate of X") as `führt (zu)` — genuinely fluent and 100%-internally-consistent on its own, but wrong, because it collapses two distinct claim concepts into one indistinguishable German verb. `having`/`have` already owned `aufweisen`; `provide` was a hard client requirement for `bereitstellen` (a single, uncommented `standard_glossary.csv` row — treat that as a strong signal of a hard requirement, not just a default); so `exhibit` needed a *third*, distinct, still domain-fitting word — `zeigen`, which reads naturally in pharmacokinetic-result claim language. Don't stop at "is this internally consistent" — also ask "does this DE word already belong to someone else."
 
 The report gives you three signals per row — EN attested, DE attested, frequency-table hits — none of which is a verdict on its own:
 
 **EN not attested is not automatically "delete it."** Multi-word phrases and fixed compounds will show up as an exact miss if the script's plain word-boundary match doesn't happen to hit — but single-word verbs routinely show `en_attested: false` and `de_attested: true` simultaneously, because German gerund/infinitive surface forms (`Empfangen`, `Senden`) legitimately contain the glossary's DE value while the EN glossary key is stored as the infinitive (`receive`, `send`) and only inflected forms (`receiving`, `sent`) appear in the actual English. That's expected, not a defect — cross-check against `verb_canonical_glossary.csv` (it already does real lemma-aware counting) instead of trying to regex-match every inflection yourself.
 
 **A canonical-table "no" (minority) doesn't mean the glossary is wrong.** The LLM that built `clean_glossary` does holistic consolidation, not blind majority vote, and it's sometimes right to overrule the majority. Read the actual segment context before deciding. Worked example from MICTCH_2608_P0124: raw table said `data transaction` → `Datenbanktransaktion` won 4/7, but `Datenbanktransaktion` literally means *database* transaction — a mistranslation — and it also contradicted the correctly-majority-chosen compounds (`Datentransaktionsinitialisierungsbefehl`, `Datentransaktionsbeendigungsbefehl`) that don't have "bank" in them. The glossary's minority choice (`Datentransaktion`) was the right call; leave it.
+
+**A sound EPO title term outranks the raw MT's own majority vote — see Step 1b.** The title is the one piece of context meant to anchor a patent's whole terminology family, so once you've judged it usable (Step 1b part 2) and confirmed the term is actually attested in the document, it wins even against a strong majority everywhere else — don't let "but most of the document already says X" talk you out of a term the title itself establishes as Y. Worked example: RTC_2608_P1331's raw MT majority-voted `Prüfvorrichtung`/`prüfen` (7/8 occurrences) for "testing device"/"test," but the EPO title is "...BUILT-IN-**TEST**...", and the final professional translation used `Testvorrichtung`/`testen` throughout instead — the majority vote was confidently, consistently wrong.
 
 **When a standard-glossary term and a non-standard/project term are both plausible, consistency wins over standard-ness.** If the standard term fits well in only one of the contexts where the concept occurs, but a non-standard term works consistently across *all* of them, prefer the consistently-usable non-standard term. A term that's "correct" in one spot but forces an awkward exception elsewhere creates more inconsistency risk across the patent than it resolves — the whole point of this glossary is document-wide consistency, which standard-glossary adherence is a proxy for, not a goal in itself. Check every context a candidate term would need to cover before locking in the standard choice just because it's the default.
 
@@ -95,7 +147,8 @@ The report gives you three signals per row — EN attested, DE attested, frequen
 - **Prefer long, intact compounds over decomposed pieces when the phrase is a distinct "thing" in the patent.** If a multi-word phrase (EN or DE) names a specific component, step, or concept — not just an incidental combination of generic words — keep it as one entry rather than splitting it into smaller atomic pieces. This applies just as much to entries discovered later in Step 7/8 — a newly-found compound like `memory sub-system` should be added whole, not decomposed. Split only when a component is a genuinely free modifier unrelated to a fixed technical compound (the CLEAN-UP note some `glossary_*.csv` files carry — "for EN multi-word terms where DE is adj.+noun, strip the EN adjective or add a bare-noun entry" — is about EN-key matching robustness in `glossary_compare.py`, not a blanket style rule).
 
 - **This is a separate question from whether a shared component across several compounds deserves its own standalone entry** — don't conflate the two, and don't decide the second one by assuming it'll help catch typos (that's the LanguageTool check's job now, not the glossary's; adding scope here to backstop a different tool is scope creep). `active state`/`idle state`/`standby state` all share the head noun "state." Whether `state,Zustand` also deserves its own entry depends entirely on whether "state" *itself* is empirically prone to a competing rendering (e.g. "Zustand" vs. "Status") somewhere in the corpus — check this directly rather than assume either way. Checked for MICTCH_2608_P0124: 65 occurrences of "Zustand" against 4 of "Status," and all 4 "Status" hits correspond to the distinct EN word "status" ("status register," "device status"), never "state" — so no standalone entry was warranted here, but the check itself, not an assumption, is what earned that conclusion. If a real split had turned up, a standalone entry is safe to add post-2026-08-21's compound-head-matching fix: it will now correctly match `state` embedded in `Standby-Zustand`/`Leerlaufzustand` (state is genuinely the compound's head there) without the false "fires on unrelated compounds" concern an earlier version of this rule wrongly raised — that concern had it backwards, since matching those compounds is the mechanism working correctly, not misfiring.
-- **Duplicate/near-duplicate entries for the same underlying concept:** two glossary rows resolving to the same verb lemma via different EN surface forms (e.g. `use,verwenden` and `using,mithilfe`) should collapse to one — keep the one with the correct DE value, delete the other rather than trying to reconcile both.
+- **Duplicate/near-duplicate entries for the same underlying concept:** two glossary rows resolving to the same verb lemma via different EN surface forms (e.g. `use,verwenden` and `using,mithilfe`) should collapse to one — keep the one with the correct DE value, delete the other rather than trying to reconcile both. **Check this isn't just a duplicate but a stem inconsistency:** if the LLM-cleanup step assigned two *different, non-cognate* DE values to different surface forms of what's actually the same lemma (e.g. `have,besitzen` alongside `having,aufweisen` — "to own" vs. "to exhibit," not variants of each other at all), that's a stronger signal than ordinary redundancy that one of the two is simply wrong — verify against the actual segment context (check every attested surface form of the lemma, not just the one under the row you're looking at) before deciding which survives.
+- **Context-dependent bare terms: mask via a fixed-phrase compound, don't overwrite the general-purpose default.** Some bare words are correct almost everywhere but wrong in one fixed, highly recurring construction — patent-claim boilerplate is full of these (`any`/`one of` are right generically but wrong inside the claim-preamble back-reference `any one of the preceding claims`; `use` is right generically but wrong inside the EPC medical-use marker `for use in/as claimed`). Don't change the bare entry's DE value to fit the construction — that breaks the bare entry for every other, unrelated context where it was already correct. Instead add the fixed phrase itself as its own compound entry (e.g. `any one of the preceding claims,einem der vorhergehenden Ansprüche`, `for use,zur Verwendung`); the checker's longest-match-wins logic then absorbs the bare word inside the construction automatically, leaving the general-purpose default free to keep firing correctly everywhere else. If the construction is generic cross-patent EPC boilerplate rather than invention-specific, propose the compound for `standard_glossary.csv` too, not just this document's CSV.
 
 ### Step 5 — Put large scope decisions to the user, don't decide unilaterally
 
@@ -106,7 +159,7 @@ If a significant fraction of entries comes back unattested, that's a scoped, con
 
 ### Step 7 — Whole-document pass: find glossary artifacts and gaps
 
-A claims-only (or any narrow-range) audit has one structural blind spot: a term verified correct and consistent *within the sample* can still misfire across the document as a whole — generic/high-frequency connector words (`use`, `include`, `system`, `cause`, `operations`, `by`) are exactly the ones most likely to be rendered differently in narrative description text than in formal claim language. Multi-word technical compounds specific to the invention (`data transaction initialization command`, `chip enable pin`) don't have this problem — there's nowhere else in the patent for them to drift. This step finds those blind spots once the glossary is checked against the complete patent, without redoing the content-curation judgment from Steps 1-6.
+**Only applies to full-patent jobs where a wider range exists beyond what Steps 1-6 audited.** For a claims-only job (see Step 1) the claims already are the whole document — there's nothing further to check here, skip straight to Step 9. This step is for the case where Steps 1-6 audited only the claims of a full patent that also has a description: that narrow-range audit has one structural blind spot — a term verified correct and consistent *within the sample* can still misfire across the document as a whole — generic/high-frequency connector words (`use`, `include`, `system`, `cause`, `operations`, `by`) are exactly the ones most likely to be rendered differently in narrative description text than in formal claim language. Multi-word technical compounds specific to the invention (`data transaction initialization command`, `chip enable pin`) don't have this problem — there's nowhere else in the patent for them to drift. This step finds those blind spots once the glossary is checked against the complete patent, without redoing the content-curation judgment from Steps 1-6.
 
 **Gather evidence with both tools, whole-document:**
 ```
