@@ -149,17 +149,20 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
             if not sys.stdin.isatty():
                 # No terminal attached (e.g. Railway running this as a subprocess
                 # of the "Fetch next job" button) — input() would just hit EOF and
-                # crash. Auto-skip instead of blocking; same outcome as answering
-                # "N" by hand. Fetch by URL directly to force-process this job type.
-                print(f"  Skipping {project_id} — '{stype}' has no dedicated workflow yet "
-                      "(non-interactive, auto-skipping instead of prompting).")
-                continue
-            answer = input(
-                f"  '{stype}' is not post-editing. Proceed with standard translation workflow? [Y/N]: "
-            ).strip().upper()
-            if answer != "Y":
-                print(f"  Skipping {project_id}.")
-                continue
+                # crash. Auto-proceed with the standard workflow instead of
+                # blocking — same outcome as answering "Y" by hand, and matches
+                # app.py's fetch_job route, which already defaults any
+                # unrecognized task_type to "post-editing" (workflow_definitions.py
+                # has no dedicated entry for e.g. proofreading yet).
+                print(f"  '{stype}' is not post-editing — proceeding with standard "
+                      "translation workflow anyway (non-interactive default).")
+            else:
+                answer = input(
+                    f"  '{stype}' is not post-editing. Proceed with standard translation workflow? [Y/N]: "
+                ).strip().upper()
+                if answer != "Y":
+                    print(f"  Skipping {project_id}.")
+                    continue
 
         xtrf_url = f"{BASE_URL}/#/jobs/classic/{job_id}"
         project_log.log_event(job_id, "LINK_EXTRACTED", detail=f"project={project_id}")

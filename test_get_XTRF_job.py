@@ -33,16 +33,19 @@ def _mock_run(monkeypatch, jobs, isatty):
     return logged
 
 
-def test_unknown_job_type_auto_skips_when_non_interactive(monkeypatch):
+def test_unknown_job_type_auto_proceeds_when_non_interactive(monkeypatch):
     """Regression test for the Railway EOFError: a job type with no dedicated
     workflow must not block on input() when there's no terminal attached —
-    it should skip that job and return None (no other candidates) instead."""
+    it should proceed with the standard workflow (same as answering "Y" by
+    hand), matching app.py's fetch_job route defaulting any unrecognized
+    task_type to "post-editing"."""
     logged = _mock_run(monkeypatch, [_PROOFREADING_JOB], isatty=False)
 
     result = gxj.run()
 
-    assert result is None
-    assert logged == []  # never reached — job was skipped, not selected
+    assert result is not None
+    assert result[1] == "MICTCH_2608_P0124"
+    assert logged  # LINK_EXTRACTED was logged — job was actually selected
 
 
 def test_unknown_job_type_prompts_when_interactive(monkeypatch):
