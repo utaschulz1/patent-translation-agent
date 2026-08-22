@@ -144,11 +144,11 @@ When in doubt, prefer stative passive.
 | respectively | **beziehungsweise** | NOT abbreviated as "bzw." |
 | said | **der / die / das** (definite article) | NOT: "besagte/r/s", "dieser/genannter" |
 | same (adjective, identical) | **gleiche/r/s** (check article) | NOT: "dieselbe/derselbe/dasselbe" — "dieselbe" implies identity of the exact same object, "gleiche" means of the same kind |
-| so that | **sodass** | NOT: "derart dass" |
+| so that | **so dass** | NOT: "derart dass" |
 | state of the art | **Stand der Technik** | |
 | subject (medical/chemical context) | **Subjekt** | NOT: "Patient" |
 | such as | **wie** | |
-| such that | **derart, dass** | NOT: "so dass" |
+| such that | **derart dass** | NOT: "so dass" |
 | summary of the invention | **Kurzdarstellung der Erfindung** | |
 | using | **mithilfe** or **durch Verwenden** | NOT: "unter Verwendung" |
 | vehicle | **Fahrzeug** | NOT: "Auto" (too colloquial) |
