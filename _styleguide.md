@@ -129,8 +129,8 @@ When in doubt, prefer stative passive.
 | form (verb) | **bilden** | NOT: "formen" or "verlaufen" |
 | have | **aufweisen** | |
 | having | **aufweisend** | |
-| include | **einschließen** or **beinhalten** | NOT: "aufweisen" (reserved for "have"), NOT: "umfassen" (reserved for "comprise"). **Exception:** if "including" appears anywhere in the same patent (→ "einschließlich"/"schließt ein", see next row), translate every instance of "include" in that patent as **einschließen** instead — same stem as "including," for document-wide consistency. Check the whole patent for "including" before locking in "beinhalten" for "include." |
-| including | **einschließlich** or **schließt ein** | Triggers the "einschließen" stem requirement for "include" above |
+| include | **einschließen** or **beinhalten** | NOT: "aufweisen" (reserved for "have"), NOT: "umfassen" (reserved for "comprise"). **Exception — claims only:** if "including" appears anywhere **within the claims** (→ "einschließlich"/"schließt ein", see next row), translate every instance of "include" **within the claims** as **einschließen** instead — same stem as "including," since claims require strict same-term consistency. This does NOT extend to the abstract or description: if "include"/"including" only occur there, using different stems is fine — "beinhalten" is the practically preferable default outside claims anyway, since "einschließen" is a separable-prefix verb (schließt...ein in a main clause) that complicates word order in ways "beinhalten" (inseparable) doesn't. Check the *claims* specifically for "including" before locking in "beinhalten" for "include" — checking the whole patent overstates the trigger condition. |
+| including | **einschließlich** or **schließt ein** | Triggers the "einschließen" stem requirement for "include" above, but only within the same claim set — an "including" that only appears in the abstract/description doesn't force consistency outside claims. |
 | in response to | **als Reaktion auf** | NOT: "in Reaktion auf" |
 | less than | **weniger als** | Alt: "kleiner als" |
 | method | **Verfahren** | |
