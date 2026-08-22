@@ -81,7 +81,7 @@ def run(target_project_id: str | None = None) -> tuple[str, str, str] | None:
     })
     _login(session, creds)
 
-    statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS,PENDING"
+    statuses = "IN_PROGRESS,IN_PROGRESS_AWAITING_CORRECTIONS"
     r = session.get(f"{BASE_URL}/jobs", params={"statuses": statuses})
     r.raise_for_status()
     jobs = r.json()
