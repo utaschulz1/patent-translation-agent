@@ -1,6 +1,7 @@
 EN,DE
 BACKGROUND,ALLGEMEINER STAND DER TECHNIK
-apparatus,Einrichtung
+apparatus,Einrichtung,Vorrichtung
+device,Vorrichtung
 e.g.,z. B.,
 less than,weniger als
 one of,eines von,
@@ -22,6 +23,7 @@ connect,verbinden,
 operatively connected,wirkverbunden,
 attach,befestigen,
 produce,erzeugen
+provide,bereitstellen,
 associate,verknüpfen,
 map,zuordnen,
 assign,zuweisen,
@@ -42,6 +44,11 @@ upstream,stromaufwärts gelegen,
 downstream,stromabwärts gelegen,
 according to claim,nach Anspruch
 any preceding claim,nach einem der vorhergehenden Ansprüche
+any one of the preceding claims,einem der vorhergehenden Ansprüche
+any one of claims,einem der Ansprüche
+one of the preceding claims,einem der vorhergehenden Ansprüche
+one of claims,einem der Ansprüche
+for use,zur Verwendung
 feature,Merkmal,
 characteristic,Merkmal,
 subsequent,anschließend,
