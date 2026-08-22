@@ -121,9 +121,15 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
         # counts standalone occurrences.
         if other_de_terms:
             for other in other_de_terms:
-                if " " not in other or len(other) <= len(de_term):
-                    continue
                 other_words = other.lower().split()
+                # Compare word count, not string length: a plural/case-inflected
+                # sibling entry (e.g. "diskrete Ausgangsleiter" for singular
+                # "diskret Ausgangsleiter") is a few characters longer but has the
+                # *same* number of stems — it is the same phrase, not a longer
+                # phrase this one is embedded in. Only a genuine extra component
+                # word (one more stem than de_term) qualifies for masking here.
+                if len(other_words) <= len(de_stems):
+                    continue
                 other_stems = []
                 for w in other_words:
                     stem = w

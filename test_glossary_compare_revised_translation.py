@@ -231,3 +231,25 @@ class TestCountNounInDeMultiWord:
     def test_multiword_count(self):
         text = "interne Feldblende und interne Feldblende"
         assert _count_noun_in_de("interne Feldblende", text) == 2
+
+    def test_singular_not_masked_by_plural_sibling_entry(self):
+        """Regression, RTC_2608_P1331 (2026-08-22): "discrete output conductor"
+        (singular, "diskret Ausgangsleiter") and "discrete output conductors"
+        (plural, "diskrete Ausgangsleiter") are separate glossary rows whose DE
+        values stem to the *same* two words once the plural "-e" is stripped.
+        The old length check (len(other) > len(de_term)) treated the
+        1-char-longer plural as "a longer phrase containing this one," masking
+        every occurrence and reporting 0 for the singular entry no matter how
+        correct and consistent the actual text was.
+        """
+        text = "der diskreten Ausgangsleiter und des diskreten Ausgangsleiters"
+        assert _count_noun_in_de("diskret Ausgangsleiter", text, ["diskrete Ausgangsleiter"]) == 2
+
+    def test_genuinely_longer_phrase_still_masks_component(self):
+        """The masking this guards must still work when `other` really does
+        have an extra component word (3 stems vs. 2) — the case the code
+        comment documents ("organisierte Punktwolke" inside "geglättete
+        organisierte Punktwolke").
+        """
+        text = "die geglättete organisierte Punktwolke"
+        assert _count_noun_in_de("organisierte Punktwolke", text, ["geglättete organisierte Punktwolke"]) == 0
