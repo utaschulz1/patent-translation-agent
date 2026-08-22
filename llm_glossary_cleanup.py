@@ -49,6 +49,29 @@ SHARED_DE_ALLOWED: set[frozenset] = {
     frozenset({"comprise", "comprising"}),
 }
 
+
+def _shared_de_note() -> str:
+    """Render SHARED_DE_ALLOWED into prompt text so the LLM is actually told
+    about these sanctioned overlaps, instead of only validate_result()
+    tolerating them after the fact. Without this, the LLM — repeatedly
+    instructed elsewhere in the prompt never to let two EN terms share a DE
+    value — has no way to know these specific pairs are fine, and "resolves"
+    the apparent conflict itself by inventing a wrong alternative DE for one
+    of the two (e.g. "have" → "besitzen" instead of "aufweisen", found live
+    on FRKE_2608_P0736, 2026-08-22)."""
+    if not SHARED_DE_ALLOWED:
+        return ""
+    lines = "\n".join(
+        f"  - {' / '.join(sorted(pair))}"
+        for pair in sorted(SHARED_DE_ALLOWED, key=lambda p: sorted(p))
+    )
+    return (
+        "The following EN term groups are expected to legitimately share one "
+        "DE term — this is standard EPO practice, not a conflict. Do NOT "
+        "invent a different DE value for one of them to avoid the overlap:\n"
+        f"{lines}"
+    )
+
 # Noun phrase leading words that indicate a sequential/relative variant rather
 # than a distinct concept.  A phrase is only filtered when its base (remaining
 # words) exists as a standalone entry, ensuring glossary coverage is never lost.
@@ -72,6 +95,8 @@ Produce a clean, consistent EN→DE glossary. The output must:
 - Prefer standard_glossary terms over observed translations
 - Use German compound nouns as long as reasonably possible
 - Correct NLP artefacts in both EN and DE strings
+
+{SHARED_DE_NOTE}
 
 ---
 
@@ -233,7 +258,8 @@ For each entry in inconsistent_nouns:
 
 Before writing output, verify:
   - No two rows share the same EN term
-  - No two rows share the same DE value
+  - No two rows share the same DE value (except the sanctioned overlaps
+    listed under Objective above)
   - Every EN term from all input sections appears exactly once
   - Compound nouns use the same base as their resolved base terms
   - No NLP artefacts remain in any EN or DE string
@@ -680,6 +706,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     # ── Call API ──────────────────────────────────────────────────────────────
 
     user_message = USER_PROMPT_TEMPLATE.replace("{INPUT_JSON}", input_json_str)
+    user_message = user_message.replace("{SHARED_DE_NOTE}", _shared_de_note())
 
     print(f"Calling {MODEL}...")
     response = client.chat.completions.create(

@@ -226,6 +226,31 @@ class TestValidateResult:
         assert any("Skipped empty" in e for e in errors)
 
 
+# ── _shared_de_note / prompt wiring ────────────────────────────────────────────
+# Regression coverage for the FRKE_2608_P0736 (2026-08-22) bug: SHARED_DE_ALLOWED
+# was only ever consulted post-hoc in validate_result(), never communicated to
+# the LLM, so it invented "have" → "besitzen" to dodge a DE-duplicate collision
+# validate_result would have accepted anyway. These tests pin the fix: the
+# prompt actually sent to the LLM must name every sanctioned pair.
+
+class TestSharedDeNote:
+    def test_note_lists_every_allowed_pair(self):
+        note = glc._shared_de_note()
+        for pair in glc.SHARED_DE_ALLOWED:
+            assert all(term in note for term in pair)
+
+    def test_note_nonempty_when_pairs_exist(self):
+        assert glc.SHARED_DE_ALLOWED  # would silently pass the next test if empty
+        assert glc._shared_de_note().strip() != ""
+
+    def test_placeholder_resolved_in_rendered_prompt(self):
+        rendered = glc.USER_PROMPT_TEMPLATE.replace("{INPUT_JSON}", "<json>")
+        rendered = rendered.replace("{SHARED_DE_NOTE}", glc._shared_de_note())
+        assert "{SHARED_DE_NOTE}" not in rendered
+        assert "have" in rendered and "having" in rendered
+        assert "comprise" in rendered and "comprising" in rendered
+
+
 # ── _is_ordinal_variant ───────────────────────────────────────────────────────
 
 class TestIsOrdinalVariant:
