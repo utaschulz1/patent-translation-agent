@@ -285,6 +285,106 @@ class TestIsOrdinalVariant:
         assert not glc._is_ordinal_variant("first", self.KNOWN)
 
 
+# ── _strip_de_ordinal_word ──────────────────────────────────────────────────
+
+class TestStripDeOrdinalWord:
+    def test_bare_stem(self):
+        assert glc._strip_de_ordinal_word("erst Bilddaten", "first") == "Bilddaten"
+
+    def test_declined_stem(self):
+        assert glc._strip_de_ordinal_word("ersten Bilddaten", "first") == "Bilddaten"
+        assert glc._strip_de_ordinal_word("zweiten Bilddaten", "second") == "Bilddaten"
+
+    def test_multi_word_remainder_preserved(self):
+        assert glc._strip_de_ordinal_word("erste Ausgangsbilddaten", "first") == "Ausgangsbilddaten"
+
+    def test_modifier_with_multiple_de_stems(self):
+        assert glc._strip_de_ordinal_word("zusätzliche Daten", "additional") == "Daten"
+        assert glc._strip_de_ordinal_word("weitere Daten", "additional") == "Daten"
+
+    def test_unexpected_leading_word_returns_none(self):
+        # DE doesn't actually lead with a translation of "first" at all
+        assert glc._strip_de_ordinal_word("initiale Bilddaten", "first") is None
+
+    def test_single_word_de_value_returns_none(self):
+        assert glc._strip_de_ordinal_word("Bilddaten", "first") is None
+
+    def test_unknown_modifier_returns_none(self):
+        assert glc._strip_de_ordinal_word("dritte Bilddaten", "unknown") is None
+
+
+# ── _merge_ordinal_siblings ──────────────────────────────────────────────────
+
+class TestMergeOrdinalSiblings:
+    def test_agreeing_siblings_merged(self):
+        """Regression, HALA_2608_P0655 (2026-08-23): "image data" never
+        occurs unmodified in the source, so _is_ordinal_variant's own
+        base-must-be-independently-attested guard never fires and
+        "first image data"/"second image data" survive as fully separate
+        entries. Comparing the siblings to each other instead of requiring
+        a third, bare occurrence catches this.
+        """
+        noun_can = {
+            "first image data":  {"ersten Bilddaten": {"count": 3, "total": 4, "canonical": True}},
+            "second image data": {"zweiten Bilddaten": {"count": 3, "total": 3, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {"image data": "Bilddaten"}
+        assert consumed == {"first image data", "second image data"}
+
+    def test_disagreeing_siblings_not_merged(self):
+        # Ordinal genuinely changes the correct DE translation — must not merge.
+        noun_can = {
+            "first electrode":  {"erste Elektrode": {"count": 5, "total": 5, "canonical": True}},
+            "second electrode": {"Gegenelektrode":  {"count": 5, "total": 5, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {}
+        assert consumed == set()
+
+    def test_single_sibling_not_merged(self):
+        noun_can = {
+            "first image data": {"ersten Bilddaten": {"count": 3, "total": 3, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {}
+        assert consumed == set()
+
+    def test_unexpected_de_form_bails_out_safely(self):
+        # One sibling's canonical DE doesn't actually lead with a
+        # translation of its own modifier — bail rather than guess.
+        noun_can = {
+            "first image data":  {"vorherige Bilddaten": {"count": 3, "total": 3, "canonical": True}},
+            "second image data": {"zweiten Bilddaten":   {"count": 3, "total": 3, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {}
+        assert consumed == set()
+
+    def test_three_way_group_all_agree(self):
+        noun_can = {
+            "first image data":  {"ersten Bilddaten":  {"count": 2, "total": 2, "canonical": True}},
+            "second image data": {"zweiten Bilddaten": {"count": 2, "total": 2, "canonical": True}},
+            "third image data":  {"dritten Bilddaten": {"count": 2, "total": 2, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {"image data": "Bilddaten"}
+        assert consumed == {"first image data", "second image data", "third image data"}
+
+    def test_uses_canonical_majority_de_when_sibling_itself_inconsistent(self):
+        # "first image data" has a minority deviant DE too — the majority
+        # (higher count) must be what gets compared/stripped, not any form.
+        noun_can = {
+            "first image data": {
+                "ersten Bilddaten": {"count": 3, "total": 4, "canonical": True},
+                "erster Bilddaten": {"count": 1, "total": 4, "canonical": False},
+            },
+            "second image data": {"zweiten Bilddaten": {"count": 3, "total": 3, "canonical": True}},
+        }
+        merged, consumed = glc._merge_ordinal_siblings(noun_can)
+        assert merged == {"image data": "Bilddaten"}
+
+
 # ── Integration: full pipeline via clean_glossary() ────────────────────────────
 
 class TestPipeline:

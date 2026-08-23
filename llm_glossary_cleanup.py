@@ -80,6 +80,101 @@ ORDINAL_MODIFIERS: frozenset[str] = frozenset({
     "other", "additional",
 })
 
+# Expected DE stem(s) for each ORDINAL_MODIFIERS word, used only to verify a
+# sibling's canonical DE actually leads with the translation we'd expect
+# before stripping it — never to guess. Some EN modifiers have more than one
+# acceptable DE rendering.
+_EN_TO_DE_ORDINAL_STEMS: dict[str, tuple[str, ...]] = {
+    "first":      ("erst",),
+    "second":     ("zweit",),
+    "third":      ("dritt",),
+    "fourth":     ("viert",),
+    "fifth":      ("fünft",),
+    "other":      ("ander",),
+    "additional": ("zusätzlich", "weiter"),
+}
+
+# Same adjective-declension endings glossary_compare_revised_translation.py's
+# _DE_ADJ_SUFFIXES strips at check time — kept as a separate local constant
+# rather than imported, since this is a small, self-contained concern.
+_DE_ADJ_ENDINGS: tuple[str, ...] = ("em", "er", "es", "en", "e")
+
+
+def _strip_de_ordinal_word(de_value: str, en_modifier: str) -> str | None:
+    """If de_value's leading word is a (possibly declined) form of the DE
+    word expected for en_modifier, return the remainder of de_value.
+    Otherwise None — a modifier that isn't actually translated as expected
+    means we don't know enough to strip it safely, so this never guesses."""
+    stems = _EN_TO_DE_ORDINAL_STEMS.get(en_modifier)
+    if not stems:
+        return None
+    parts = de_value.split(None, 1)
+    if len(parts) != 2:
+        return None
+    first_word, remainder = parts[0].lower(), parts[1]
+    for stem in stems:
+        if first_word == stem or any(first_word == stem + suf for suf in _DE_ADJ_ENDINGS):
+            return remainder
+    return None
+
+
+def _merge_ordinal_siblings(
+    noun_can: dict[str, dict[str, dict]],
+) -> tuple[dict[str, str], set[str]]:
+    """Collapse ordinal-modifier siblings of the same base noun phrase (e.g.
+    "first image data" / "second image data") into one bare-base entry when
+    they agree on the underlying DE term once each one's own ordinal word is
+    stripped — a purely mechanical merge, no LLM judgment needed (matches
+    the glossary-range-audit skill's Step 4 ordinal-collapse rule).
+
+    Complements, rather than replaces, _is_ordinal_variant(): that function
+    only fires when the bare base is *also* independently attested somewhere
+    in the raw extraction, which never happens for a concept that only ever
+    occurs modified (HALA_2608_P0655, 2026-08-23: "image data" never occurs
+    unmodified — only as first/second/input/output/intermediate image data —
+    so first/second image data survived as fully separate entries). This
+    compares ordinal siblings to *each other* instead, so no third,
+    independently-attested occurrence is required.
+
+    Any mismatch — an unexpected leading DE word, or siblings that strip to
+    different remainders — bails out for that whole group rather than
+    guessing, leaving the phrases to go through normal classification
+    unchanged.
+    """
+    groups: dict[str, list[tuple[str, str]]] = defaultdict(list)  # base -> [(modifier, en_phrase)]
+    for en_phrase in noun_can:
+        words = en_phrase.split()
+        if len(words) < 2 or words[0] not in ORDINAL_MODIFIERS:
+            continue
+        base = " ".join(words[1:])
+        groups[base].append((words[0], en_phrase))
+
+    merged_bases: dict[str, str] = {}
+    consumed: set[str] = set()
+
+    for base, members in groups.items():
+        if len(members) < 2:
+            continue
+        stripped: dict[str, str] = {}
+        ok = True
+        for modifier, en_phrase in members:
+            de_map = noun_can[en_phrase]
+            canonical_de = max(de_map.items(), key=lambda kv: kv[1]["count"])[0]
+            remainder = _strip_de_ordinal_word(canonical_de, modifier)
+            if remainder is None:
+                ok = False
+                break
+            stripped[en_phrase] = remainder
+        if not ok:
+            continue
+        remainders = set(stripped.values())
+        if len(remainders) != 1:
+            continue
+        merged_bases[base] = next(iter(remainders))
+        consumed.update(en_phrase for _, en_phrase in members)
+
+    return merged_bases, consumed
+
 SYSTEM_PROMPT = """\
 You are a German patent translator specialising in EP patent claims and \
 descriptions. You follow EPO translation conventions and German patent language \
@@ -647,7 +742,14 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
 
     _noun_phrases = set(noun_can.keys())
 
+    merged_bases, consumed_by_merge = _merge_ordinal_siblings(noun_can)
+    for base, de in merged_bases.items():
+        if base not in noun_can:
+            consistent_nouns.setdefault(base, de)
+
     for en_phrase in sorted(noun_can.keys(), key=len):
+        if en_phrase in consumed_by_merge:
+            continue
         if _is_ordinal_variant(en_phrase, _noun_phrases):
             continue
         de_map         = noun_can[en_phrase]
@@ -678,7 +780,8 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
             "deviations":      deviations,
         })
 
-    print(f"Nouns  — consistent: {len(consistent_nouns)}, inconsistent: {len(inconsistent_nouns)}.")
+    print(f"Nouns  — consistent: {len(consistent_nouns)}, inconsistent: {len(inconsistent_nouns)}."
+          + (f" ({len(merged_bases)} ordinal-sibling group(s) merged.)" if merged_bases else ""))
 
     # ── Assemble JSON input ──────────────────────────────────────────────────
 
