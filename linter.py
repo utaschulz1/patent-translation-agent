@@ -30,6 +30,7 @@ Checks:
   same_selbe                          — "dieselbe*/derselbe*/dasselbe*/demselbe*/denselbe*/desselbe*" in target when source has "same"
   same_gleich_missing                 — "gleich*" absent from target when source has "same"
   comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
+  step_schritt                        — "step*" count in source must match "Schritt*" count in target
   vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
   folgendes_umfasst                   — finite "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:"); participial "umfassend:" is correct without "Folgendes"
   folgendes_konfiguriert              — "konfiguriert ist:" before a list without "zu Folgendem"
@@ -96,6 +97,8 @@ _PLURALITY_SRC_RE   = re.compile(r"\bpluralit\w*\b", re.IGNORECASE)
 _PLURALITY_TGT_RE   = re.compile(r"\bVielzahl\b", re.IGNORECASE)
 _COMPRISE_SRC_RE    = re.compile(r"\bcompris\w*\b", re.IGNORECASE)
 _UMFASSEN_TGT_RE    = re.compile(r"\bumfass\w*\b", re.IGNORECASE)
+_STEP_SRC_RE        = re.compile(r"\bstep\w*\b", re.IGNORECASE)
+_SCHRITT_TGT_RE     = re.compile(r"\bSchritt\w*\b", re.IGNORECASE)
 _IN_RESPONSE_TO_RE  = re.compile(r"\bin response to\b", re.IGNORECASE)
 _IN_REAKTION_RE     = re.compile(r"\bin Reaktion\b", re.IGNORECASE)
 _RANGE_HYPHEN_RE    = re.compile(r"\d\s*-\s*\d")  # digit-hyphen-digit, with optional spaces
@@ -370,6 +373,18 @@ def comprise_umfassen(source: str, target: str) -> str | None:
         return None
     src_info = f'only {src_count}x "compris*"' if src_count > 0 else '"compris*" not found'
     return f'error: {tgt_count}x "umfass*" in target but {src_info} in source'
+
+
+def step_schritt(source: str, target: str) -> str | None:
+    """Flag when 'Schritt*' count in target does not match 'step*' count in source."""
+    tgt_count = len(_SCHRITT_TGT_RE.findall(target))
+    if tgt_count == 0:
+        return None
+    src_count = len(_STEP_SRC_RE.findall(source))
+    if src_count == tgt_count:
+        return None
+    src_info = f'only {src_count}x "step*"' if src_count > 0 else '"step*" not found'
+    return f'error: {tgt_count}x "Schritt*" in target but {src_info} in source'
 
 
 def werden_dynamic(_: str, target: str) -> str | None:
@@ -667,6 +682,7 @@ CHECKS = [
     same_selbe,
     same_gleich_missing,
     comprise_umfassen,
+    step_schritt,
     vielzahl_plurality,
     folgendes_umfasst,
     folgendes_konfiguriert,

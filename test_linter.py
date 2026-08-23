@@ -24,6 +24,7 @@ from linter import (
     same_selbe,
     same_gleich_missing,
     comprise_umfassen,
+    step_schritt,
     vielzahl_plurality,
     folgendes_umfasst,
     folgendes_konfiguriert,
@@ -588,6 +589,47 @@ class TestCompriseUmfassen:
 
     def test_case_insensitive(self):
         assert comprise_umfassen("A Device Comprising A Sensor", "eine Vorrichtung, die einen Sensor UMFASST") is None
+
+
+# ── step_schritt ───────────────────────────────────────────────────────────────
+
+class TestStepSchritt:
+    @pytest.mark.parametrize("tgt_word", ["Schritt", "Schritte", "Schrittes", "Schritten"])
+    def test_target_forms_trigger(self, tgt_word):
+        # Schritt* in target but no step* in source → flag
+        result = step_schritt("a method comprising", f"ein Verfahren, umfassend den {tgt_word} eines Bestimmens")
+        assert result is not None
+        assert '"step*" not found' in result
+
+    def test_counts_match(self):
+        assert step_schritt(
+            "comprising a step of determining and a step of obtaining",
+            "umfassend einen Schritt eines Bestimmens und einen Schritt eines Erhaltens",
+        ) is None
+
+    def test_no_schritt_in_target_no_flag(self):
+        # step* in source but no Schritt* in target → no flag (target is the trigger)
+        assert step_schritt("comprising the steps of determining", "umfassend ein Bestimmen") is None
+
+    def test_schritt_without_step_in_source(self):
+        result = step_schritt("comprising determining", "umfassend den Schritt eines Bestimmens")
+        assert result is not None
+        assert '"step*" not found' in result
+
+    def test_count_mismatch(self):
+        result = step_schritt(
+            "comprising the step of determining",
+            "umfassend den Schritt eines Bestimmens und den Schritt eines Erhaltens",
+        )
+        assert result is not None
+        assert "2x" in result
+        assert 'only 1x "step*"' in result
+
+    def test_no_schritt_no_step(self):
+        assert step_schritt("a device with a sensor", "eine Vorrichtung mit einem Sensor") is None
+
+    def test_case_insensitive(self):
+        assert step_schritt("a method with a step", "ein Verfahren mit einem SCHRITT") is None
 
 
 # ── vielzahl_plurality ────────────────────────────────────────────────────────
