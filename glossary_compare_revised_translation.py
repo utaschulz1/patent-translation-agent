@@ -53,7 +53,7 @@ with open(HERE / "DE_verb_lemma_lookup.json", encoding="utf-8") as fh:
     de_verb_lookup: dict[str, str] = json.load(fh)
 
 
-_DE_ADJ_SUFFIXES = ("em", "er", "es", "en", "e")
+_DE_ADJ_SUFFIXES = ("em", "er", "es", "en", "e", "s")
 
 
 def _count_lemmas(text: str, lookup: dict[str, str], strip_de_adj: bool = False) -> dict[str, int]:
@@ -227,6 +227,47 @@ def _count_noun_in_de(de_term: str, de_text: str, other_de_terms: list[str] | No
     return count
 
 
+def _mask_de_noun_phrases(de_text: str, de_noun_terms: list[str]) -> str:
+    """Blank out every occurrence of each multi-word noun-phrase glossary DE
+    value in de_text, so a subsequent DE verb-lemma count doesn't also count
+    it.
+
+    Mirrors the EN-side noun-phrase masking already done in
+    check_segment_glossary before EN verb counting — but that masking only
+    ever touched en_text; the DE verb-lemma counter had no equivalent, so a
+    Partizip-II adjective inside an already-tracked noun-phrase compound
+    (e.g. "erweiterten" inside "erweiterten effektiven Anzeigebereichs")
+    silently inflated the bare verb's count too ("expand" reported as
+    seen 4 times in a segment where the actual verb "erweitern" occurs
+    once, HALA_2608_P0655 2026-08-22). Single-word noun terms are not
+    masked here — the collision this guards against is specifically a
+    verb's participle surviving as the trailing adjective/head-noun word of
+    a multi-word phrase; a bare single-word noun colliding with a verb
+    lemma is a different, unconfirmed risk not worth the extra masking.
+    """
+    text_lower = de_text.lower()
+    multiword_terms = [t for t in de_noun_terms if " " in t]
+    # Longest (most words) first: a shorter phrase's pattern can otherwise
+    # partially match the tail of a longer phrase that contains it (e.g.
+    # "effektiven Anzeigebereichs" inside "erweiterten effektiven
+    # Anzeigebereichs"), blanking out just that tail and leaving the longer
+    # phrase's own leading word ("erweiterten") behind, unmasked, once its
+    # turn comes — masking longest-first avoids that self-collision.
+    multiword_terms.sort(key=lambda t: len(t.split()), reverse=True)
+    for term in multiword_terms:
+        parts = []
+        for word in term.lower().split():
+            stem = word
+            for suffix in _DE_ADJ_SUFFIXES:
+                if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+                    stem = word[: -len(suffix)]
+                    break
+            parts.append(re.escape(stem) + r"\w*")
+        pat = re.compile(r"\s+".join(parts), re.IGNORECASE)
+        text_lower = pat.sub(lambda m: " " * len(m.group()), text_lower)
+    return text_lower
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, dict, list]:
@@ -332,7 +373,8 @@ def check_segment_glossary(
     masked_en = "".join(masked_chars)
 
     en_counts = _count_lemmas(masked_en, en_verb_lookup)
-    de_counts = _count_lemmas(de_text, de_verb_lookup, strip_de_adj=True)
+    masked_de_for_verbs = _mask_de_noun_phrases(de_text, all_de_noun_terms)
+    de_counts = _count_lemmas(masked_de_for_verbs, de_verb_lookup, strip_de_adj=True)
 
     _fallback = verb_fallback or {}
     for en_lemma, en_count in sorted(en_counts.items()):

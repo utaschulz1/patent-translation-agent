@@ -47,6 +47,8 @@ with (
         _count_lemmas,
         _count_noun_in_de,
         _count_en_phrase,
+        _mask_de_noun_phrases,
+        check_segment_glossary,
     )
 
 
@@ -253,3 +255,74 @@ class TestCountNounInDeMultiWord:
         """
         text = "die geglättete organisierte Punktwolke"
         assert _count_noun_in_de("organisierte Punktwolke", text, ["geglättete organisierte Punktwolke"]) == 0
+
+    def test_head_noun_genitive_s_stripped(self):
+        """Regression, HALA_2608_P0655 (2026-08-22): the glossary value was
+        extracted from one genitive-case sentence ("effektiven
+        Anzeigebereichs"), so the stored head noun ends in a bare "-s" — a
+        masculine/neuter genitive-singular marker, not one of the adjective
+        suffixes ("-e/-en/-er/-em/-es") the stemming already stripped. Before
+        the fix, only the genitive form itself matched; dative/accusative/
+        nominative occurrences of the same noun ("effektiven Anzeigebereich",
+        no trailing -s) were silently undercounted, flagging a fully-correct,
+        consistent translation as a mismatch.
+        """
+        text = "des effektiven Anzeigebereichs und dem effektiven Anzeigebereich"
+        assert _count_noun_in_de("effektiven Anzeigebereichs", text) == 2
+
+
+# ── _mask_de_noun_phrases ───────────────────────────────────────────────────
+
+class TestMaskDeNounPhrases:
+    def test_masks_multiword_term(self):
+        text = "die interne Feldblende ist klein"
+        masked = _mask_de_noun_phrases(text, ["interne Feldblende"])
+        assert "feldblende" not in masked
+
+    def test_single_word_terms_left_alone(self):
+        # Single-word noun terms are deliberately not masked here — see the
+        # function's docstring for why.
+        text = "die steuerung ist konfiguriert"
+        masked = _mask_de_noun_phrases(text, ["Steuerung"])
+        assert "steuerung" in masked
+
+    def test_longer_phrase_masked_before_shorter_component(self):
+        """Regression (self-inflicted, caught before shipping): masking in
+        list order let "effektiven Anzeigebereichs" consume the tail of
+        "erweiterten effektiven Anzeigebereichs" first, leaving "erweiterten"
+        stranded and still visible for the next (now-broken) pattern to
+        match. Longest-word-count-first avoids the collision entirely.
+        """
+        text = "einen erweiterten effektiven Anzeigebereich zu erhalten"
+        terms = ["effektiven Anzeigebereichs", "erweiterten effektiven Anzeigebereichs"]
+        masked = _mask_de_noun_phrases(text, terms)
+        assert "erweiter" not in masked
+        assert "anzeigebereich" not in masked
+
+
+# ── check_segment_glossary ───────────────────────────────────────────────────
+
+class TestCheckSegmentGlossaryVerbNounOverlap:
+    """Regression, HALA_2608_P0655 (2026-08-22): a Partizip-II adjective
+    ("erweiterten"/"erweiterte") inside the multi-word noun entry "expanded
+    effective display area" shares its stem with the unrelated bare verb
+    entry "expand,erweitern". Before the fix, DE verb-lemma counting had no
+    masking against noun-phrase spans (only the EN side did), so the same
+    physical words got counted twice: once correctly toward the noun phrase,
+    and again, wrongly, toward the bare verb — inflating a real, single
+    "erweitern" occurrence into a false "expand (1), erweitern (4)" flag.
+    """
+
+    def test_participle_in_noun_phrase_not_doublecounted_as_verb(self):
+        verb_lookup = {"expand": "erweitern"}
+        noun_lookup = {"expanded effective display area": "erweiterten effektiven Anzeigebereichs"}
+        all_de_noun_terms = list(noun_lookup.values())
+
+        en_text = "expand an effective display area to obtain an expanded effective display area"
+        de_text = (
+            "Erweitern eines Anzeigebereichs, um einen erweiterten effektiven "
+            "Anzeigebereich zu erhalten"
+        )
+
+        notes = check_segment_glossary(en_text, de_text, verb_lookup, noun_lookup, all_de_noun_terms)
+        assert not any("expand" in n for n in notes)
