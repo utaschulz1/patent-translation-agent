@@ -73,85 +73,14 @@ def reset_prompt_override(proj_dir: Path) -> None:
 # ── clean_glossary_<id>.csv parsing / reassembly ────────────────────────────
 # Format written by llm_glossary_cleanup.py: header row, optional EPO title
 # row, blank line, main resolved terms, blank line, appended standard terms.
+# The implementations moved to glossary_lib/csv_io.py (PRD_glossary_agent.md
+# §4, Phase 0) and are re-exported here unchanged.
 
-def parse_clean_glossary(
-    text: str,
-) -> tuple[tuple[str, str] | None, list[tuple[str, str]], list[tuple[str, str]]]:
-    """Split glossary CSV text into (epo_row, main_rows, standard_rows).
-
-    epo_row is only extracted when a cell literally starts with "EPO EN:" or
-    "EPO DE:" — the current on-disk format. Once cleaned (see
-    clean_epo_title_row), a re-run of this parser no longer finds it, and it
-    correctly becomes a normal member of main_rows from then on.
-    """
-    rows = list(csv.reader(io.StringIO(text)))
-    if not rows:
-        return None, [], []
-    rows = rows[1:]  # drop "EN,DE" header
-
-    sections: list[list[list[str]]] = [[]]
-    for row in rows:
-        is_blank = not row or all(not c.strip() for c in row)
-        if is_blank:
-            if sections[-1]:
-                sections.append([])
-            continue
-        sections[-1].append(row)
-    sections = [s for s in sections if s]
-
-    if not sections:
-        return None, [], []
-
-    epo_row: tuple[str, str] | None = None
-    first = sections[0]
-    if first and len(first[0]) >= 2 and (
-        first[0][0].strip().upper().startswith("EPO EN:")
-        or first[0][1].strip().upper().startswith("EPO DE:")
-    ):
-        epo_row = (first[0][0].strip(), first[0][1].strip())
-        sections[0] = first[1:]
-    sections = [s for s in sections if s]
-
-    def _pairs(section: list[list[str]]) -> list[tuple[str, str]]:
-        return [(r[0].strip(), r[1].strip()) for r in section if len(r) >= 2]
-
-    main_rows = _pairs(sections[0]) if sections else []
-    standard_rows = _pairs(sections[1]) if len(sections) > 1 else []
-    return epo_row, main_rows, standard_rows
-
-
-def clean_epo_title_row(en: str, de: str) -> tuple[str, str]:
-    """Deterministic (non-LLM) cleanup: strip 'EPO EN:'/'EPO DE:' labels and
-    inner commas — a plain mechanical transform, not a judgement call."""
-    en = re.sub(r"^EPO\s+EN:\s*", "", en, flags=re.IGNORECASE).strip()
-    de = re.sub(r"^EPO\s+DE:\s*", "", de, flags=re.IGNORECASE).strip()
-    en = re.sub(r",\s*", " ", en).strip()
-    de = re.sub(r",\s*", " ", de).strip()
-    return en, de
-
-
-def reassemble_glossary(
-    epo_row: tuple[str, str] | None,
-    main_rows: list[tuple[str, str]],
-    standard_rows: list[tuple[str, str]],
-) -> str:
-    # No blank line after epo_row: once cleaned it's just a normal row (see
-    # clean_epo_title_row), and a blank line here would create a false extra
-    # section boundary on the *next* parse — a second "Use LLM" click would
-    # then misread the rest of the glossary as the standard-vocab tail and
-    # silently exclude it from review.
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(["EN", "DE"])
-    if epo_row:
-        writer.writerow(list(epo_row))
-    for en, de in main_rows:
-        writer.writerow([en, de])
-    if standard_rows:
-        writer.writerow([])
-        for en, de in standard_rows:
-            writer.writerow([en, de])
-    return buf.getvalue()
+from glossary_lib.csv_io import (  # noqa: E402, F401
+    clean_epo_title_row,
+    parse_clean_glossary,
+    reassemble_glossary,
+)
 
 
 # ── Frequency reference data (structured counts only — no raw sentences) ────
