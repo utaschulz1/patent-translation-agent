@@ -320,3 +320,40 @@ compound-head matching (2026-08-20/21 fix) likely still recognizes bare `Vorrich
 `Anzeigevorrichtung` going forward, so this is probably checker-safe, just less precise than
 the human pass — a content-quality data point for future audit-prompt tuning, not something
 fixed here.
+
+**2026-08-24, later still — `_AUDIT_SYSTEM_PROMPT` rule 7 rewritten (user-driven, traced from
+the live `be,ist` incident above), full history worth keeping:**
+
+The user traced the `be,ist` addition all the way through — confirmed it came from a real
+`_styleguide.md` line (113: `be (is/are) expressing a value or state | ist / sind | NOT:
+"beträgt"`), read via `state["styleguide_text"]` (loaded once in `load_inputs`, used **only** by
+`_audit_batch` — `resolve_inconsistent` and `check_epo_title` never see it), and correctly
+pointed out that this exact rule is **already enforced target-side** by `linter.py`'s
+`betraegt_stative` check (`_BETRAEGT_RE` flags `beträgt|betragen|liegt|liegen` in the DE output
+directly) — a fundamentally better fit than a glossary entry, since "be"/"is" is far too
+generic on the source side for count-matching to work without noise. The audit LLM had no rule
+telling it that "this house rule is important" and "this belongs in the glossary" are different
+questions, so it dutifully encoded the styleguide line as a new row.
+
+Separately, the user also found rule 7's original `use` clause genuinely unclear — `"use"
+keeps its entry unless the finite-verb instances themselves drift"` doesn't say which surface
+forms count as "finite-verb instances," doesn't name the `using`/`by using` exclusion (the
+actual point of the original SKILL.md rule — those render as a bare noun phrase, not a finite
+verb, so a flag on them is expected noise), and "drift" itself is undefined jargon. Traced back
+to `SKILL.md`'s Step 7 `use` bullet, which has the missing content but never made it into the
+compressed prompt.
+
+**Rule 7 rewritten** (word "drift" removed per direct instruction; `be`-exception added):
+`by`/`at least` stay unconditional keeps; `use` is kept/added only when attested in finite form
+(`use`/`uses`/`used`) — dropped if only `using`/`by using`/`for use` occur; `be` (or any finite
+form: `is`/`are`/`am`) never enters the glossary at all, no further check, with the
+`betraegt_stative` cross-reference stated explicitly in the prompt so the model (and any future
+reader) knows the mechanism is covered elsewhere. New regression tests,
+`tests/test_glossary_agent_phase2.py::TestAuditSystemPromptRule7` (4 tests: `drift` absent, all
+six `use`-family forms named, `be`/`betraegt_stative` present, `by`/`at least` still
+unconditional). Full outer suite: 177 passed, 4 llm_live skipped.
+
+**Process note for future prompt edits:** this incident is a good argument for keeping a
+regression test on every named exception in `_AUDIT_SYSTEM_PROMPT` going forward, not just
+ad-hoc ones added after something breaks — a compressed system prompt is exactly the kind of
+text that silently loses meaning under editing pressure with nothing to catch it.
