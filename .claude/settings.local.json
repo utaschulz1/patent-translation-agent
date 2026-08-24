@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.matecat.com)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/matecat/MateCat/master/public/api/swagger-source.js\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/matecat/MateCat/master/public/api/swagger-source.js\")",
+      "Bash(git -C /home/hpz400/projects/patent-translation-app branch -a)",
+      "Bash(git -C /home/hpz400/projects/patent-translation-app status --short)",
+      "Read(//home/hpz400/projects/patent-translation-app/**)",
+      "Bash(git -C /home/hpz400/projects/patent-translation-app log --oneline -3)",
+      "Bash(git -C /home/hpz400/projects/patent-translation-app show eb434f3 --stat)",
+      "Bash(python -m pytest tests/test_review_integration.py -q)",
+      "Bash(pip list:*)",
+      "Bash(.venv/bin/python -m pytest tests/ -q)",
+      "Bash(git stash:*)",
+      "Bash(.venv/bin/python -m pytest tests/test_app.py::test_sync_triggers_gdrive tests/test_app.py::test_sync_uses_project_dir -q)",
+      "Skill(claude-in-chrome)",
+      "Bash(git -C agent diff .claude/settings.local.json)",
+      "Bash(git -C agent add glossary_lib/__init__.py)",
+      "Bash(git -C:*)",
+      "Bash(git -C agent log --oneline -1)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
