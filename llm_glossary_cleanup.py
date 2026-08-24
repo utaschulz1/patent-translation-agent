@@ -714,14 +714,16 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     print(f"\nGlossary written → {inputs.clean_glossary_path.name}  "
           f"({len(clean_rows)} project terms + {len(extra_standard)} extra standard terms = {total} total)")
 
-    # ── Grow the shared verb lemma tables with any new verbs from this project ─
+    # ── Grow this project's verb lemma overlay with any new verbs ────────────
     # See glossary_lib/lemma_sync.py — detects verb pairs (from the *cleaned*
-    # rows above, never raw spaCy output) not yet covered by the lemma tables,
-    # and requests+merges their inflected forms.
+    # rows above, never raw spaCy output) not yet covered by the merged
+    # baseline+overlay tables, and writes their inflected forms to the
+    # project-scoped overlay files (PRD §6b — the shared baseline is never
+    # written at runtime).
 
     from verb_lemma_sync import sync_verb_lemma_tables
 
-    sync_verb_lemma_tables(clean_rows, consistent_verbs, inconsistent_verbs, client, MODEL)
+    sync_verb_lemma_tables(clean_rows, consistent_verbs, inconsistent_verbs, client, MODEL, proj_dir=proj_dir)
 
     print("Next step: lara_glossary_upload.py")
 

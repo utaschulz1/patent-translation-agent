@@ -26,19 +26,27 @@ AGENT_DIR = Path(__file__).parent.parent
 EN_BASELINE_PATH = AGENT_DIR / "EN_verb_lemma_lookup.json"
 DE_BASELINE_PATH = AGENT_DIR / "DE_verb_lemma_lookup.json"
 
+# Project-scoped overlay files (PRD §6b): live in the project's own
+# pre-processing folder on the persistent volume, so lemma growth survives
+# Railway deploys (which re-download agent/ fresh, wiping runtime writes to
+# the baseline files) and stays scoped to the domain that produced it.
+EN_OVERLAY_NAME = "EN_verb_lemma_overlay.json"
+DE_OVERLAY_NAME = "DE_verb_lemma_overlay.json"
+
 _DE_ADJ_SUFFIXES = ("em", "er", "es", "en", "e", "s")
 
 
 def load_lemma_tables(proj_dir: Path | None = None) -> tuple[dict[str, str], dict[str, str]]:
-    """Load the EN/DE verb lemma lookup tables.
+    """Load the EN/DE verb lemma lookup tables: shared baseline + project overlay.
 
-    Phase 0: returns the shared baseline tables from agent/. proj_dir is
-    accepted now so call sites don't need a signature change when the
-    project-scoped overlay merge lands (PRD §6b, Phase 0b).
+    The repo-shipped baseline tables are read-only at runtime; per-project
+    additions live in overlay JSONs inside proj_dir and are merged on top
+    (overlay wins on a key conflict — rare, since both sides are
+    additive-only). Missing overlay files are simply skipped.
 
     Args:
-        proj_dir: the project's pre-processing folder, or None for baseline
-            only.
+        proj_dir: the project's pre-processing folder, or None for the
+            baseline tables alone.
 
     Returns:
         (en_table, de_table) — surface form → infinitive lemma.
@@ -47,6 +55,12 @@ def load_lemma_tables(proj_dir: Path | None = None) -> tuple[dict[str, str], dic
         en_table: dict[str, str] = json.load(fh)
     with open(DE_BASELINE_PATH, encoding="utf-8") as fh:
         de_table: dict[str, str] = json.load(fh)
+    if proj_dir is not None:
+        for name, table in ((EN_OVERLAY_NAME, en_table), (DE_OVERLAY_NAME, de_table)):
+            overlay_path = Path(proj_dir) / name
+            if overlay_path.exists():
+                with open(overlay_path, encoding="utf-8") as fh:
+                    table.update(json.load(fh))
     return en_table, de_table
 
 

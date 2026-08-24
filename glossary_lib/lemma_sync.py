@@ -223,14 +223,35 @@ def sync_verb_lemma_tables(
     model: str,
     en_lemma_path: Path = EN_LEMMA_PATH,
     de_lemma_path: Path = DE_LEMMA_PATH,
+    proj_dir: Path | None = None,
 ) -> tuple[list[str], list[str]]:
     """Detect + fill verb lemma-table gaps for one project's cleaned glossary.
-    Writes en_lemma_path/de_lemma_path in place, only when something new was
-    actually added. Returns the (en_added, de_added) surface forms."""
-    with open(en_lemma_path, encoding="utf-8") as f:
-        en_lemma_table = json.load(f)
-    with open(de_lemma_path, encoding="utf-8") as f:
-        de_lemma_table = json.load(f)
+
+    Two modes:
+      - proj_dir given (production, PRD §6b): detection runs against the
+        merged baseline+overlay view, and every new form is written ONLY to
+        the project's overlay files (EN/DE_verb_lemma_overlay.json inside
+        proj_dir) — the shared baseline tables are never written at runtime,
+        so lemma growth survives deploys with the project's own data and
+        stays scoped to its domain.
+      - proj_dir None (legacy/tests): reads and writes en_lemma_path/
+        de_lemma_path in place, exactly the historical behavior.
+
+    Returns the (en_added, de_added) surface forms.
+    """
+    # Local import: matching does not import lemma_sync, so this is acyclic;
+    # kept out of module scope to avoid importing pandas for pure-sync callers.
+    from glossary_lib.matching import DE_OVERLAY_NAME, EN_OVERLAY_NAME, load_lemma_tables
+
+    if proj_dir is not None:
+        en_lemma_table, de_lemma_table = load_lemma_tables(proj_dir)
+        en_overlay_path = Path(proj_dir) / EN_OVERLAY_NAME
+        de_overlay_path = Path(proj_dir) / DE_OVERLAY_NAME
+    else:
+        with open(en_lemma_path, encoding="utf-8") as f:
+            en_lemma_table = json.load(f)
+        with open(de_lemma_path, encoding="utf-8") as f:
+            de_lemma_table = json.load(f)
 
     unknown_en, unknown_de = find_unknown_verbs(
         clean_rows, consistent_verbs, inconsistent_verbs, en_lemma_table, de_lemma_table
@@ -248,12 +269,31 @@ def sync_verb_lemma_tables(
         return [], []
 
     en_added, de_added = merge_derivations(data, en_lemma_table, de_lemma_table)
-    if en_added:
-        write_lemma_table(en_lemma_path, en_lemma_table)
-        print(f"  EN_verb_lemma_lookup.json: added {len(en_added)} form(s) — {', '.join(sorted(en_added))}")
-    if de_added:
-        write_lemma_table(de_lemma_path, de_lemma_table)
-        print(f"  DE_verb_lemma_lookup.json: added {len(de_added)} form(s) — {', '.join(sorted(de_added))}")
+
+    if proj_dir is not None:
+        # Only the newly-added forms belong in the overlay — the merged view
+        # they were added into also contains the whole baseline.
+        def _updated_overlay(path: Path, added: list[str], merged: dict[str, str]) -> dict[str, str]:
+            overlay: dict[str, str] = {}
+            if path.exists():
+                with open(path, encoding="utf-8") as f:
+                    overlay = json.load(f)
+            overlay.update({form: merged[form] for form in added})
+            return overlay
+
+        if en_added:
+            write_lemma_table(en_overlay_path, _updated_overlay(en_overlay_path, en_added, en_lemma_table))
+            print(f"  {EN_OVERLAY_NAME}: added {len(en_added)} form(s) — {', '.join(sorted(en_added))}")
+        if de_added:
+            write_lemma_table(de_overlay_path, _updated_overlay(de_overlay_path, de_added, de_lemma_table))
+            print(f"  {DE_OVERLAY_NAME}: added {len(de_added)} form(s) — {', '.join(sorted(de_added))}")
+    else:
+        if en_added:
+            write_lemma_table(en_lemma_path, en_lemma_table)
+            print(f"  EN_verb_lemma_lookup.json: added {len(en_added)} form(s) — {', '.join(sorted(en_added))}")
+        if de_added:
+            write_lemma_table(de_lemma_path, de_lemma_table)
+            print(f"  DE_verb_lemma_lookup.json: added {len(de_added)} form(s) — {', '.join(sorted(de_added))}")
     if not en_added and not de_added:
         print("  No new lemma forms to add (all forms already present).")
 
