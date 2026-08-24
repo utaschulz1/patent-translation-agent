@@ -259,3 +259,64 @@ per-file, outer suite 169 + 4 llm_live skips. Findings:
   (copies each archive to tmp; real Luna 5 spend; asserts the RTC/FRKE/MICTCH/HALA row-level
   outcomes). Record pass/fail per project here. **This is the gate that retires the manual
   audit-skill session.**
+
+**2026-08-24, later — first live Swagger run (HALA_2608_P0655, real project folder, real Luna 5
+spend, user-triggered), 2 real bugs found and fixed:**
+
+Run completed successfully (57 rows, 7 LLM calls, ~90s) and, compared row-by-row against the
+2026-08-22 human-audited original, matched or improved on nearly everything: ordinal merges
+intact, EPO-title anchors correctly overrode nothing incorrectly, ordinary DE-form differences
+(genitive vs. nominative on `effective display area`/`horizontal direction`) are both
+acceptable per SKILL.md Step 4's own doctrine, and `multiple,mehrere`'s absence is *expected*
+(the user deleted that standard_glossary.csv row earlier this session — PRD §6c). But two
+**structural** bugs surfaced, both now fixed in `apply_verdicts` (`glossary_agent/graph.py`)
+with regression tests in `tests/test_glossary_agent.py::TestApplyVerdicts`:
+
+1. **A `delete` verdict got silently undone by the standard-glossary fallback.** The audit
+   correctly deleted `processing,Verarbeiten` (fabricated bare entry — the real content is
+   compounds like `image processing unit`) and `any,beliebig` (masking-compound rule: both
+   occurrences are inside the fixed claim-preamble `any of the preceding claims`, which the
+   audit correctly added as its own compound entry instead). Both terms *also* have a
+   `standard_glossary.csv` row, and `extra_standard`'s old computation
+   (`relevant_standard − final_en`) only knew what *survived* into `final_rows`, not what had
+   been deliberately cut — so both reappeared in the output's standard-terms tail, defeating
+   the audit's own judgment. Fix: track `deleted_en` from `delete` verdicts and exclude it from
+   `extra_standard` too.
+2. **The "hard gate" didn't actually gate.** `validate_result` (shared with
+   `resolve_inconsistent`'s retry loop) only ever drops empty entries and exact en+de
+   duplicates — a standard-glossary-conflict or real DE/EN-duplicate row is reported as an
+   *error* but still returned in `clean_rows` (by design, for the retry flow). `apply_verdicts`
+   has no retry, so calling `validate_result` there and only logging the errors meant a verdict
+   that reintroduced a conflict shipped anyway. Concretely: the audit amended
+   `including,einschließlich` → `including,schließt ein` — a conjugated, multi-word form,
+   chosen to satisfy the include/including stem-consistency house rule but violating the
+   `standard_glossary.csv` hard requirement (`einschließlich`) *and*, mechanically, invisible to
+   the production checker afterward (`build_glossary_lookups`/`build_lookups_from_rows` route
+   verb-lemma EN keys with a space in DE into neither `verb_lookup` nor `noun_lookup` — the row
+   would sit in the CSV but never be checked again). The gate logged a warning
+   (`"Standard glossary conflict..."`) and shipped it regardless. Fix: new `_enforce_hard_gate`
+   in `apply_verdicts` — (a) any EN with a `relevant_standard` entry gets that DE value
+   unconditionally (self-heals this exact case, since `einschließlich` is also single-word and
+   checker-compatible), (b) real duplicate collisions (the `exhibit`/`provide`→`führen` shape)
+   are now actually dropped, not merely logged.
+
+Open, not auto-fixed (flagged for a decision, not a mechanical bug): the same run added
+`be,ist` as a `lemma_sweep_gap` "add" candidate — a bare copula/auxiliary verb, whose DE lemma
+table coverage is partial (`is`→`be`/`ist`→`sein` registered; `are`/`was`/`were` are not), and
+which is likely to misfire broadly on future checks of this project (a generic function word,
+not domain vocabulary). No rule currently excludes generic/auxiliary verbs from
+`lemma_sweep_gap` candidates or tells the audit prompt not to add them — unlike
+`verb_lemma_sync.NON_VERB_DE_TERMS`, there's no equivalent stoplist here. Options: (a) a small
+stoplist in `evidence.lemma_sweep` (mirrors `NON_VERB_DE_TERMS`), (b) an explicit rule in
+`_AUDIT_SYSTEM_PROMPT`'s category-rules section. Needs a decision, not urgent — didn't undo it
+manually since it's a content judgment call, not a mechanical defect.
+
+Separately observed, not a bug: the audit kept bare `device,Vorrichtung` and `process,Vorgang`
+via the standard+title-outranks-majority rule even though both are admittedly unattested as
+bare words in this document (the LLM's own reasoning says so) — where the 2026-08-22 human
+audit instead traced `device` to the real compound `display device,Anzeigevorrichtung` (the
+`chip enable pin` pattern) and dropped bare `process` entirely. `_count_noun_in_de`'s
+compound-head matching (2026-08-20/21 fix) likely still recognizes bare `Vorrichtung` inside
+`Anzeigevorrichtung` going forward, so this is probably checker-safe, just less precise than
+the human pass — a content-quality data point for future audit-prompt tuning, not something
+fixed here.
