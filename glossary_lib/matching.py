@@ -281,6 +281,57 @@ def _mask_de_noun_phrases(de_text: str, de_noun_terms: list[str]) -> str:
     return text_lower
 
 
+def build_lookups_from_rows(
+    rows: list[tuple[str, str]],
+    lemma_tables: tuple[dict, dict] | None = None,
+) -> tuple[dict, dict, dict, list]:
+    """build_glossary_lookups' routing logic over in-memory rows.
+
+    Same contract and routing rules as build_glossary_lookups (verb rows via
+    the EN lemma table, DE-side lemma-or-fallback split, noun rows with the
+    <5-char guard), but over (en, de) pairs that haven't been written to a
+    clean_glossary CSV yet — the glossary agent audits draft rows through the
+    real checker before anything ships (PRD §3.4).
+
+    Args:
+        rows: (en, de) pairs.
+        lemma_tables: (en_table, de_table) from load_lemma_tables; defaults
+            to the shared baseline tables.
+
+    Returns:
+        (verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms).
+    """
+    en_table, de_table = lemma_tables if lemma_tables is not None else (en_verb_lookup, de_verb_lookup)
+
+    verb_lookup: dict[str, str] = {}
+    verb_fallback: dict[str, str] = {}
+    for en_raw, de_raw in rows:
+        en_l = str(en_raw).strip().lower()
+        de_l = str(de_raw).strip().lower()
+        if " " in de_l:
+            continue
+        en_lemma = en_table.get(en_l)
+        if en_lemma is None:
+            continue
+        de_lemma = de_table.get(de_l)
+        if de_lemma is not None:
+            verb_lookup.setdefault(en_lemma, de_lemma)
+        else:
+            verb_fallback.setdefault(en_lemma, de_l)
+
+    noun_lookup: dict[str, str] = {}
+    for en_raw, de_raw in rows:
+        en_s = str(en_raw).strip()
+        de_s = str(de_raw).strip()
+        if en_table.get(en_s.lower()) is not None:
+            continue
+        if len(de_s) < 5:
+            continue
+        noun_lookup.setdefault(en_s.lower(), de_s)
+
+    return verb_lookup, verb_fallback, noun_lookup, list(noun_lookup.values())
+
+
 def build_glossary_lookups(proj_dir: Path) -> tuple[dict, dict, dict, list]:
     """Load the project glossary and return (verb_lookup, verb_fallback, noun_lookup, all_de_noun_terms).
 
