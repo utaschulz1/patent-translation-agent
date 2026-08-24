@@ -23,68 +23,68 @@ compiles. Check TODOs off here as they land, with the commit hash next to substa
 
 Pure refactor. No behavior change, no new features. Submodule only.
 
-- [ ] **0.1 `glossary_lib/csv_io.py`**
-  - [ ] Move from `llm_glossary_revise.py`: `parse_clean_glossary`, `clean_epo_title_row`,
+- [x] **0.1 `glossary_lib/csv_io.py`**
+  - [x] Move from `llm_glossary_revise.py`: `parse_clean_glossary`, `clean_epo_title_row`,
         the reassembly logic.
-  - [ ] Extract `write_clean_glossary(path, epo, rows, standard_rows)` from
+  - [x] Extract `write_clean_glossary(path, epo, rows, standard_rows)` from
         `llm_glossary_cleanup.clean_glossary()`'s write block (keep the labeled-title behavior
         for now — the label-stripping delta activates only in the agent's `write_glossary`
         node, Phase 1).
-  - [ ] Move the EPO-title read (`glossary_<PID>.csv` "EPO EN:"/"EPO DE:" row scan) from
+  - [x] Move the EPO-title read (`glossary_<PID>.csv` "EPO EN:"/"EPO DE:" row scan) from
         `llm_glossary_cleanup.py` into `read_epo_title(glossary_path)`.
-- [ ] **0.2 `glossary_lib/classify.py`** — move from `llm_glossary_cleanup.py`:
+- [x] **0.2 `glossary_lib/classify.py`** — move from `llm_glossary_cleanup.py`:
       `ORDINAL_MODIFIERS`, `_EN_TO_DE_ORDINAL_STEMS`, `_strip_de_ordinal_word`,
       `_merge_ordinal_siblings`, `_is_ordinal_variant`, `SHARED_DE_ALLOWED`, `_shared_de_note`,
       plus the consistent/inconsistent classification loops factored into callable functions
       (`classify_verbs(verb_groups)`, `classify_nouns(noun_can, noun_deviations)`,
       `classify_capabilities(cap_groups)`).
-- [ ] **0.3 `glossary_lib/attestation.py`**
-  - [ ] Move `_appears_in` from `llm_glossary_cleanup.py`.
-  - [ ] Move `load_segments`, `find_segs`, `load_frequency_tables`, `lookup_in_tables` from
+- [x] **0.3 `glossary_lib/attestation.py`**
+  - [x] Move `_appears_in` from `llm_glossary_cleanup.py`.
+  - [x] Move `load_segments`, `find_segs`, `load_frequency_tables`, `lookup_in_tables` from
         `.claude/skills/glossary-range-audit/audit_glossary.py`; rewrite that script to import
         from here (its CLI behavior unchanged).
-- [ ] **0.4 `glossary_lib/matching.py`**
-  - [ ] Move from `glossary_compare_revised_translation.py`: `_DE_ADJ_SUFFIXES`,
+- [x] **0.4 `glossary_lib/matching.py`**
+  - [x] Move from `glossary_compare_revised_translation.py`: `_DE_ADJ_SUFFIXES`,
         `_count_lemmas`, `_count_en_phrase`, `_count_noun_in_de`, `_mask_de_noun_phrases`,
         `build_glossary_lookups`, `check_segment_glossary`.
-  - [ ] Replace the module-level `en_verb_lookup`/`de_verb_lookup` JSON loads with an explicit
+  - [x] Replace the module-level `en_verb_lookup`/`de_verb_lookup` JSON loads with an explicit
         `load_lemma_tables()` function (baseline-only in this phase; `proj_dir` overlay comes
         in 0b). `build_glossary_lookups` calls it; the legacy module keeps its globals as
         re-exports for anything that pokes them directly.
-- [ ] **0.5 `glossary_lib/lemma_sync.py`** — move the whole public surface of
+- [x] **0.5 `glossary_lib/lemma_sync.py`** — move the whole public surface of
       `verb_lemma_sync.py` (paths stay the shared-table defaults until 0b).
-- [ ] **0.6 `glossary_lib/validate.py`** — move `parse_response`, `validate_result`, `_norm_en`
+- [x] **0.6 `glossary_lib/validate.py`** — move `parse_response`, `validate_result`, `_norm_en`
       (`llm_glossary_cleanup.py`) and `parse_json_object_lenient` (`verb_lemma_sync.py`); add
       the shared `parse_json_lenient(raw, expect=list|dict)` with bounded trailing-comma repair.
-- [ ] **0.7 Legacy wrappers**: `llm_glossary_cleanup.py`, `glossary_compare_revised_translation.py`,
+- [x] **0.7 Legacy wrappers**: `llm_glossary_cleanup.py`, `glossary_compare_revised_translation.py`,
       `verb_lemma_sync.py`, `llm_glossary_revise.py`, `audit_glossary.py` become thin
       re-exporting wrappers keeping their `main()`/`__main__` entry points and public names.
       **No importer outside the submodule changes in this phase** (app.py, review_agent, tests
       keep working untouched).
-- [ ] **0.8 Testability factor**: split `llm_glossary_cleanup.clean_glossary()` into
+- [x] **0.8 Testability factor**: split `llm_glossary_cleanup.clean_glossary()` into
       `load_cleanup_inputs(proj_dir, project_id)` (everything before the LLM call) + the call +
       post-processing, so Phase 1's `load_inputs` node and the tests reuse the loading without
       network.
-- [ ] **0.9 Tests** — `agent/test_glossary_lib.py` per TEST §Phase 0 (import identity, golden
+- [x] **0.9 Tests** — `agent/test_glossary_lib.py` per TEST §Phase 0 (import identity, golden
       CSV round-trip, no-`project_log`-imports check, wrapper smoke runs); full suite green
       **before** any test imports are rewritten; then one mechanical commit pointing test
       imports at `glossary_lib`.
 
 ## Phase 0b — project-scoped lemma overlay (PRD §6b)
 
-- [ ] **0b.1** `load_lemma_tables(proj_dir: Path | None)` in `glossary_lib/matching.py`:
+- [x] **0b.1** `load_lemma_tables(proj_dir: Path | None)` in `glossary_lib/matching.py`:
       baseline (`agent/EN_verb_lemma_lookup.json` / `DE_...`) merged with overlay
       (`<proj_dir>/EN_verb_lemma_overlay.json` / `DE_...`), overlay wins on key conflict,
       missing overlay ⇒ baseline only. `build_glossary_lookups(proj_dir)` passes its
       `proj_dir` through.
-- [ ] **0b.2** `glossary_lib/lemma_sync.py`: default write targets become the overlay paths
+- [x] **0b.2** `glossary_lib/lemma_sync.py`: default write targets become the overlay paths
       (derived from a `proj_dir` argument); baseline files are never written at runtime.
       `llm_glossary_cleanup`'s call site passes its `proj_dir`.
-- [ ] **0b.3** Update every checker path to load through the merge and verify each resolves an
+- [x] **0b.3** Update every checker path to load through the merge and verify each resolves an
       overlay-only paradigm: standalone checker script (`--pid`), app.py CAT UI check endpoint,
       `review_agent/graph.py::_build_lint_checks` (already passes `project_folder`), the future
       agent's `gather_evidence`.
-- [ ] **0b.4** Retarget `test_verb_lemma_sync.py` to overlay paths; add
+- [x] **0b.4** Retarget `test_verb_lemma_sync.py` to overlay paths; add
       `agent/test_glossary_lib_lemma.py` per TEST §Phase 0b (merge semantics, overlay-only
       writes, `anzuzeigen` regression pair).
 
@@ -92,11 +92,11 @@ Pure refactor. No behavior change, no new features. Submodule only.
 
 Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no workflow wiring.
 
-- [ ] **1.1 Preliminary verification (PRD §12.3):** inspect 2–3 recent projects'
+- [x] **1.1 Preliminary verification (PRD §12.3):** inspect 2–3 recent projects'
       `*_translated.xlsx` `Lara` column — marker name/position stability, and whether
       XTM-TM-pre-filled segments inside the range lack the marker (if so: range = min..max of
       marked ids). Record findings in this doc.
-- [ ] **1.2 `glossary_agent/graph.py` scaffolding**: `TermVerdict`/`GlossaryState` TypedDicts
+- [x] **1.2 `glossary_agent/graph.py` scaffolding**: `TermVerdict`/`GlossaryState` TypedDicts
       (PRD §3 schema incl. `run_seg_range`); config constants from env
       (`GLOSSARY_AGENT_MODEL_*` — all defaulting to Luna 5, `MAX_TOOL_CALLS_PER_NODE`,
       `NODE_TIMEOUT_SECONDS`, `LLM_CALL_TIMEOUT_SECONDS`, `MAX_PARSE_RETRIES`,
@@ -104,28 +104,28 @@ Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no wor
       absent-or-absolute); `_session_kwargs`; reuse `review_agent.get_openrouter_client`
       (import, don't duplicate); `_log_llm_call` clone with the `{project_id}:` log-prefix
       convention.
-- [ ] **1.3 Deterministic nodes**: `load_inputs` (via `load_cleanup_inputs`; **hard-fail →
+- [x] **1.3 Deterministic nodes**: `load_inputs` (via `load_cleanup_inputs`; **hard-fail →
       error END when no xlsx**), `classify_terms` (glossary_lib.classify), `resolve_range`
       (the §3.3 three-level fallback chain + ABSTRACT-boundary noting + `workflow_kind` from
       caller), `write_glossary` (csv_io + `clean_epo_title_row` + timestamped backup),
       `finalize`.
-- [ ] **1.4 `resolve_inconsistent` node**: port the batch prompt from `llm_glossary_cleanup.py`
+- [x] **1.4 `resolve_inconsistent` node**: port the batch prompt from `llm_glossary_cleanup.py`
       (incl. `_shared_de_note()`), `validate_result` + single bounded re-prompt, echoed-title
       drop, consistent-term fill-in — same semantics, Luna 5 default, parse via
       `parse_json_lenient` with `MAX_PARSE_RETRIES`.
-- [ ] **1.5 `confirm_scope` interrupt node**: degenerate-range + contamination-scale triggers
+- [x] **1.5 `confirm_scope` interrupt node**: degenerate-range + contamination-scale triggers
       only; forward-only resume via `Command(goto="gather_evidence")` (Phase 1: goto the next
       existing node); resume payload per PRD §3.
-- [ ] **1.6 Graph wiring**: edges per PRD §3 (Phase-1 subset), `_route_after_llm` conditional
+- [x] **1.6 Graph wiring**: edges per PRD §3 (Phase-1 subset), `_route_after_llm` conditional
       after every LLM node → END on failure; `SqliteSaver` checkpointer; `run_graph` /
       `resume_graph` / `get_status` (interrupts before `state.next`) / `cancel_run` —
       review_agent shapes.
-- [ ] **1.7 `glossary_agent/api.py`**: sub-app with explicit `project_folder` +
+- [x] **1.7 `glossary_agent/api.py`**: sub-app with explicit `project_folder` +
       `seg_range` + `workflow_kind` start body, status/resume/cancel; full Swagger field docs
       to the PRD §5 standard (budgeted — write them with the models, not after).
-- [ ] **1.8 Mount** in `app.py` (`app.mount("/glossary-agent", glossary_app)`) — sub-app only,
+- [x] **1.8 Mount** in `app.py` (`app.mount("/glossary-agent", glossary_app)`) — sub-app only,
       no workflow-step coupling yet.
-- [ ] **1.9 Tests**: `tests/test_glossary_agent.py` per TEST §Phase 1 (node units, fallback
+- [x] **1.9 Tests**: `tests/test_glossary_agent.py` per TEST §Phase 1 (node units, fallback
       chain ×4, confirm_scope routing, failure routing, status vocabulary, golden write).
 - [ ] **1.10 `@llm_live`**: Luna-5 model-swap regression on archived input; then the row-by-row
       **parity diff protocol** vs. the old path on one fresh project — record the diff in this
@@ -133,30 +133,30 @@ Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no wor
 
 ## Phase 2 — the judgment stage (PRD §3 nodes 4–9, §7)
 
-- [ ] **2.1 `gather_evidence` node** (deterministic, glossary_lib): per-row EN/DE attestation
+- [x] **2.1 `gather_evidence` node** (deterministic, glossary_lib): per-row EN/DE attestation
       (benchmark + whole corpus), frequency-table hits, verb lemma sweep with
       compound-embedded filtering, live-checker completeness run over the benchmark segments,
       bidirectional DE→EN index (draft + standard_glossary, `SHARED_DE_ALLOWED` exempt).
-- [ ] **2.2 Triage** (deterministic): PRD §7 criteria table → `clean` pass-through vs
+- [x] **2.2 Triage** (deterministic): PRD §7 criteria table → `clean` pass-through vs
       `flagged`; batching by `MAX_AUDIT_BATCH_TERMS`.
-- [ ] **2.3 `check_epo_title` node**: Step-1b prompt (usable/unusable + anchor pairs);
+- [x] **2.3 `check_epo_title` node**: Step-1b prompt (usable/unusable + anchor pairs);
       deterministic post-check discards unattested anchors; errata → report.
-- [ ] **2.4 `audit_flagged` node**: prompt encoding SKILL.md Step 3/4 rules (PRD §3.7 list);
+- [x] **2.4 `audit_flagged` node**: prompt encoding SKILL.md Step 3/4 rules (PRD §3.7 list);
       tools `get_segments(ids)` / `count_pattern(regex)` / `check_entry(en, de)` in a bounded
       ReAct loop (review_agent `classify` shape: ThreadPoolExecutor timeout, per-call httpx
       timeout, tool-call cap); outputs `TermVerdict`s with reasoning strings.
-- [ ] **2.5 `whole_doc_pass` node** + `workflow_kind` conditional edge (proofreading only):
+- [x] **2.5 `whole_doc_pass` node** + `workflow_kind` conditional edge (proofreading only):
       whole-corpus evidence sweep, 4-bucket triage; buckets 2/3 → verdicts (claims-priority DE
       sourcing enforced deterministically), buckets 1/4 → report only.
-- [ ] **2.6 `apply_verdicts` node**: merge verdicts; hard gate = `validate_result` +
+- [x] **2.6 `apply_verdicts` node**: merge verdicts; hard gate = `validate_result` +
       bidirectional re-check (violating verdict ⇒ rejected, logged, reported); `extra_standard`
       append; **zero-verdicts-with-flagged-outstanding ⇒ error state**.
-- [ ] **2.7 `report_node`**: grouped-by-kind summary (Step 9 shape) incl. report-only findings;
+- [x] **2.7 `report_node`**: grouped-by-kind summary (Step 9 shape) incl. report-only findings;
       persist `glossary_agent_report_<PID>.md` next to the CSV.
-- [ ] **2.8 `sync_lemmas` node**: existing sync (overlay) + backfill of live-checker-note
+- [x] **2.8 `sync_lemmas` node**: existing sync (overlay) + backfill of live-checker-note
       surface forms with LLM-derived paradigms (additive-only).
-- [ ] **2.9 Run budget**: `MAX_RUN_LLM_CALLS` counter in state → `budget_exceeded` stop_reason.
-- [ ] **2.10 Tests**: TEST §Phase 2 — evidence units, triage matrix, replay tests (incl. the
+- [x] **2.9 Run budget**: `MAX_RUN_LLM_CALLS` counter in state → `budget_exceeded` stop_reason.
+- [x] **2.10 Tests**: TEST §Phase 2 — evidence units, triage matrix, replay tests (incl. the
       three malformed-JSON shapes), apply-gate, whole_doc conditional, report markers,
       session_id assertion, guardrail stop_reasons.
 - [ ] **2.11 `@llm_live` historical regression suite**: RTC / FRKE / MICTCH / HALA per the
@@ -213,3 +213,49 @@ Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no wor
 
 (append here: 1.1 Lara-column findings, 1.10 parity diff, 2.11 regression results, live
 incidents — so the next session doesn't re-derive them)
+
+**2026-08-24 — Phases 0, 0b, 1, 2 implemented** (submodule `40441b7`/`b0261bb`/`6f5a8ce`,
+outer `226bfa6`/`6158483`/`9f82364`). All non-`@llm_live` gates green: agent suites 398
+per-file, outer suite 169 + 4 llm_live skips. Findings:
+
+1. **Task 1.1 — Lara column verified against real archives.** The marker is the literal
+   lowercase string `"lara"` in **column 4** of the file written by `lara_translate.py`
+   (typically the `<PID>_..._translated.xlsx`); the `*_GERMAN_translated.xlsx` Matecat export
+   has **no** marker column. Samples: RTC_2606_P1098 ids 1–25 marked, RTC_2608_P1331 ids 1–34,
+   both contiguous; MICTCH (proofreading-shape, no pretranslation) has no markers anywhere —
+   as expected. Range derived as **min..max of marked ids** per PRD §12.3.
+   `_scan_lara_range` prefers the marker-bearing file as corpus; falls back to the first
+   `*_translated.xlsx`.
+2. **Node-order correction vs. the PRD's §3 edge list**: `check_epo_title` runs BEFORE
+   `resolve_inconsistent` (its attested anchors feed the resolve prompt — the title-outranks-
+   majority rule needs to act at resolve time), and `gather_evidence` runs AFTER resolve
+   (evidence is gathered per *draft row*, which doesn't exist pre-resolve). This matches the
+   PRD's intent; the §3 diagram listed gather before resolve.
+3. **confirm_scope trigger (b) (contamination-scale) simplified**: the missing-xlsx cause
+   hard-fails in `load_inputs`; residual large-scale unattestation flows through triage →
+   audit as ordinary per-row judgment, and a `drop_unattested` resume decision (when the range
+   question was asked) pre-deletes rows attested nowhere without LLM spend. A second interrupt
+   entry point would have broken confirm_scope's fixed forward-only `goto` — not worth it.
+4. **check_epo_title parse failure degrades, doesn't kill the run** (verdict "title check
+   failed — no anchor used", warning in report). Honest degraded mode like review's
+   missing-XLF, not a fabricated success; the §8 hard-failure rule applies to nodes whose
+   output downstream nodes would otherwise silently trust.
+5. **zu-infinitive backfill is deterministic, no LLM**: `evidence.zu_infinitive_gaps` finds
+   tokens where deleting one internal "zu" yields a known DE-table key (`anzuzeigen` →
+   `anzeigen`) and `sync_lemmas` writes them straight to the project overlay.
+6. **Pre-existing test-infra quirk (not ours)**: running `test_llm_glossary_cleanup.py` and
+   `test_verb_lemma_sync.py` in ONE pytest process fails the two `TestLiveRoundTrip` tests —
+   the cleanup suite's module-level `sys.modules["openai"]` mock poisons the live test's real
+   client. Present on unchanged pre-Phase-0 code; suites pass per-file, which is how they're
+   run. `test_glossary_lib.py` imports `test_llm_glossary_cleanup` first, deliberately, to
+   share its canonical mock rather than racing it.
+7. **Baseline DE lemma table already contains `anzuzeigen`** (added after the HALA incident),
+   so HALA-shape regression tests must fabricate their own unknown forms rather than rely on
+   that gap still existing.
+
+**Still open (the two `@llm_live` gates):**
+- **1.10 parity diff** — run flag-off vs. Phase-1 graph on one fresh project, record here.
+- **2.11 historical regression suite** — `RUN_LLM_TESTS=1 pytest tests/test_glossary_regression.py -v -s`
+  (copies each archive to tmp; real Luna 5 spend; asserts the RTC/FRKE/MICTCH/HALA row-level
+  outcomes). Record pass/fail per project here. **This is the gate that retires the manual
+  audit-skill session.**
