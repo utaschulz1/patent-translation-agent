@@ -293,3 +293,9 @@ Place the acronym so the compound makes sense without it, using hyphens:
 | Gerund/verbal noun (e.g., "separating") | Nominalized verb: **Trennen** |
 
 The noun form (Trennung = result/product) and the nominalized verb (Trennen = process) are not interchangeable in patent claims.
+
+
+Add to §4.1 or as a new subsection following §4.2: When “configured to:” introduces a colon-separated list of actions or functions, translate it as “zu Folgendem konfiguriert ist:” and retain the colon. This list-introducing construction takes precedence over “konfiguriert ist, … zu [Infinitiv]”, which applies to a single infinitive. Example: EN “a generation unit configured to: generate a first signal; and generate a second signal” → DE “eine Erzeugungseinheit, die zu Folgendem konfiguriert ist: ein erstes Signal zu erzeugen; und ein zweites Signal zu erzeugen”.
+
+
+When a colon introduces a list, use the appropriate inflected form of “Folgend-” before the list, regardless of whether the list follows a finite verb or a participial/configuration construction, e.g. “Folgendes umfasst:”, “Folgendes umfassend:” or “zu Folgendem konfiguriert ist:”. Do not add “Folgend-” or a colon when the source has no colon. Example: EN “a method comprising: determining a value; and generating a signal” → DE “ein Verfahren, Folgendes umfassend: Bestimmen eines Werts; und Erzeugen eines Signals”.
