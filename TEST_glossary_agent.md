@@ -162,6 +162,64 @@ fabricates success.
 - [ ] **`session_id` wiring**: assert every stubbed client call received
   `extra_body={"session_id": project_id}`.
 
+## Phase 2b — corrected-design closeout (`corrected_PRD_GLOSSARY_AGENT.md`)
+
+Proves: the agent's judgment quality actually matches the manual skill on the points the
+Phase 0-2 build was found to have flattened or missed (2026-08-24 HALA Swagger test), and that
+the new self-learning mechanism is real, not just plumbing that never gets exercised.
+
+- [ ] **Self-learning loop** (`tests/test_glossary_agent_learning.py`):
+  - `await_clarification` batching: multiple `confidence: "low"` verdicts from one
+    `audit_flagged` pass produce exactly one interrupt, not one per row; payload includes
+    candidate verdict + low-confidence reason + evidence per row.
+  - `handle_glossary_feedback` one-off vs. generalizable judgment: a scope-mistake correction
+    (mirror the review agent's "comprising:" case) → `rule_draft: null`, no `confirm_glossary_rule`
+    pause; a genuinely recurring pattern → drafts a rule and pauses.
+  - `confirm_glossary_rule` round-trip: confirm → `append_to_learning_doc` writes the entry (all
+    fields present) → graph loops back into `audit_flagged`, and any other still-pending
+    low-confidence rows in the *same* run are re-evaluated with the new rule available (assert
+    the learning-doc content actually reaches that second `audit_flagged` call's prompt).
+  - Reject/edit path: rejected draft → nothing written to `_glossary_agent_learnings.md`.
+  - Priority-tier check: a learning-doc entry that conflicts with a canonical/frequency-table
+    majority wins, same as a `standard_glossary.csv`/`_styleguide.md` source would (C10 parity).
+  - Quick-edit logging: the fast correction path writes an F27 record with
+    `sourcing_path: "quick-edit"` and never triggers `confirm_glossary_rule`.
+  - **`@llm_live` round-trip** (the decisive proof, small and cheap by design): one archived
+    project, force one row below the confidence threshold, resume through a real
+    `confirm_glossary_rule` confirm, re-run the graph on a second project and assert the learned
+    rule is loaded and visibly influences at least one verdict. This is the test the corrected
+    PRD's build-order note says to run before investing further in the rest of this phase.
+- [ ] **`verify_against_checker` (post-merge)** (`tests/test_glossary_agent.py::TestPostMergeVerify`):
+  - Full-range re-check, not touched-rows-only: a delete that changes an *untouched* row's
+    matching (the "shorter entry starts absorbing text the deleted longer compound used to own"
+    shape) is caught.
+  - Failure routing case (a): a note on a row `audit_flagged` just added → routes back with
+    failure evidence, capped at 1 retry.
+  - Failure routing case (b): a note on an untouched row caused by another row's change →
+    same routing, evidence includes what changed nearby.
+  - Failure routing case (c): retry still fails → row reverted to pre-merge state,
+    `"Could not auto-resolve"` report section contains it, row does **not** carry a checker note
+    into `write_glossary`.
+  - Hard gate: `write_glossary` never runs while any `final_rows` row has an unresolved note
+    (assert on the execution path, mirrors the 2.6 `apply_verdicts` hard-gate test shape).
+- [ ] **Rule 8 split regression** (`tests/test_glossary_agent_phase2.py::TestAuditSystemPromptRule8`,
+  same file/pattern as `TestAuditSystemPromptRule7`): all four sub-rule markers present in
+  `_AUDIT_SYSTEM_PROMPT`; each worked example (`data transaction`, `corresponding value` /
+  `memory sub-system`, `have,besitzen` vs `having,aufweisen`) named; no bare "rule 8" dense
+  sentence remains.
+- [ ] **B6 fold-in**: `gather_evidence`'s checker notes carry a `note_type` field distinguishing
+  `missing_lemma_key` from `wrong_stored_value`; a missing-key note routes to `sync_lemmas`
+  (overlay write), not to a CSV DE-value edit via `audit_flagged`.
+- [ ] **`verify_trigger_in_claims`** (`agent/test_glossary_lib.py` or equivalent):
+  segment-in-claims-range → true; segment in an adjacent abstract/header just outside the
+  resolved claims boundary → false (the `including`/abstract regression case, named explicitly);
+  result reaches `whole_doc_pass`'s bucket-3/4 prompt as a precomputed boolean, never re-derived
+  by the LLM.
+- [ ] **Structured synthesis log** (F27): golden JSON/CSV sidecar comparison — one row each for
+  add/amend/delete/keep, with `bucket`, `sourcing_path` (incl. `"user-clarification"`,
+  `"learned-rule:<id>"`, `"quick-edit"`), and `segments` populated; prose report content is
+  generated from this structured data (assert equivalence, not two independently-written texts).
+
 ## Phase 3 — workflow integration (PRD §5)
 
 Proves: the step machinery, flag, and UI behave — mostly `tests/test_glossary_integration.py`

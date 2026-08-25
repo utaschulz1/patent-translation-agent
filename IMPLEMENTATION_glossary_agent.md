@@ -163,6 +163,89 @@ Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no wor
       TEST table — record pass/fail + notes in this doc. **This gate retires the manual
       audit-skill session for new projects.**
 
+## Phase 2b — corrected-design closeout (per `glossary_agent/corrected_PRD_GLOSSARY_AGENT.md`)
+
+Not in the original PRD/TEST docs — added after the 2026-08-24 HALA Swagger test showed the
+Phase 0-2 build ran fine mechanically but didn't faithfully transfer the skill's judgment logic
+(see that session's findings above and the outer-repo `corrected_PRD_GLOSSARY_AGENT.md`, which
+is the source of truth for the *why* behind every item below; this section is just the
+actionable breakdown). Numbering here is this doc's own task numbering — it does **not** map
+1:1 onto the corrected PRD's skill-point numbering (1.1–1.8, C11, D17–D19, etc.), which is a
+separate mapping namespace; each task below cites the corrected-PRD point(s) it implements.
+
+**Build order, per the corrected PRD's own explicit recommendation and the user's stated
+priority (2026-08-25): land 2b.1 (the self-learning loop) first**, as a small real live
+round-trip, before 2b.2–2b.6. Those five are judgment-quality refinements to a single run; 2b.1
+is the mechanism that decides whether quality compounds across runs at all, and it's the one
+piece with no proven precedent anywhere in either agent (the review agent's own equivalent,
+`confirm_rule`, only got its first live validation on 2026-08-25 itself).
+
+- [ ] **2b.1 Self-learning loop** (corrected PRD §5.1–5.5) — do first:
+  - [ ] New file `agent/_glossary_agent_learnings.md`, deliberately separate from
+        `_styleguide.md` (styleguide = document-wide grammar house rules; this = generalized
+        glossary-judgment patterns). Seed empty with a header + entry-format comment.
+  - [ ] Loader: read alongside `standard_glossary.csv`/`_styleguide.md` in `load_inputs`, fed
+        into `audit_flagged`'s prompt at the **same priority tier as C10** (not a weaker hint).
+  - [ ] `TermVerdict` gains a `confidence: "high" | "medium" | "low"` field; `audit_flagged`'s
+        prompt requires it per verdict, not just the verdict itself.
+  - [ ] `await_clarification` node: batches all `confidence: "low"` verdicts from one
+        `audit_flagged` pass into a single interrupt (never one pause per row — same anti-spam
+        discipline as `confirm_scope`); payload shows candidate verdict + why confidence is low
+        + evidence gathered so far, per row.
+  - [ ] `handle_glossary_feedback` node: two entry points — resuming `await_clarification`, and
+        free-text feedback on the finished report (mirrors review agent's `await_feedback`
+        shape). Applies the immediate fix, then judges one-off vs. generalizable (mirror
+        `handle_correction`'s judgment — the "comprising:" one-off case is the negative-test
+        precedent to replicate here).
+  - [ ] `confirm_glossary_rule` interrupt (mirrors `confirm_rule` exactly): fires only when
+        `handle_glossary_feedback` drafts a `rule_draft`; shows the draft, waits for explicit
+        confirm/edit/reject, never auto-writes.
+  - [ ] `append_to_learning_doc` node (mirrors `update_styleguide`): writes the confirmed entry
+        (date, trigger scenario, rule statement, source project, status), then loops back into
+        `audit_flagged` so remaining flagged rows in *this* run benefit immediately.
+  - [ ] Quick-edit path (per [[feedback_patent_agent_correction_paths]]): whatever fast,
+        no-conversation correction path this agent ends up with (analogous to the review agent's
+        `"decisions"`/`edit`) must still log into the F27 structured record with
+        `sourcing_path: "quick-edit"` and no rule drafted — never silently untracked, but never
+        forced through `confirm_glossary_rule` either.
+  - [ ] Live round-trip test (see TEST §Phase 2b): one low-confidence row, one real
+        `confirm_glossary_rule` confirm, reload on a second run, confirm the learned rule
+        actually loads and gets applied.
+- [ ] **2b.2 `verify_against_checker` (post-merge)** (corrected PRD §1.7) — new node between
+      `apply_verdicts` and `write_glossary`: re-run `build_glossary_lookups` +
+      `check_segment_glossary` over the **entire** audited range against merged `final_rows`
+      (not just rows touched this run — checker matching is corpus-relative, per the corrected
+      PRD's reasoning). Three-way failure routing: (a) note on a row `audit_flagged` just
+      added/amended → route back to `audit_flagged` with the failure evidence, 1 retry cap; (b)
+      note on an untouched row caused by another row's delete/amend (interaction effect) → same
+      routing, with a note on what changed nearby; (c) retry still fails → revert that row to
+      its pre-merge (1.4/2.1-verified) state, add to a new report section "Could not
+      auto-resolve." Hard gate: `write_glossary` cannot run while any `final_rows` row has an
+      unresolved checker note — same class as `apply_verdicts`' existing hard gate (2.6).
+- [ ] **2b.3 `_AUDIT_SYSTEM_PROMPT` rule 8 split** (corrected PRD C11, D17–D19) — same treatment
+      rule 7 already got (2026-08-24, see decision log below): split the single dense sentence
+      into four explicit sub-rules (minority-can-be-correct / generic-modifier-splitting /
+      prefer-intact-compounds / duplicate-with-stem-inconsistency-check), each with its worked
+      example (`data transaction`, `corresponding value` vs. `memory sub-system`,
+      `have,besitzen` vs. `having,aufweisen`) inlined in the prompt. New regression test class
+      mirroring `TestAuditSystemPromptRule7`.
+- [ ] **2b.4 B6 — folded into 1.4/2.1, not built separately** (corrected PRD recommendation):
+      tag `gather_evidence`'s checker notes with a `note_type` field
+      (`missing_lemma_key` | `wrong_stored_value` | `interior_tag` | ...) so `audit_flagged` can
+      route a missing-key note to `sync_lemmas`'s overlay-registration path specifically, rather
+      than treating every note as "edit the CSV's DE value." No new step.
+- [ ] **2b.5 `verify_trigger_in_claims` helper** (corrected PRD E23): deterministic segment-ID
+      membership test against the claims boundary resolved in `resolve_range`; called wherever
+      `whole_doc_pass` invokes claims-priority for a bucket-3/4 finding; result handed to the
+      audit prompt as a precomputed fact, never re-derived by the LLM (this is the fix for the
+      `including`/abstract three-strikes failure class).
+- [ ] **2b.6 Structured synthesis log** (corrected PRD F27): `report_node` emits a JSON/CSV
+      sidecar per changed row (`row_key`, `action`, `bucket`, `sourcing_path`, `segments`,
+      `reasoning`) alongside the existing prose report, generated *from* the structured data
+      rather than hand-assembled; `sourcing_path` values include `"user-clarification"` and
+      `"learned-rule:<id>"` from 2b.1, and `"quick-edit"` from the quick-edit path. Feeds the
+      historical-regression table (2.11) so it becomes queryable instead of eyeballed.
+
 ## Phase 3 — workflow integration (PRD §5)
 
 - [ ] **3.1** `workflow_definitions.py`: `GLOSSARY_ANALYZED` `ONCE` → `REPEATABLE`.
@@ -206,6 +289,12 @@ Outer repo (`glossary_agent/`) + submodule imports. Swagger-only trigger, no wor
       document-order-stateful like `german_claim_no_article` — remember the same exclusion in
       `review_agent/graph.py::_build_lint_checks` if it joins `CHECKS`.
 - [ ] **C.2** Regression guard: no `multiple` row re-added to `standard_glossary.csv`.
+- **(idea, not scheduled)** Loop in the *project-scoped* `proofreading-scorecard` output as
+  regression ground truth + rule candidates for 2b.1's learning loop — corrected PRD §5.6.
+  Explicitly NOT the general cross-project `scorecard-analysis`/`consolidate_scorecards.py`
+  pipeline, which stays excluded per the 2026-08-22 ruling ([[feedback_patent_scorecard_scope_distinction]]).
+  Needs a project with both a glossary-agent run and a later proofreading scorecard to test
+  against, and needs 2b.1 validated first.
 
 ---
 
