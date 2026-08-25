@@ -191,27 +191,41 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   `c15_standard_drop` origin, project drop → `c15_project_drop`, attested row stays clean) +
   `TestReportAndBackfill::test_c15_drops_get_their_own_sections_not_audit_verdicts`. Outer
   `70ef321`.
-- [ ] **Self-learning loop** (`tests/test_glossary_agent_learning.py`):
-  - `await_clarification` batching: multiple `confidence: "low"` verdicts from one
-    `audit_flagged` pass produce exactly one interrupt, not one per row; payload includes
-    candidate verdict + low-confidence reason + evidence per row.
-  - `handle_glossary_feedback` one-off vs. generalizable judgment: a scope-mistake correction
-    (mirror the review agent's "comprising:" case) → `rule_draft: null`, no `confirm_glossary_rule`
-    pause; a genuinely recurring pattern → drafts a rule and pauses.
-  - `confirm_glossary_rule` round-trip: confirm → `append_to_learning_doc` writes the entry (all
-    fields present) → graph loops back into `audit_flagged`, and any other still-pending
-    low-confidence rows in the *same* run are re-evaluated with the new rule available (assert
-    the learning-doc content actually reaches that second `audit_flagged` call's prompt).
-  - Reject/edit path: rejected draft → nothing written to `_glossary_agent_learnings.md`.
-  - Priority-tier check: a learning-doc entry that conflicts with a canonical/frequency-table
-    majority wins, same as a `standard_glossary.csv`/`_styleguide.md` source would (C10 parity).
-  - Quick-edit logging: the fast correction path writes an F27 record with
-    `sourcing_path: "quick-edit"` and never triggers `confirm_glossary_rule`.
-  - **`@llm_live` round-trip** (the decisive proof, small and cheap by design): one archived
-    project, force one row below the confidence threshold, resume through a real
-    `confirm_glossary_rule` confirm, re-run the graph on a second project and assert the learned
-    rule is loaded and visibly influences at least one verdict. This is the test the corrected
-    PRD's build-order note says to run before investing further in the rest of this phase.
+- [x] **Self-learning loop** (`tests/test_glossary_agent_learning.py`, 23 tests) — landed:
+  - `TestConfidenceField`: `_raw_to_verdicts` carries `confidence` through, defaults to "high"
+    when missing or invalid (never lets a malformed field silently force a pause).
+  - `TestRouteToClarificationOrApply`: low-confidence-and-not-done → clarify; already-done → apply
+    even with low-confidence verdicts present; no low-confidence → apply; failure state → end.
+  - `TestHandleGlossaryFeedback` (8 tests): no-resolutions → straight to `apply_verdicts`; confirm
+    → confidence forced high + "USER CONFIRMED" annotation; override → de/action replaced +
+    "USER OVERRIDE: <note>"; rule drafted → routes to `confirm_glossary_rule` with `flagged`
+    narrowed to exclude just-resolved rows; no rule → straight to apply; malformed JSON / LLM
+    exception → degrades to "no rule" WITHOUT losing the already-applied resolutions (the
+    fabricated-success-adjacent case: a rule-proposal failure must never roll back real human
+    fixes); an unanswered row in the same batch is untouched byte-for-byte.
+  - `TestConfirmGlossaryRuleDecisionLogic`: only a literal `"confirm"` (case-insensitive) counts;
+    everything else — reject, missing, `None` — is a no-op reject (the interrupt() call itself is
+    only exercised through the real graph, below).
+  - `TestAppendToLearningDoc`: writes the entry (trigger/rule/source/project id all present);
+    loops back to `audit_flagged` with `learnings_text` refreshed when `flagged` still has rows;
+    routes straight to `apply_verdicts` when empty; a second entry appends, doesn't overwrite.
+  - `TestLearningsInAuditPrompt`: `learnings_text` reaches `_audit_batch`'s payload under
+    `glossary_agent_learnings`; `load_inputs` actually reads `_glossary_agent_learnings.md` (skip
+    if the RTC fixture isn't present).
+  - **`TestSelfLearningRoundTrip`** (the decisive proof, mocked — not `@llm_live`, see below): a
+    full graph run through BOTH new interrupts with mocked LLM responses — one low-confidence
+    verdict → `await_clarification` fires → resume with a confirm → `handle_glossary_feedback`
+    drafts a rule → `confirm_glossary_rule` fires → resume with `{"decision": "confirm"}` →
+    `_glossary_agent_learnings.md` has the entry on disk, `flagged` was empty after the resolve so
+    the loop-back correctly skips straight to `apply_verdicts`, and the written
+    `clean_glossary_*.csv` contains the row. A second test proves the reject path writes nothing.
+  - **Deferred, explicitly not built this session:** the quick-edit-path logging
+    (`sourcing_path: "quick-edit"`) has no UI/API surface yet to attach to (Phase 3, not Phase 2b)
+    — see the decision log. The real `@llm_live` round-trip (real Luna 5, not mocked responses)
+    also isn't built yet — the mocked round-trip above proves the *wiring*; a live one is still
+    needed to prove the *prompts* (both `_AUDIT_SYSTEM_PROMPT`'s new confidence rule and
+    `_FEEDBACK_SYSTEM_PROMPT`) actually produce sensible real-model behavior before trusting this
+    on a real project.
 - [ ] **`verify_against_checker` (post-merge)** (`tests/test_glossary_agent.py::TestPostMergeVerify`):
   - Full-range re-check, not touched-rows-only: a delete that changes an *untouched* row's
     matching (the "shorter entry starts absorbing text the deleted longer compound used to own"

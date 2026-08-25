@@ -194,34 +194,45 @@ piece with no proven precedent anywhere in either agent (the review agent's own 
       reaches `audit_flagged`. Real verdicts (not just removal from `flagged`) so
       `apply_verdicts`' `extra_standard` fallback can't silently reinstate a dropped
       standard-glossary term — same bug class as the 2026-08-24 `apply_verdicts` fix.
-- [ ] **2b.1 Self-learning loop** (corrected PRD §5.1–5.5) — do first:
-  - [ ] New file `agent/_glossary_agent_learnings.md`, deliberately separate from
+- [x] **2b.1 Self-learning loop** (corrected PRD §5.1–5.5) — landed, submodule `bd44662`
+      (`_glossary_agent_learnings.md` seed), outer (graph.py/api.py/tests, see decision log below
+      for commit hash):
+  - [x] New file `agent/_glossary_agent_learnings.md`, deliberately separate from
         `_styleguide.md` (styleguide = document-wide grammar house rules; this = generalized
         glossary-judgment patterns). Seed empty with a header + entry-format comment.
-  - [ ] Loader: read alongside `standard_glossary.csv`/`_styleguide.md` in `load_inputs`, fed
-        into `audit_flagged`'s prompt at the **same priority tier as C10** (not a weaker hint).
-  - [ ] `TermVerdict` gains a `confidence: "high" | "medium" | "low"` field; `audit_flagged`'s
-        prompt requires it per verdict, not just the verdict itself.
-  - [ ] `await_clarification` node: batches all `confidence: "low"` verdicts from one
-        `audit_flagged` pass into a single interrupt (never one pause per row — same anti-spam
-        discipline as `confirm_scope`); payload shows candidate verdict + why confidence is low
-        + evidence gathered so far, per row.
-  - [ ] `handle_glossary_feedback` node: two entry points — resuming `await_clarification`, and
-        free-text feedback on the finished report (mirrors review agent's `await_feedback`
-        shape). Applies the immediate fix, then judges one-off vs. generalizable (mirror
-        `handle_correction`'s judgment — the "comprising:" one-off case is the negative-test
-        precedent to replicate here).
-  - [ ] `confirm_glossary_rule` interrupt (mirrors `confirm_rule` exactly): fires only when
+  - [x] Loader: read alongside `standard_glossary.csv`/`_styleguide.md` in `load_inputs`, fed
+        into `audit_flagged`'s prompt at the **same priority tier as C10** (not a weaker hint) —
+        `_AUDIT_SYSTEM_PROMPT` rule 2 amended to name it explicitly, not just standard_glossary.
+  - [x] `TermVerdict` gains a `confidence: "high" | "medium" | "low"` field; `audit_flagged`'s
+        prompt (new rule 9) requires it per verdict; `_raw_to_verdicts` defaults to "high" on a
+        missing/mangled value rather than letting a malformed field silently force a pause.
+  - [x] `await_clarification` node: batches all `confidence: "low"` verdicts from one
+        `audit_flagged` (or `whole_doc_pass`) pass into a single interrupt via a new
+        `check_confidence` join node (both upstream exits route there first) — same anti-spam
+        discipline as `confirm_scope`; payload shows candidate verdict + evidence summary per row.
+        Fires at most once per run (`clarification_done` latches on resume regardless of outcome).
+  - [x] `handle_glossary_feedback` node — **only the `await_clarification` entry point built.**
+        Applies each resolution (confirm/override) to the matching verdict, then makes one LLM
+        call judging one-off vs. generalizable (mirrors `handle_correction`'s judgment — a
+        malformed/failed LLM call degrades to "no rule" WITHOUT losing the already-applied
+        resolutions, since those came from a human and are worth more than the rule guess).
+        **The second entry point — free-text feedback on the ALREADY-FINISHED report — was NOT
+        built this session.** It needs its own API design (feeding text into a completed
+        checkpoint thread) that wasn't resolved; deferred, not forgotten. See decision log.
+  - [x] `confirm_glossary_rule` interrupt (mirrors `confirm_rule` exactly): fires only when
         `handle_glossary_feedback` drafts a `rule_draft`; shows the draft, waits for explicit
-        confirm/edit/reject, never auto-writes.
-  - [ ] `append_to_learning_doc` node (mirrors `update_styleguide`): writes the confirmed entry
-        (date, trigger scenario, rule statement, source project, status), then loops back into
-        `audit_flagged` so remaining flagged rows in *this* run benefit immediately.
-  - [ ] Quick-edit path (per [[feedback_patent_agent_correction_paths]]): whatever fast,
-        no-conversation correction path this agent ends up with (analogous to the review agent's
-        `"decisions"`/`edit`) must still log into the F27 structured record with
-        `sourcing_path: "quick-edit"` and no rule drafted — never silently untracked, but never
-        forced through `confirm_glossary_rule` either.
+        confirm/reject (+ optional `rule_text` edit), never auto-writes. Reject routes straight to
+        `apply_verdicts` — nothing changed that would justify spending more LLM budget re-auditing.
+  - [x] `append_to_learning_doc` node (mirrors `update_styleguide`): writes the confirmed entry
+        (date, trigger, rule, source term, project id, status), then loops back into
+        `audit_flagged` over the still-unaddressed `flagged` subset (narrowed by
+        `handle_glossary_feedback` to exclude just-resolved rows) so the rest of *this* run
+        benefits immediately. New `whole_doc_done` state flag guards `_route_workflow` against
+        re-running `whole_doc_pass` a second time on this loop-back.
+  - [ ] Quick-edit path (per [[feedback_patent_agent_correction_paths]]) — **not built.** There's
+        no fast, no-conversation correction UI/API surface for this agent yet at all (Phase 3,
+        workflow/frontend integration, hasn't started) — nothing to attach F27-style
+        `sourcing_path: "quick-edit"` logging to. Revisit when Phase 3 adds one.
   - [ ] Live round-trip test (see TEST §Phase 2b): one low-confidence row, one real
         `confirm_glossary_rule` confirm, reload on a second run, confirm the learned rule
         actually loads and gets applied.
@@ -503,3 +514,49 @@ and resolved (data already in the project archives, no synthetic fixtures needed
   see [[feedback_patent_glossary_bidirectional_consistency_exception]] — but has no confirmed
   real project attached. Do not build a test for this from the MICTCH case; wait for a real
   project that actually surfaces the pattern.
+
+**2026-08-25, later — 2b.1 self-learning loop implemented.** Outer commit (see `git log` on
+`glossary-agent` for the hash — this entry written pre-commit), submodule `bd44662` (learnings
+file seed). Full outer + submodule test suites green (211 outer + 4 llm_live skips, 405 submodule)
+throughout, including the pre-existing suite which never had to change.
+
+Key design decisions made while building, beyond what the corrected PRD specified:
+
+1. **`check_confidence` join node.** LangGraph conditional edges route to node names, not to an
+   inline check shared by two upstream sources — `audit_flagged`'s direct exit and
+   `whole_doc_pass`'s exit both used to point straight at `apply_verdicts`. Rather than duplicate
+   the low-confidence routing check in two places, both now route to a new no-op `check_confidence`
+   node first, which has the single `_route_to_clarification_or_apply` conditional edge.
+2. **`whole_doc_done` flag, not in the corrected PRD.** The loop-back
+   (`append_to_learning_doc → audit_flagged`) re-enters `_route_workflow`, which would otherwise
+   re-run `whole_doc_pass` a second time on any proofreading-workflow run — Step 7 is a one-shot
+   pass, unrelated to whether a new rule was just learned. `whole_doc_pass` now sets
+   `whole_doc_done: True` on every return path; `_route_workflow` checks it.
+3. **Loop-back only follows a CONFIRMED rule, never a rejection or "no rule."** Considered looping
+   back after every `handle_glossary_feedback` call regardless of outcome, to give unaddressed
+   low-confidence rows a second look — rejected: with nothing new in context (no rule, or a
+   rejected one), a re-audit would just reproduce the same verdicts for real LLM cost. Only a
+   genuinely new rule justifies spending the budget again.
+4. **`flagged` narrowing, not a separate tracking field.** `handle_glossary_feedback` computes
+   `remaining_flagged` (this run's `flagged` minus the EN keys the user just resolved) and passes
+   it forward in the `Command` update; `append_to_learning_doc` reads it straight from state. This
+   reuses the exact mechanism `audit_flagged` already batches over, so the loop-back call is
+   just "call `audit_flagged` again" — no new re-audit code path needed.
+5. **LLM failures in `handle_glossary_feedback` degrade, never fabricate a stop.** A malformed or
+   failed rule-proposal call still returns `Command(goto="apply_verdicts", update=base_update)` —
+   the user's explicit resolutions (already applied to `verdicts` before the LLM call) are never
+   lost because a *secondary*, lower-stakes judgment (does this generalize?) failed. Distinct from
+   `audit_flagged`'s own failures, which correctly DO stop the run — there the LLM call *is* the
+   primary work; here it's optional enrichment on top of already-real human input.
+6. **Deferred, not built:** the free-text "feedback on an already-finished report" entry point
+   (corrected PRD §5.4's second entry point) needs its own API shape (posting into a *completed*
+   checkpoint thread, which the current `/resume` guard explicitly rejects) that wasn't designed
+   this session — `await_clarification` (the mid-run entry point) is what got built and tested.
+   The quick-edit-path logging has no UI/API surface to attach to yet at all (Phase 3 territory).
+   Both are real gaps, not oversights — see the TEST doc's Phase 2b section for the same caveat.
+7. **Round-trip test is mocked, not `@llm_live`.** `TestSelfLearningRoundTrip` proves the graph
+   wiring end-to-end through both new interrupts (confirm and reject paths) with scripted LLM
+   responses — the cheap, fast proof that the *mechanism* works. It does NOT prove Luna 5 actually
+   produces sensible `confidence` ratings or rule proposals on real content — that needs a real
+   `@llm_live` run against an archived project (e.g. the small FRKE_2604_P0334 fixture) before
+   trusting this on a live project. Not yet done.
