@@ -180,6 +180,15 @@ is the mechanism that decides whether quality compounds across runs at all, and 
 piece with no proven precedent anywhere in either agent (the review agent's own equivalent,
 `confirm_rule`, only got its first live validation on 2026-08-25 itself).
 
+- [ ] **2b.0 C15 — classify-and-drop for widespread unattested rows** (corrected PRD C15,
+      redesigned 2026-08-24, not yet built): deterministic pre-filter inside/just before
+      `triage_node`, no interrupt. Trigger: a row EN-and-DE-both-unattested within the benchmark
+      range (distinct from C14's DE-only-unattested, which stays a judgment call routed to
+      `audit_flagged`). For every triggered row, classify by presence in `standard_glossary.csv`
+      (the full client file, not the source-filtered `relevant_standard` subset): present → drop,
+      report in a `"WARNING: standard-glossary terms unattested"` section; absent → drop, report
+      in a separate, plain `"unattested terms"` informational section. Neither section reaches
+      `audit_flagged`.
 - [ ] **2b.1 Self-learning loop** (corrected PRD §5.1–5.5) — do first:
   - [ ] New file `agent/_glossary_agent_learnings.md`, deliberately separate from
         `_styleguide.md` (styleguide = document-wide grammar house rules; this = generalized
@@ -446,3 +455,46 @@ unconditional). Full outer suite: 177 passed, 4 llm_live skipped.
 regression test on every named exception in `_AUDIT_SYSTEM_PROMPT` going forward, not just
 ad-hoc ones added after something breaks — a compressed system prompt is exactly the kind of
 text that silently loses meaning under editing pressure with nothing to catch it.
+
+**2026-08-25 — TEST doc gap audit + real fixture investigation for Phase 2b.** Reviewing
+Phase 2b's own tests against `SKILL.md` found two real problems: (1) C15 (the redesigned
+classify-and-drop step) had a task in the corrected PRD but no task/test anywhere in this doc's
+Phase 2b — added above as 2b.0. (2) most of Phase 2b's tests (rule-8 marker checks, replay
+tests) prove the scaffolding around an LLM call behaves, not that the LLM's actual judgment is
+correct — the historical regression table is the only place that proves real outcomes, and
+several real SKILL.md rules with live worked examples had zero representation there. Investigated
+and resolved (data already in the project archives, no synthetic fixtures needed):
+
+- **FRKE_2604_P0334 added as a 5th historical regression project** — the real source of
+  SKILL.md's own "Anhang"/"Gliedmaße" title-domain-blindness example (confirmed by reading
+  `RCA_FRKE_2604_P0334_de-DE_Sprogløsninger ApS.docx` and
+  `Appendix A - SourceError_German_[Patent_FRKE_2606_P0334].xlsx` in the project folder). The
+  archived `clean_glossary_FRKE_2604_P0334.csv` still carries the uncorrected `appendage,Anhang`
+  row — a real, non-synthetic "before" fixture. Client's official correction is `Gliedmaße`;
+  neither the raw MT (`Anhang`) nor the raw-MT majority (`Ansatz`, 2/4 per
+  `noun_canonical_glossary.csv`) is right, so this case also proves majority-vote alone doesn't
+  save you. RCA root cause, worth remembering as the real-world stakes case: the translator
+  privately knew the correct term but suppressed the fix specifically to stay consistent with the
+  bad title — the exact failure mode Step 1b part 2 exists to prevent, with a documented client
+  Major Accuracy nonconformity as the consequence. Small (46 rows, claims-only), cheap to run.
+- **FRKE_2608_P0736's existing row extended, no new project needed**: confirmed via
+  `pre-processing/glossary-range-audit_practice/clean_glossary_FRKE_2608_P0736.csv.bak_preaudit`
+  vs. the post-audit file that `any one of the preceding claims,einem der vorhergehenden
+  Ansprüche` and `for use,zur Verwendung` were really added as masking compounds.
+- **MICTCH_2608_P0124's existing row extended, no new project needed**: `verb_canonical_glossary.csv`
+  confirms `cause,veranlassen,19,24,yes` / `cause,veranlass,5,24,no` — the exact split SKILL.md
+  cites for "yes/no split is conjugation, not inconsistency." Also confirmed `including`/`include`
+  really only occur at segment 430 (abstract) in this project, never in claims 369–428 — added as
+  an explicit E23 assertion (the three-strikes regression case).
+- **Standard-vs-consistency tiebreak — investigated, deliberately left untested.** User recalled
+  a candidate MICTCH case (`cause`→`veranlassen` vs. a `führt zu` rendering, segments 56/60).
+  Checked directly against the real translated xlsx: segment 56 doesn't contain "cause" at all;
+  segment 60's `führen` is a whole-clause nominalization restructuring ("causing X to be
+  enabled... can result in Y" → "...führen"), not a clean lexical choice — too ambiguous to
+  assert against, matching the user's own hedge on it. The broader principle the user described
+  (English sometimes has more near-synonyms — `execute`/`perform`/`carry out`, or
+  `include`/`involve`/`incorporate`/`encompass` — than German has natural distinct equivalents,
+  so DE overlap outside claims is acceptable rather than a defect) is real and worth keeping —
+  see [[feedback_patent_glossary_bidirectional_consistency_exception]] — but has no confirmed
+  real project attached. Do not build a test for this from the MICTCH case; wait for a real
+  project that actually surfaces the pattern.

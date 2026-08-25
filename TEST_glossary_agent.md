@@ -152,10 +152,25 @@ fabricates success.
   | Project | Must hold |
   |---|---|
   | **RTC_2608_P1331** | `testing device→Testvorrichtung`, `test→testen` — EPO-title anchor overrides the 7/8 `Prüf*` raw-MT majority |
-  | **FRKE_2608_P0736** | `provide→bereitstellen` (standard hard requirement); `exhibit` gets a distinct third verb (`zeigen`-class), never shares with `provide` or `have`; `have`/`having→aufweisen` shared and NOT "resolved" to `besitzen`; bonus: `place→einbringen` over majority `geben` |
-  | **MICTCH_2608_P0124** (proofreading-shape → also exercises `whole_doc_pass`) | `using,mithilfe` deleted; `enable,in die Lage versetzen` deleted + `chip enable pin,Chipaktivierungspin` added; `data transaction→Datentransaktion` (minority) kept; `write,schreiben` + `perform,durchführen` kept (claims-attested verbs); whole-doc: `memory sub-system,Speichersubsystem` added (bucket 3), `utilize,nutzen` added; SCA-protocol description defect + `memory sub-system controller` violations in report only |
+  | **FRKE_2608_P0736** | `provide→bereitstellen` (standard hard requirement); `exhibit` gets a distinct third verb (`zeigen`-class), never shares with `provide` or `have`; `have`/`having→aufweisen` shared and NOT "resolved" to `besitzen`; bonus: `place→einbringen` over majority `geben`; **masking-compound entries present**, confirmed via the `glossary-range-audit_practice` pre/post diff: `any one of the preceding claims,einem der vorhergehenden Ansprüche` and `for use,zur Verwendung`, added as their own compound rows rather than overwriting the bare `any`/`one of`/`use` defaults |
+  | **MICTCH_2608_P0124** (proofreading-shape → also exercises `whole_doc_pass`) | `using,mithilfe` deleted; `enable,in die Lage versetzen` deleted + `chip enable pin,Chipaktivierungspin` added; `data transaction→Datentransaktion` (minority) kept; `write,schreiben` + `perform,durchführen` kept (claims-attested verbs); whole-doc: `memory sub-system,Speichersubsystem` added (bucket 3), `utilize,nutzen` added; SCA-protocol description defect + `memory sub-system controller` violations in report only; **`cause,veranlassen` kept as the sole entry**, NOT split into a separate `cause,veranlass` row — `verb_canonical_glossary.csv`'s `19/24 yes` vs. `5/24 no` split is verb conjugation of one lemma, not a real inconsistency (SKILL.md Step 3's own cited example, confirmed against this project's actual canonical table); **the `including`/`include` claims-priority rule must NOT fire on the description's ~100+ `beinhalten` instances** — `including`/`include` occur only in the abstract (segment 430), never inside the actual claims (369–428), so E23's `verify_trigger_in_claims` must return false for that segment and the rule must not apply (this is the exact three-strikes regression case from SKILL.md Step 7) |
   | **HALA_2608_P0655** | ordinal merges present (`image data,Bilddaten` / `output…` / `intermediate…` — upstream `_merge_ordinal_siblings` not regressed); Eingang/Eingabe ↔ Ausgang/Ausgabe drift surfaced in report; `anzuzeigen` lemma gap caught at draft time (overlay gains the form); title row label-free in output |
+  | **FRKE_2604_P0334** (new, added 2026-08-25 — title-rejection case) | `appendage,Gliedmaße` — the client's own official correction (`Appendix A - SourceError_German_...xlsx`, "Corrected"); **NOT** `appendage,Anhang` (the raw MT's own rendering, and what the EPO title itself says, and what the archived `clean_glossary_FRKE_2604_P0334.csv` still has uncorrected on disk today); **NOT** `appendage,Ansatz` either (the raw-MT majority, 2/4 in `noun_canonical_glossary.csv` — also wrong, so this case also proves majority-vote alone doesn't save you). `check_epo_title` must judge the title unusable as an anchor for this term (Step 1b part 2 — "Anhang" is a domain-blind false-friend for "appendage," same failure class as the SKILL.md-cited "Anhang"/"Gliedmaße" pattern, because this project *is* that pattern's real source) and the title must appear as errata in the report. Real stakes, not hypothetical: this exact failure produced a documented client RCA (`RCA_FRKE_2604_P0334_de-DE_Sprogløsninger ApS.docx`) — a Major Accuracy nonconformity on Claim 1, root-caused to the translator privately knowing the correct term but suppressing the fix specifically to stay consistent with the (wrong) title. Small, cheap fixture: 46 rows, claims-only. |
 
+- **Known untested rule, flagged not silently skipped (2026-08-25):** the standard-vs-consistency
+  tiebreak (SKILL.md Step 3) / bidirectional-consistency-has-a-legitimate-exception-outside-claims
+  principle has no regression coverage. Investigated directly: the candidate MICTCH_2608_P0124
+  case (`cause`→`veranlassen` vs. a `führt zu` rendering, segments 56/60) doesn't hold up on
+  inspection — segment 56 doesn't contain "cause" at all, and segment 60's `führen` is a
+  whole-clause nominalization restructuring ("causing X to be enabled... can result in Y" →
+  "...führen"), not a clean lexical `cause`→`führt zu` choice, so it isn't solid enough to assert
+  against. The broader, still-real principle (English sometimes has more near-synonyms — e.g.
+  `execute`/`perform`/`carry out`, or `include`/`involve`/`incorporate`/`encompass` — than German
+  has natural distinct equivalents, so some DE overlap outside claims is acceptable rather than a
+  defect) has no confirmed real project attached yet. See
+  [[feedback_patent_glossary_bidirectional_consistency_exception]]. **Do not add a test for this
+  until a real project surfaces it** — a test built on the MICTCH case specifically would assert
+  the wrong thing.
 - [ ] **Cost guardrails**: with `MAX_RUN_LLM_CALLS=1` a normal fixture run stops with
   `budget_exceeded` (not a crash, not a fabricated result); per-node timeout and tool-call
   limits produce their named stop_reasons (stubbed clients, no real waiting).
@@ -168,6 +183,15 @@ Proves: the agent's judgment quality actually matches the manual skill on the po
 Phase 0-2 build was found to have flattened or missed (2026-08-24 HALA Swagger test), and that
 the new self-learning mechanism is real, not just plumbing that never gets exercised.
 
+- [ ] **C15 — classify-and-drop for widespread unattested rows** (`agent/test_glossary_lib.py` or
+  `tests/test_glossary_agent.py::TestC15`, synthetic fixture, deterministic — no LLM, no real
+  project needed): a row EN-and-DE-both-unattested within the benchmark range and present in
+  `standard_glossary.csv` → dropped, appears in the "WARNING: standard-glossary terms unattested"
+  report section; a row meeting the same trigger but absent from `standard_glossary.csv` → dropped,
+  appears in the separate, plain "unattested terms" informational section; a row EN-attested but
+  DE-unattested (C14 shape) → **not** touched by this check at all, routes to `audit_flagged`
+  instead (assert the two triggers stay disjoint); neither section ever reaches `audit_flagged`'s
+  input (mirrors the Triage-matrix assertion above, for this specific pre-filter).
 - [ ] **Self-learning loop** (`tests/test_glossary_agent_learning.py`):
   - `await_clarification` batching: multiple `confidence: "low"` verdicts from one
     `audit_flagged` pass produce exactly one interrupt, not one per row; payload includes
