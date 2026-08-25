@@ -560,3 +560,55 @@ Key design decisions made while building, beyond what the corrected PRD specifie
    produces sensible `confidence` ratings or rule proposals on real content — that needs a real
    `@llm_live` run against an archived project (e.g. the small FRKE_2604_P0334 fixture) before
    trusting this on a live project. Not yet done.
+
+**2026-08-25, later still — first real Swagger run against FRKE_2604_P0334, real Luna 5 spend
+(user-triggered).** `project_folder` needs to be absolute (Swagger field already says so, but the
+first attempt used a relative path and hit `load_inputs`' hard-fail — not a bug, a usage error).
+Once corrected, the run completed successfully end-to-end and validated real, previously
+untested-live behavior:
+
+1. **`check_epo_title` correctly rejected this project's actual title.** `usable=False` — "Anhang"
+   judged domain-inappropriate for "appendage." This is the live confirmation that the exact
+   worked example this fixture was chosen for (SKILL.md's Anhang/Gliedmaße pattern, and this
+   project's own RCA) actually works in the built agent, not just in mocked tests.
+2. **C15 fired for real**: `21 clean, 30 flagged, 6 standard-glossary unattested (C15), 1
+   project-term unattested (C15)` — first live confirmation of the whole 2b.0 mechanism.
+3. **No `await_clarification` pause this run** — the audit didn't rate anything "low" confidence.
+   Expected, not a bug: confirms the risk already flagged above (confidence is the model's own
+   call, not guaranteed to fire on any given document) — this run just didn't happen to hit it.
+4. **A real, live-caught bug: the no-op-amend defect.** The audit's report reasoning for
+   `appendage` correctly argued "Anhang" must become "Gliedmaße" (echoing the title-check finding)
+   — but the verdict's own `de` field still said "Anhang," unchanged, and the written CSV shipped
+   the wrong value under an `### amend` label that implied it had been fixed. Root cause,
+   traced from the surrounding log: the audit's `check_entry` tool call on its own proposed
+   "Gliedmaße" correctly returned 0 attestation (expected — this is a post-editing job, the raw MT
+   never used the correct term), but nothing told the model that a 0-count result on its OWN
+   correction is fine, not a reason to quietly revert. **This is a different failure class than
+   node 1.7 (post-merge checker verification) was designed to catch** — 1.7 checks attestation,
+   and "Anhang" *is* attested in the still-uncorrected raw MT; the bug is reasoning-vs-output
+   inconsistency, not an attestation gap.
+5. **Fixed same session**, per the user's explicit design (not my first proposal — I suggested a
+   silent revert-to-"keep" + report-only flag; the user asked for something that stays actionable
+   within the run instead): extended `_audit_batch`'s existing parse-failure retry loop with a
+   second validation layer — any `"amend"` verdict whose `de` is identical to the row's original
+   value is invalid by construction (amend implies a change), gets one bounded retry with the
+   specific offending row named and an explicit note that a 0-attestation check_entry result on
+   the model's own correction is expected and not a reason to revert. If it's *still* unresolved
+   after `MAX_PARSE_RETRIES` attempts, the verdict is forced to `action: "delete"`, `de: ""`,
+   `confidence: "low"`, reasoning prefixed `COULD NOT AUTO-RESOLVE:` (original diagnosis
+   preserved) — this reuses the already-built self-learning loop rather than inventing a new
+   mechanism: the row surfaces at `await_clarification` (if that hasn't already fired this run) or
+   in the final report's `[low confidence]` marker (new — see below), and a human can override it
+   with the real corrected value through the existing resolution path.
+6. **Confidence was invisible in the finished report — fixed alongside this.** The user asked
+   directly whether confidence is shown anywhere; it wasn't — only used internally for routing,
+   visible only in the live `await_clarification` pause payload. Matters especially for the
+   no-op-amend fallback: if it fires on a loop-back re-audit *after* `clarification_done` has
+   already latched True this run, that low-confidence verdict never gets a live pause of its own
+   and would otherwise ship into the final report with no visible marker. `report_node` now
+   appends `[low confidence]` to any verdict line where `confidence == "low"` (silent for
+   "medium"/"high" — not worth the noise).
+7. **Tests**: `tests/test_glossary_agent_phase2.py::TestNoOpAmendGuard` (4 tests — retry-then-
+   resolves, retry-exhausted-then-deleted, a genuine amend is never flagged, "keep" is never
+   flagged) and `TestReportAndBackfill::test_low_confidence_marker_shown_high_confidence_silent`.
+   Full outer (216 + 4 llm_live skips) + submodule (405) suites green throughout.

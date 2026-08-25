@@ -257,6 +257,16 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   `"learned-rule:<id>"`, `"quick-edit"`), and `segments` populated; prose report content is
   generated from this structured data (assert equivalence, not two independently-written texts).
 
+- [x] **No-op-amend guard** (`tests/test_glossary_agent_phase2.py::TestNoOpAmendGuard`, 4 tests) —
+  live-caught 2026-08-25 (FRKE_2604_P0334, real Luna 5 run): an `"amend"` verdict whose `de` is
+  unchanged from the original value is invalid by construction. `_audit_batch` gets one bounded
+  retry (naming the specific row, clarifying that a 0-attestation `check_entry` result on the
+  model's OWN proposed correction is expected, not a reason to revert) before forcing
+  `action: "delete"`, `de: ""`, `confidence: "low"` on persistent failure — reuses the
+  self-learning loop rather than a new mechanism. Also: `report_node` now marks
+  `[low confidence]` on any verdict line where `confidence == "low"` (was previously invisible in
+  the finished report, only shown live at `await_clarification`).
+
 ## Phase 3 — workflow integration (PRD §5)
 
 Proves: the step machinery, flag, and UI behave — mostly `tests/test_glossary_integration.py`
