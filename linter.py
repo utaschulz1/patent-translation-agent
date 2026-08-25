@@ -28,7 +28,7 @@ Checks:
   preposition_contraction             — German im/vom/am/beim/zum/zur contractions in target
   betraegt_stative                    — "beträgt/betragen/liegt/liegen" in target flagged; use "ist/sind" instead
   same_selbe                          — "dieselbe*/derselbe*/dasselbe*/demselbe*/denselbe*/desselbe*" in target when source has "same"
-  same_gleich_missing                 — "gleich*" absent from target when source has "same"
+  same_gleich_missing                 — "gleich*" absent from target when source has "a same"
   comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
   step_schritt                        — "step*" count in source must match "Schritt*" count in target
   vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
@@ -142,6 +142,7 @@ _SCHRITT_ZUM_RE         = re.compile(r"\bSchritt\w*\s+zum\s+[A-Z]\w+en\b")
 _MINDESTENS_TGT_RE      = re.compile(r"\bmindestens\b", re.IGNORECASE)
 _AT_LEAST_SRC_RE        = re.compile(r"\bat least\b", re.IGNORECASE)
 _SAME_SRC_RE        = re.compile(r"\bsame\b", re.IGNORECASE)
+_A_SAME_SRC_RE       = re.compile(r"\ba same\b", re.IGNORECASE)
 _SELBE_TGT_RE       = re.compile(r"\b(die|der|das|dem|den|des)selb\w*\b", re.IGNORECASE)
 _GLEICH_TGT_RE      = re.compile(r"\bgleich\w*\b", re.IGNORECASE)
 _NUM_SPLIT_RE       = re.compile(r"[.,]")   # strip decimal/thousand separators before digit extraction
@@ -481,16 +482,16 @@ def same_selbe(source: str, target: str) -> str | None:
         return None
     m = _SELBE_TGT_RE.search(target)
     if m:
-        return f'error: "{m.group()}" in target — same = gleiche, also check article'
+        return f'error: "{m.group()}" in target — doublecheck selbe/gleiche'
     return None
 
 
 def same_gleich_missing(source: str, target: str) -> str | None:
-    """Flag when source contains 'same' but target contains no 'gleich*'."""
-    if not _SAME_SRC_RE.search(source):
+    """Flag when source contains 'a same' but target contains no 'gleich*'."""
+    if not _A_SAME_SRC_RE.search(source):
         return None
     if not _GLEICH_TGT_RE.search(target):
-        return 'error: source: "same", target: "gleich" missing'
+        return 'error: source: "a same", target: "gleich" missing'
     return None
 
 
