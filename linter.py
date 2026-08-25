@@ -1,6 +1,6 @@
 """
 TODO: add check for "sowohl ... als auch" in target, wenn there is no "both" in source; comment "translate 'and' with 'und'"
-add check for number of colons and semicolons matching between source and target
+add check for number of colons matching between source and target
 add check for finding "In einer Ausführung"/ "In Ausführungsformen" in target; comment "Bei einer Ausführungsform"/ "Bei Ausführungsformen" is preferred"
 linter.py — Segment-level lint checks on *_revised_translation_checks.xlsx.
 add check for ", was" in target when source does not contain "which" ; comment "Relativsatz nur mit 'was' einleiten, wenn 'which' in source, otherwise 'wobei'"
@@ -32,6 +32,11 @@ Checks:
   comprise_umfassen                   — "compris*" count in source must match "umfass*" count in target
   step_schritt                        — "step*" count in source must match "Schritt*" count in target
   vielzahl_plurality                  — "Vielzahl" count in target must match "plurality" count in source
+  semicolon_not_transferred           — ";" count in source exceeds ";" count in target
+  semicolon_added_in_target           — ";" count in target exceeds ";" count in source
+  and_not_transferred                 — "and" count in source exceeds "und" count in target
+  und_added_in_target                 — "und" count in target exceeds "and" count in source
+  sowie_and_mismatch                  — "sowie" in target while "and"/"und" counts differ; likely "sowie" used instead of "und"
   folgendes_umfasst                   — finite "umfasst:" before a list without "Folgendes" (→ "Folgendes umfasst:"); participial "umfassend:" is correct without "Folgendes"
   folgendes_konfiguriert              — "konfiguriert ist:" before a list without "zu Folgendem"
   dazu_konfiguriert                   — "dazu konfiguriert" found; standard is "konfiguriert" without "dazu", unless "zu Folgendem konfiguriert ist:" also occurs in the segment
@@ -99,6 +104,10 @@ _COMPRISE_SRC_RE    = re.compile(r"\bcompris\w*\b", re.IGNORECASE)
 _UMFASSEN_TGT_RE    = re.compile(r"\bumfass\w*\b", re.IGNORECASE)
 _STEP_SRC_RE        = re.compile(r"\bstep\w*\b", re.IGNORECASE)
 _SCHRITT_TGT_RE     = re.compile(r"\bSchritt\w*\b", re.IGNORECASE)
+_SEMICOLON_RE       = re.compile(r";")
+_AND_SRC_RE         = re.compile(r"\band\b", re.IGNORECASE)
+_UND_TGT_RE         = re.compile(r"\bund\b", re.IGNORECASE)
+_SOWIE_TGT_RE       = re.compile(r"\bsowie\b", re.IGNORECASE)
 _IN_RESPONSE_TO_RE  = re.compile(r"\bin response to\b", re.IGNORECASE)
 _IN_REAKTION_RE     = re.compile(r"\bin Reaktion\b", re.IGNORECASE)
 _RANGE_HYPHEN_RE    = re.compile(r"\d\s*-\s*\d")  # digit-hyphen-digit, with optional spaces
@@ -385,6 +394,61 @@ def step_schritt(source: str, target: str) -> str | None:
         return None
     src_info = f'only {src_count}x "step*"' if src_count > 0 else '"step*" not found'
     return f'error: {tgt_count}x "Schritt*" in target but {src_info} in source'
+
+
+def semicolon_not_transferred(source: str, target: str) -> str | None:
+    """Flag when ';' count in source exceeds ';' count in target."""
+    src_count = len(_SEMICOLON_RE.findall(source))
+    if src_count == 0:
+        return None
+    tgt_count = len(_SEMICOLON_RE.findall(target))
+    if tgt_count < src_count:
+        return f'error: {src_count}x ";" in source but only {tgt_count}x ";" in target'
+    return None
+
+
+def semicolon_added_in_target(source: str, target: str) -> str | None:
+    """Flag when ';' count in target exceeds ';' count in source."""
+    tgt_count = len(_SEMICOLON_RE.findall(target))
+    if tgt_count == 0:
+        return None
+    src_count = len(_SEMICOLON_RE.findall(source))
+    if src_count < tgt_count:
+        return f'error: {tgt_count}x ";" in target but only {src_count}x ";" in source'
+    return None
+
+
+def and_not_transferred(source: str, target: str) -> str | None:
+    """Flag when 'and' count in source exceeds 'und' count in target."""
+    src_count = len(_AND_SRC_RE.findall(source))
+    if src_count == 0:
+        return None
+    tgt_count = len(_UND_TGT_RE.findall(target))
+    if tgt_count < src_count:
+        return f'error: {src_count}x "and" in source but only {tgt_count}x "und" in target'
+    return None
+
+
+def und_added_in_target(source: str, target: str) -> str | None:
+    """Flag when 'und' count in target exceeds 'and' count in source."""
+    tgt_count = len(_UND_TGT_RE.findall(target))
+    if tgt_count == 0:
+        return None
+    src_count = len(_AND_SRC_RE.findall(source))
+    if src_count < tgt_count:
+        return f'error: {tgt_count}x "und" in target but only {src_count}x "and" in source'
+    return None
+
+
+def sowie_and_mismatch(source: str, target: str) -> str | None:
+    """Flag 'sowie' in target when 'and'/'und' counts differ — likely used in place of 'und'."""
+    if not _SOWIE_TGT_RE.search(target):
+        return None
+    src_count = len(_AND_SRC_RE.findall(source))
+    tgt_count = len(_UND_TGT_RE.findall(target))
+    if src_count == tgt_count:
+        return None
+    return f'error: {src_count}x "and" in source vs {tgt_count}x "und" in target — "sowie" in target: translate "and" as "und"'
 
 
 def werden_dynamic(_: str, target: str) -> str | None:
@@ -684,6 +748,11 @@ CHECKS = [
     comprise_umfassen,
     step_schritt,
     vielzahl_plurality,
+    semicolon_not_transferred,
+    semicolon_added_in_target,
+    and_not_transferred,
+    und_added_in_target,
+    sowie_and_mismatch,
     folgendes_umfasst,
     folgendes_konfiguriert,
     # dazu_konfiguriert disabled 2026-08-20: contradicted actual accepted usage —
