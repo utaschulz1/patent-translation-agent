@@ -183,15 +183,14 @@ Proves: the agent's judgment quality actually matches the manual skill on the po
 Phase 0-2 build was found to have flattened or missed (2026-08-24 HALA Swagger test), and that
 the new self-learning mechanism is real, not just plumbing that never gets exercised.
 
-- [ ] **C15 — classify-and-drop for widespread unattested rows** (`agent/test_glossary_lib.py` or
-  `tests/test_glossary_agent.py::TestC15`, synthetic fixture, deterministic — no LLM, no real
-  project needed): a row EN-and-DE-both-unattested within the benchmark range and present in
-  `standard_glossary.csv` → dropped, appears in the "WARNING: standard-glossary terms unattested"
-  report section; a row meeting the same trigger but absent from `standard_glossary.csv` → dropped,
-  appears in the separate, plain "unattested terms" informational section; a row EN-attested but
-  DE-unattested (C14 shape) → **not** touched by this check at all, routes to `audit_flagged`
-  instead (assert the two triggers stay disjoint); neither section ever reaches `audit_flagged`'s
-  input (mirrors the Triage-matrix assertion above, for this specific pre-filter).
+- [x] **C15 — classify-and-drop for widespread unattested rows** — landed:
+  `tests/test_glossary_agent_phase2.py::TestClassifyUnattested` (7 tests, pure-function evidence
+  level: standard drop, project drop, benchmark-scoped-not-whole-corpus, C14 stays disjoint and
+  untouched, lemma_sweep_gap entries never classified, case-insensitive lookup) +
+  `::TestTriageNodeC15` (3 tests, graph-level wiring: standard drop → real delete verdict +
+  `c15_standard_drop` origin, project drop → `c15_project_drop`, attested row stays clean) +
+  `TestReportAndBackfill::test_c15_drops_get_their_own_sections_not_audit_verdicts`. Outer
+  `70ef321`.
 - [ ] **Self-learning loop** (`tests/test_glossary_agent_learning.py`):
   - `await_clarification` batching: multiple `confidence: "low"` verdicts from one
     `audit_flagged` pass produce exactly one interrupt, not one per row; payload includes

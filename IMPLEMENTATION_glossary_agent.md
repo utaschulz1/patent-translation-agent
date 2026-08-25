@@ -180,15 +180,20 @@ is the mechanism that decides whether quality compounds across runs at all, and 
 piece with no proven precedent anywhere in either agent (the review agent's own equivalent,
 `confirm_rule`, only got its first live validation on 2026-08-25 itself).
 
-- [ ] **2b.0 C15 — classify-and-drop for widespread unattested rows** (corrected PRD C15,
-      redesigned 2026-08-24, not yet built): deterministic pre-filter inside/just before
-      `triage_node`, no interrupt. Trigger: a row EN-and-DE-both-unattested within the benchmark
-      range (distinct from C14's DE-only-unattested, which stays a judgment call routed to
-      `audit_flagged`). For every triggered row, classify by presence in `standard_glossary.csv`
-      (the full client file, not the source-filtered `relevant_standard` subset): present → drop,
-      report in a `"WARNING: standard-glossary terms unattested"` section; absent → drop, report
-      in a separate, plain `"unattested terms"` informational section. Neither section reaches
-      `audit_flagged`.
+- [x] **2b.0 C15 — classify-and-drop for widespread unattested rows** (corrected PRD C15,
+      redesigned 2026-08-24) — submodule `b5dab1b` (`glossary_lib.csv_io.load_standard_glossary`),
+      outer `70ef321` (`evidence.classify_unattested`, `triage_node` wiring, `report_node`
+      sections, `confirm_scope`'s `drop_unattested` payload removed). Deterministic pre-filter
+      inside `triage_node`, no interrupt. Trigger: a row EN-and-DE-both-unattested **within the
+      benchmark range** (`en_benchmark`/`de_benchmark`, not whole-corpus — the corrected PRD's
+      explicit wording; distinct from C14's DE-only-unattested, untouched, still routed to
+      `audit_flagged`). Classified by presence in the full, unfiltered `standard_glossary.csv`:
+      present → drop with a real "delete" verdict (`origin: c15_standard_drop`), reported in a
+      `"WARNING: standard-glossary terms unattested"` section; absent → drop
+      (`c15_project_drop`), reported in a separate, plain `"unattested terms"` section. Neither
+      reaches `audit_flagged`. Real verdicts (not just removal from `flagged`) so
+      `apply_verdicts`' `extra_standard` fallback can't silently reinstate a dropped
+      standard-glossary term — same bug class as the 2026-08-24 `apply_verdicts` fix.
 - [ ] **2b.1 Self-learning loop** (corrected PRD §5.1–5.5) — do first:
   - [ ] New file `agent/_glossary_agent_learnings.md`, deliberately separate from
         `_styleguide.md` (styleguide = document-wide grammar house rules; this = generalized
