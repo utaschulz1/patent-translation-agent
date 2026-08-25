@@ -99,6 +99,33 @@ def reassemble_glossary(
     return buf.getvalue()
 
 
+def load_standard_glossary(agent_dir: Path) -> dict[str, str]:
+    """Read the FULL standard_glossary.csv, unfiltered by source relevance.
+
+    Distinct from llm_glossary_cleanup.load_cleanup_inputs's relevant_standard
+    (which is already filtered to terms attested somewhere in the project's
+    source text) — callers that need to classify a term as "is this a
+    standard-glossary term at all" (e.g. the C15 unattested-row classifier)
+    need the unfiltered file, not the per-project subset.
+
+    Returns:
+        {en_lower: de} — empty dict if the file is missing.
+    """
+    path = agent_dir / "standard_glossary.csv"
+    standard: dict[str, str] = {}
+    if not path.exists():
+        return standard
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            if len(row) >= 2:
+                en, de = row[0].strip(), row[1].strip()
+                if en and de:
+                    standard[en.lower()] = de
+    return standard
+
+
 def read_epo_title(glossary_path: Path) -> tuple[str, str]:
     """Read the EPO title from a glossary_<PID>.csv's labeled row.
 
