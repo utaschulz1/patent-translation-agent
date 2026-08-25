@@ -222,14 +222,27 @@ def fetch_xtrf_task_details(job_id: str) -> dict:
 # ── scorecard file discovery + writing ───────────────────────────────────────
 
 def find_scorecard(project_dir: Path) -> Path | None:
+    """Locate the project's scorecard. Prefers a match directly in project_dir
+    (deterministic) over one in a subfolder — rglob() order is filesystem-
+    dependent, not meaningful, so picking matches[0] blindly can silently
+    target the wrong file when e.g. a delivery/export subfolder (like a
+    "Proofread/" packaging folder some other part of the app writes) also
+    holds a copy. Confirmed live 2026-08-25: a subfolder copy was picked over
+    the top-level one this way, and a script overwrote the wrong file's
+    Part Two/Three."""
     matches = [
         p for p in project_dir.rglob("Translator Scorecard*.xlsx")
         if "pre-processing" not in p.parts
     ]
     if not matches:
         return None
+    top_level = [p for p in matches if p.parent == project_dir]
+    if top_level:
+        if len(matches) > len(top_level):
+            print(f"  NOTE: scorecard also found in a subfolder, using the top-level one: {matches}")
+        return top_level[0]
     if len(matches) > 1:
-        print(f"  WARNING: multiple scorecard files found, using {matches[0]}: {matches}")
+        print(f"  WARNING: multiple scorecard files found in subfolders, ambiguous — using {matches[0]}: {matches}")
     return matches[0]
 
 
