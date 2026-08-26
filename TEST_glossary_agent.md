@@ -327,6 +327,28 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   self-learning loop actually works cross-run, not just that it's wired. Tests: `TestTriageNodeC15`
   +2, `TestLearningsInAuditPrompt` +1 (`_audit_batch` actually forwards the field into the real
   JSON payload). Full outer (241 + 4 llm_live skips) + submodule (405) suites green.
+- [x] **Clean rows merged into the audit's scope — the triage split was never in the manual
+  skill** — architecture correction, 2026-08-26, user-specified (rejected a bespoke
+  compound-consistency check I proposed first): `flags: []` no longer means "never reaches
+  `audit_flagged`," only "nothing mechanically detected." Real numbers from the same thread: 57
+  draft rows, 38 originally flagged, 19 that would previously have skipped the LLM entirely.
+  Reasoning: any single hand-written deterministic check only covers the one pattern it was
+  written for; only the LLM, seeing the full picture, can catch what nobody's thought to hardcode
+  yet — matching how the manual skill always worked (one holistic read, no cost-driven skip).
+  **Batching problem this immediately raises, fixed in the same change**: merging clean into
+  flagged without more would silently reintroduce the same blind spot for any two related rows
+  landing in *different* `MAX_AUDIT_BATCH_TERMS` batches. New `full_glossary_context` in
+  `_audit_batch`'s payload — every current `draft_rows` entry (en/de only), sent in *every* batch
+  alongside `flagged_rows`; the model may emit a verdict for a context row too, but only on a
+  real, evidence-based inconsistency, never as a second batch to re-litigate. `_AUDIT_SYSTEM_PROMPT`
+  intro + rule 8 updated to explain the two-tier payload and name the shared-component pattern
+  explicitly (the `guard`/`guard actuator` case). No-op-amend guard's `original_de` baseline moved
+  from batch-only to full `draft_rows`, so a context-sourced amend gets the same "did this
+  actually change" check a same-batch amend already had. Tests: `full_glossary_context` payload
+  test; a no-op-amend test for a context-sourced (not-in-batch) amend; three pre-existing tests
+  updated for the new contract (clean rows now appear in `flagged` with `flags: []`, two
+  `NoOpAmendGuard` fixtures needed `draft_rows` to include the row under test). Full outer
+  (243 + 4 llm_live skips) + submodule (405) suites green.
 
 ## Phase 3 — workflow integration (PRD §5)
 

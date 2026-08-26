@@ -751,3 +751,49 @@ variant actually is — the *outcome* was fine (it landed on the internally-cons
 stated justification was inaccurate, suggesting the model sometimes asserts attestation without
 actually calling `check_entry` to verify it. Smaller and not obviously harmful yet; flagged for
 awareness, not addressed.
+
+**2026-08-26, later still — the `guard closing direction` finding turned into an actual
+architecture question: should clean rows even be hidden from the audit at all?** Discussing that
+"attested but factually shaky reasoning" note, the user asked directly whether a real fix needs a
+new deterministic compound-consistency check, or something broader. My first answer proposed a
+bespoke check (mirroring `bidirectional_index` but for the forward direction). **The user pushed
+back with two options and asked me to actually think about it**: either add one more narrow
+deterministic check (which only ever covers the one pattern it was written for — brittle, and
+nobody knows what a future patent will need checked that nobody's thought of yet), or stop hiding
+clean rows from the LLM at all, since only the LLM can catch a pattern nobody anticipated. On
+reflection this is right, and matches every other finding this session: the flagged/clean triage
+split was never part of the manual skill (it read every entry in one holistic pass) — it's a pure
+agent-only cost optimization, documented in `evidence.py`'s own docstring as "the expensive audit
+stage only ever sees rows this layer could not positively clear." That optimization is exactly
+what was hiding the cross-compound consistency problem from the one thing capable of catching it.
+
+**Implemented as specified — clean rows now go to the audit too, same verdict requirement as any
+flagged row:**
+- `triage_node`: after C15 processing, `flagged = flagged + clean` — `flags: []` no longer means
+  "skip," only "nothing was mechanically detected here." Real numbers, checked directly against
+  the FRKE_2604_P0334-3 thread: 57 draft rows, 38 originally flagged, only 1 genuine C15 drop this
+  run → 19 rows that would previously never have reached the LLM at all.
+- **The batching problem this immediately raises, addressed in the same change:** `MAX_AUDIT_BATCH_TERMS`
+  splits large row sets across multiple independent `_audit_batch` calls — simply merging clean
+  into flagged would silently reintroduce the exact same blind spot for any two related rows
+  (e.g. a bare term and a compound sharing it) that happen to land in *different* batches. Fixed
+  by adding `full_glossary_context` to `_audit_batch`'s payload: every row currently in
+  `draft_rows`, lightweight (en/de only), sent alongside `flagged_rows` in *every* batch —
+  `flagged_rows` is what that call must produce a verdict for, `full_glossary_context` is
+  everything else, for cross-checking. The model may emit a verdict for a `full_glossary_context`
+  row too, but only when it finds a real, evidence-based inconsistency — the prompt is explicit
+  that it's reference material, not a second batch to re-litigate from scratch.
+- `_AUDIT_SYSTEM_PROMPT`: intro rewritten to explain the two-tier payload; rule 8 gained an
+  explicit shared-component instruction (the `guard`/`guard actuator` shape) naming the actual
+  worked example; closing output-format instruction updated to allow (not require) a
+  `full_glossary_context`-sourced verdict.
+- **No-op-amend guard extended to match**: `original_de` (the guard's "did this actually change"
+  baseline) now built from the full `draft_rows`, not just the current batch — otherwise a
+  context-driven amend on a row outside the batch would silently bypass the exact same no-op check
+  a same-batch amend already gets.
+- Three pre-existing tests updated for the new contract (a "clean" row now correctly appears in
+  `flagged` with `flags: []` instead of being absent; two `NoOpAmendGuard` tests needed their
+  fixture's `draft_rows` to actually include the row under test, since the guard's baseline moved
+  from batch-only to full-draft-rows). New: a `full_glossary_context` payload test, and a
+  no-op-amend test specifically for a context-sourced (not-in-batch) amend. Full outer (243 + 4
+  llm_live skips) + submodule (405) suites green.
