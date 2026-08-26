@@ -616,35 +616,47 @@ def numeric_mismatch(source: str, target: str) -> str | None:
     return f'error: numeric mismatch — {"; ".join(parts)}'
 
 
-_ALNUM_LABEL_RE = re.compile(r"\b[A-Z]{1,3}(?:\d+(?:\.\d+)?|[a-zA-Z])\b")
+_ALNUM_LABEL_RE = re.compile(
+    r"\b[A-Z]{1,3}(?:\d+(?:\.\d+)?|[a-zA-Z])\b"  # letter-prefixed: I1, TSAm, GSX
+    r"|\b\d+[A-Za-z]\b"                          # digit-prefixed: 110A, 220b (reference numerals)
+)
 
 
 def _extract_alnum_labels(text: str) -> Counter:
-    """Return a Counter of alphanumeric identifier/acronym tokens (e.g. I1, TSAm, GSX)."""
+    """Return a Counter of alphanumeric identifier/acronym tokens (e.g. I1, TSAm, GSX, 110A)."""
     return Counter(_ALNUM_LABEL_RE.findall(text))
 
 
 def alphanumeric_label_mismatch(source: str, target: str) -> str | None:
-    """Flag when alphanumeric identifier/acronym labels (I1, TSY, GSAp…) present in
+    """Flag when alphanumeric identifier/acronym labels (I1, TSY, GSAp, 110A…) present in
     source are absent from target, or vice versa.
 
-    Catches two failure classes seen in practice on this project:
+    Catches three failure classes seen in practice on this project:
       • OCR/glyph-confusable character swaps — capital "I" rendered as lowercase "l"
         (I1 -> l1) — invisible to the eye in most UI fonts.
       • CAT-tool fuzzy-match/leverage propagation that carries a variable letter over
         from a different, similarly-worded segment without adapting it to the current
         segment's source (TSY -> TSX).
-    Both were invisible to Xbench's Alphanumeric Mismatch check because the source XLIFF
-    splits the letter from its digit/suffix across an inline tag boundary (subscript
+      • The same leverage-carryover failure on reference-numeral ranges, where the
+        variable letter trails the digits instead of leading them (110A -> 110C in a
+        "(110A-110N)" range).
+    All three were invisible to Xbench's Alphanumeric Mismatch check because the source
+    XLIFF splits the letter from its digit/suffix across an inline tag boundary (subscript
     formatting), so "I2" never exists as one string for Xbench to compare. This check
     runs on the plain-text *_checks.xlsx export instead, where tags are already stripped
     and the full token is one contiguous string.
 
-    Known false-positive source: a bare two-letter token that happens to spell a real
-    word capitalized at the start of a clause (e.g. German "In Kontakt bringen...") can
-    register as an added/missing label. Rare in practice (only affects single-letter
-    prefixes with no digit) — left as a manual-review flag rather than suppressed,
-    consistent with this linter's other heuristic checks.
+    Known false-positive sources:
+      • A bare two-letter token that happens to spell a real word capitalized at the
+        start of a clause (e.g. German "In Kontakt bringen...") can register as an
+        added/missing label. Rare in practice (only affects single-letter prefixes with
+        no digit).
+      • A digit directly followed by a unit or dimension letter with no space (e.g.
+        "10V", "3D") registers as a label too. Harmless unless that exact attached
+        form only appears on one side — units/dimension abbreviations are normally
+        carried over unchanged into German, so in practice both sides match.
+    Left as a manual-review flag rather than suppressed, consistent with this linter's
+    other heuristic checks.
     """
     src_c = _extract_alnum_labels(source)
     tgt_c = _extract_alnum_labels(target)

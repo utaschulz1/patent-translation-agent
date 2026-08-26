@@ -39,6 +39,7 @@ from linter import (
     unter_verwendung,
     schritt_zum,
     mindestens_at_least,
+    alphanumeric_label_mismatch,
 )
 
 NBSP = " "  # non-breaking space (Alt+0160)
@@ -1076,3 +1077,44 @@ class TestNumericMismatch:
 
     def test_repeated_number_mismatch(self):
         assert numeric_mismatch("10 to 10 mm", "10 bis 20 mm") is not None
+
+
+# ── alphanumeric_label_mismatch ──────────────────────────────────────────────
+
+class TestAlphanumericLabelMismatch:
+    def test_matching_letter_prefixed_labels(self):
+        assert alphanumeric_label_mismatch("sensor I1 detects TSAm", "Sensor I1 erfasst TSAm") is None
+
+    def test_ocr_glyph_swap_flagged(self):
+        # capital "I" rendered as lowercase "l" (I1 -> l1)
+        assert alphanumeric_label_mismatch("sensor I1 detects", "Sensor l1 erfasst") is not None
+
+    def test_leverage_carryover_letter_prefixed_flagged(self):
+        # variable letter carried over from a different segment (TSY -> TSX)
+        assert alphanumeric_label_mismatch("value TSY is read", "Wert TSX wird gelesen") is not None
+
+    def test_matching_reference_numeral_range(self):
+        assert alphanumeric_label_mismatch(
+            "Reference numerals (110A-110N) are used",
+            "Bezugszeichen (110A-110N) werden verwendet",
+        ) is None
+
+    def test_reference_numeral_letter_mismatch_flagged(self):
+        result = alphanumeric_label_mismatch(
+            "Reference numerals (110A-110N) are used",
+            "Bezugszeichen (110C-110N) werden verwendet",
+        )
+        assert result is not None
+        assert "110A" in result
+        assert "110C" in result
+
+    def test_reference_numeral_missing_from_target(self):
+        assert alphanumeric_label_mismatch("element 100a connects to 100b", "Element 100a verbindet sich") is not None
+
+    def test_no_labels_not_flagged(self):
+        assert alphanumeric_label_mismatch("the device comprises a sensor", "die Vorrichtung umfasst einen Sensor") is None
+
+    def test_message_content(self):
+        result = alphanumeric_label_mismatch("label I1 present", "Label present")
+        assert result is not None
+        assert "missing" in result
