@@ -53,7 +53,7 @@ from glossary_lib.classify import (  # noqa: F401
     classify_nouns,
     classify_pairs,
 )
-from glossary_lib.csv_io import read_epo_title, write_clean_glossary
+from glossary_lib.csv_io import filter_relevant_standard, read_epo_title, write_clean_glossary
 from glossary_lib.validate import _norm_en, parse_response, validate_result  # noqa: F401
 
 HERE = Path(__file__).parent
@@ -380,7 +380,7 @@ def load_cleanup_inputs(proj_dir: Path, project_id: str) -> CleanupInputs:
         _data  = _raw.iloc[3:].reset_index(drop=True)
         _data.columns = ["ID", "Source", "Target"] + list(_data.columns[3:])
         source_text       = " ".join(_data["Source"].dropna().astype(str).tolist()).lower()
-        relevant_standard = {en: de for en, de in standard.items() if _appears_in(en, source_text)}
+        relevant_standard = filter_relevant_standard(standard, source_text)
         print(f"  → {len(relevant_standard)}/{len(standard)} standard terms present in source text.")
     else:
         relevant_standard = dict(standard)

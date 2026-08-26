@@ -126,6 +126,19 @@ def load_standard_glossary(agent_dir: Path) -> dict[str, str]:
     return standard
 
 
+def filter_relevant_standard(standard: dict[str, str], source_text: str) -> dict[str, str]:
+    """Filter a full standard-glossary dict (as returned by load_standard_glossary)
+    down to only the terms attested in source_text (already lowercased).
+
+    Shared by llm_glossary_cleanup.py and llm_glossary_revise.py so the
+    attestation-filter semantics — including inflection tolerance — live in
+    exactly one place instead of being forked per call site.
+    """
+    from glossary_lib.attestation import _appears_in
+
+    return {en: de for en, de in standard.items() if _appears_in(en, source_text)}
+
+
 def read_epo_title(glossary_path: Path) -> tuple[str, str]:
     """Read the EPO title from a glossary_<PID>.csv's labeled row.
 
