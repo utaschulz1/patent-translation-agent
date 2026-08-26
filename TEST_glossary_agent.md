@@ -350,6 +350,19 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   `NoOpAmendGuard` fixtures needed `draft_rows` to include the row under test). Full outer
   (243 + 4 llm_live skips) + submodule (405) suites green.
 
+**First clean real-project live validation, SNSW_2608_P0018 (2026-08-26) — not a mocked test,
+recorded here as evidence, not as a formal regression entry yet.** Real project with a manual
+skill-audit baseline (user ran the skill first, found a real `glossary_lib/matching.py` masking
+bug, documented in SKILL.md Step 4 + hand-added a general rule to `_glossary_agent_learnings.md`).
+Live-confirmed, spot-checked against the real segments and the raw `GET /state` dump: the
+`full_glossary_context` cross-check caught `signal→Signale` independently in two batches; the
+general (non-per-term) learnings-doc rule applied correctly 3×; `lemma_attested` cited by name in
+the audit's own reasoning for multiple verbs; zero verbs wrongly C15-dropped; one suspicious-looking
+verdict (`couple→befestigen`) verified correct against the real text. **Open: whether to formalize
+this into `test_glossary_regression.py`'s historical table** (5th/6th project) — would need a full
+row-by-row check against the user's manual-audit baseline, not just the spot-checks done live this
+session.
+
 ## Phase 3 — workflow integration (PRD §5)
 
 Proves: the step machinery, flag, and UI behave — mostly `tests/test_glossary_integration.py`

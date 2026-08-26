@@ -797,3 +797,37 @@ flagged row:**
   from batch-only to full-draft-rows). New: a `full_glossary_context` payload test, and a
   no-op-amend test specifically for a context-sourced (not-in-batch) amend. Full outer (243 + 4
   llm_live skips) + submodule (405) suites green.
+
+**2026-08-26, later still — first clean live run on a real (non-practice) project, SNSW_2608_P0018.
+No bugs found this time.** The user had run the *manual* skill on this project first — found a real
+production bug in `glossary_lib/matching.py`'s masking mechanics (exact-string, no-stemming
+cross-entry checks mis-firing on singular/plural mismatches: `signal,Signal` vs. a compound storing
+`Signale`; `processor`/`processors` as two separate entries double-counting the same occurrences),
+documented it in SKILL.md Step 4, and hand-added a general (non-per-term) "store noun entries in
+singular" rule directly to `_glossary_agent_learnings.md` (not through `confirm_glossary_rule` —
+this is checker-mechanics guidance, not a per-term translation choice). Running the agent
+afterward, live, confirmed every fix from this session holding up on genuinely new data:
+
+- `full_glossary_context` cross-checking caught the `signal→Signale` mismatch **independently in
+  two different batches**, both converging on the same correction — direct proof the
+  clean-rows-merge + cross-batch-context fix works as designed, not just in the FRKE test case it
+  was built against.
+- The general learnings-doc rule was applied correctly three times (two redundant-plural-entry
+  deletions, one amend) — confirms the learnings doc's priority-tier design handles general
+  checker-mechanics guidance exactly like a narrow per-term rule, no special-casing needed.
+- `evidence.lemma_attested` was cited **by name** in the audit's own reasoning for multiple verbs
+  (`perform`, `communicate`, `correspond`) — direct evidence the model is using the new evidence
+  field, not coincidentally landing on right answers. Zero verbs wrongly C15-dropped this run
+  (only one genuine drop, a noun).
+- One judgment call checked directly against the real segments on suspicion (`couple→befestigen`,
+  expected `koppeln`) turned out correct — the document's only two "couple" occurrences are both
+  a physical mount's fastening purpose, a different sense than the usual "communicatively coupled"
+  boilerplate, with no collision risk since no other sense of "couple" appears anywhere in the
+  document.
+
+**Open, not decided yet: should SNSW_2608_P0018 become a new historical regression fixture?** It's
+real client data with a known-good manual baseline (the user's own skill-audit) and at least one
+already-confirmed cross-checked finding (the `signal`/`Signale` fix). Formalizing it into
+`test_glossary_regression.py`'s table (matching how FRKE_2604_P0334 was formalized) would need the
+same rigor — checking the manual audit's actual final glossary row-by-row against what the agent
+produced, not just spot-checking a few rows the way this session's live review did. Not done.
