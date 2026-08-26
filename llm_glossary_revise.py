@@ -34,7 +34,8 @@
 #   load_prompt(proj_dir) -> (text, is_override)
 #   save_prompt_override(proj_dir, text)
 #   reset_prompt_override(proj_dir)
-#   revise_glossary(glossary_text, prompt_text, proj_dir, client, model) -> str
+#   revise_glossary(glossary_text, prompt_text, proj_dir, client, model,
+#                    project_id, session_id=None) -> (revised_text, warning)
 # ============================================================
 
 import csv
@@ -45,8 +46,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from glossary_lib.attestation import _appears_in, load_segments
-from glossary_lib.csv_io import load_standard_glossary, read_epo_title
+from glossary_lib.attestation import load_segments
+from glossary_lib.csv_io import filter_relevant_standard, load_standard_glossary, read_epo_title
 
 HERE = Path(__file__).parent
 DEFAULT_PROMPT_PATH = HERE / "glossary_revise_prompt.md"
@@ -132,8 +133,10 @@ def load_frequency_data(proj_dir: Path) -> tuple[list[dict], list[dict], list[di
 def _find_translated_xlsx(proj_dir: Path) -> Path | None:
     candidates = sorted(
         f for f in proj_dir.glob("*_translated.xlsx")
-        if not f.name.startswith("~$") and not f.name.endswith("_checks.xlsx")
+        if not f.name.startswith("~$")
     )
+    if len(candidates) > 1:
+        print(f"[glossary-revise] Multiple translated files found, using: {candidates[0]}", flush=True)
     return candidates[0] if candidates else None
 
 
@@ -157,7 +160,7 @@ def load_raw_context(proj_dir: Path, project_id: str) -> dict:
 
     standard = load_standard_glossary(HERE)
     source_text = " ".join(en for _, en, _ in segments).lower()
-    relevant_standard = {en: de for en, de in standard.items() if _appears_in(en, source_text)}
+    relevant_standard = filter_relevant_standard(standard, source_text)
 
     styleguide_text = STYLEGUIDE_PATH.read_text(encoding="utf-8") if STYLEGUIDE_PATH.exists() else ""
     learnings_text = LEARNINGS_PATH.read_text(encoding="utf-8") if LEARNINGS_PATH.exists() else ""
@@ -231,12 +234,14 @@ def revise_glossary(
     model: str,
     project_id: str,
     session_id: str | None = None,
-) -> str:
-    """Runs the grounded consolidation+audit review and returns the revised
-    glossary CSV text. Never writes to disk — the caller (the
-    /glossary/llm-revise endpoint) hands the result back to the frontend for
-    the user to review/edit/save, same as any other manual edit in this
-    step.
+) -> tuple[str, str | None]:
+    """Runs the grounded consolidation+audit review and returns
+    (revised_glossary_csv_text, warning). Never writes to disk — the caller
+    (the /glossary/llm-revise endpoint) hands the result back to the frontend
+    for the user to review/edit/save, same as any other manual edit in this
+    step. warning is None when nothing looked off; otherwise a
+    human-readable message the caller should surface to the user (e.g. a
+    suspiciously large row-count drop) rather than only logging server-side.
     """
     epo_row, main_rows, standard_rows = parse_clean_glossary(glossary_text)
     if epo_row:
@@ -244,6 +249,14 @@ def revise_glossary(
 
     verb_freq, noun_freq, cap_freq = load_frequency_data(proj_dir)
     raw_context = load_raw_context(proj_dir, project_id)
+    if not raw_context["segments"]:
+        raise ValueError(
+            "No *_translated.xlsx found for this project — the grounded review "
+            "cannot run without the segment corpus (rule 5's fabrication check "
+            "would treat every existing glossary entry as unattested and delete "
+            "it). Run translation first, or restore the translated file, then "
+            "retry."
+        )
 
     input_data = {
         "current_glossary": [{"en": en, "de": de} for en, de in main_rows],
@@ -269,10 +282,10 @@ def revise_glossary(
         )
         finish_reason = resp.choices[0].finish_reason
         content = (resp.choices[0].message.content or "").strip()
-        if finish_reason != "stop" and not content:
+        if finish_reason != "stop" and (not content or not _parse_json_array_lenient(content)):
             raise ValueError(
-                f"LLM response was truncated (finish_reason={finish_reason!r}) before any "
-                "content was produced — the glossary was left unchanged. Try again or reduce "
+                f"LLM response was truncated (finish_reason={finish_reason!r}) before a complete "
+                "response was produced — the glossary was left unchanged. Try again or reduce "
                 "the amount of context (a smaller benchmark range/segment corpus)."
             )
         return content
@@ -306,11 +319,12 @@ def revise_glossary(
             "— the glossary was left unchanged."
         )
 
+    warning = None
     if len(revised_rows) < len(main_rows) * 0.7:
-        print(
-            f"[glossary-revise] WARNING: revised list has {len(revised_rows)} rows, "
-            f"down from {len(main_rows)} — review carefully before saving.",
-            flush=True,
+        warning = (
+            f"Revised list has {len(revised_rows)} rows, down from {len(main_rows)} "
+            "— review carefully before saving."
         )
+        print(f"[glossary-revise] WARNING: {warning}", flush=True)
 
-    return reassemble_glossary(epo_row, revised_rows, standard_rows)
+    return reassemble_glossary(epo_row, revised_rows, standard_rows), warning

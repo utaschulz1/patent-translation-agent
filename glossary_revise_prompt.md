@@ -18,7 +18,7 @@ glossary. Two jobs, both yours in this one pass:
    an unattested or wrong value sitting in `current_glossary` is exactly
    what you're here to catch, not evidence that it was already checked.
 2. **Find what's missing.** An entry that should exist (a claims-attested
-   verb, a term the EPO title anchors, a concept split out by rule 2 below)
+   verb, a term the EPO title anchors, a concept split out by rule 9 below)
    but isn't in `current_glossary` at all must be added, not just corrected
    if present.
 

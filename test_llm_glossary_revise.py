@@ -28,6 +28,7 @@ sys.modules.setdefault("dotenv", MagicMock())
 os.environ.setdefault("OPENROUTER_API_KEY", "test-key")
 
 import llm_glossary_revise as rev
+from glossary_lib.attestation import _appears_in
 
 
 def _write_translated_xlsx(path: Path, rows: list[tuple[int, str, str]]) -> None:
@@ -46,6 +47,18 @@ def proj_dir(tmp_path) -> Path:
     return d
 
 
+@pytest.fixture
+def proj_dir_with_segments(proj_dir) -> Path:
+    """proj_dir with a minimal *_translated.xlsx already present. revise_glossary
+    requires at least one segment to run (see TestReviseGlossaryRequiresSegments)
+    — tests that only care about other behavior use this fixture so the
+    segments-required guard doesn't get in the way."""
+    _write_translated_xlsx(proj_dir / "Doc_translated.xlsx", [
+        (1, "the device comprises a widget", "die Vorrichtung umfasst ein Widget"),
+    ])
+    return proj_dir
+
+
 # ── _find_translated_xlsx ───────────────────────────────────────────────────
 
 class TestFindTranslatedXlsx:
@@ -53,9 +66,19 @@ class TestFindTranslatedXlsx:
         _write_translated_xlsx(proj_dir / "Doc_translated.xlsx", [(1, "a widget", "ein Widget")])
         assert rev._find_translated_xlsx(proj_dir) == proj_dir / "Doc_translated.xlsx"
 
-    def test_ignores_checks_file(self, proj_dir):
+    def test_checks_file_name_never_matches_the_glob(self, proj_dir):
+        # A "*_checks.xlsx" file (e.g. produced by glossary_compare_revised_
+        # translation.py) never ends in "_translated.xlsx", so it's already
+        # excluded by the glob pattern itself — no separate filter needed.
         _write_translated_xlsx(proj_dir / "Doc_translated_checks.xlsx", [(1, "a", "b")])
         assert rev._find_translated_xlsx(proj_dir) is None
+
+    def test_multiple_matches_picks_first_and_warns(self, proj_dir, capsys):
+        _write_translated_xlsx(proj_dir / "A_translated.xlsx", [(1, "a", "b")])
+        _write_translated_xlsx(proj_dir / "B_translated.xlsx", [(1, "c", "d")])
+        result = rev._find_translated_xlsx(proj_dir)
+        assert result == proj_dir / "A_translated.xlsx"
+        assert "Multiple translated files found" in capsys.readouterr().out
 
     def test_ignores_lock_file(self, proj_dir):
         (proj_dir / "~$Doc_translated.xlsx").write_bytes(b"")
@@ -127,7 +150,7 @@ class TestLoadRawContext:
         assert std.get("comprise") == "umfassen"
         # every returned term must genuinely be attested in that segment
         for row in ctx["standard_glossary"]:
-            assert rev._appears_in(row["en"], "the device comprises a widget")
+            assert _appears_in(row["en"], "the device comprises a widget")
 
     def test_standard_glossary_empty_when_nothing_attested(self, proj_dir):
         _write_translated_xlsx(proj_dir / "Doc_translated.xlsx", [
@@ -178,25 +201,59 @@ class TestReviseGlossaryContext:
         assert "styleguide_text" in payload
         assert "learnings_text" in payload
 
-    def test_model_and_project_id_threaded_through(self, proj_dir):
+    def test_model_and_project_id_threaded_through(self, proj_dir_with_segments):
         client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]))
-        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
+        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments, client,
                              "openai/gpt-5.6-luna", "TEST_0001")
         assert client.chat.completions.create.call_args.kwargs["model"] == "openai/gpt-5.6-luna"
 
-    def test_session_id_defaults_from_project_id(self, proj_dir):
+    def test_session_id_defaults_from_project_id(self, proj_dir_with_segments):
         client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]))
-        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
+        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments, client,
                              "openai/gpt-5.6-luna", "TEST_0001")
         extra_body = client.chat.completions.create.call_args.kwargs["extra_body"]
         assert extra_body == {"session_id": "TEST_0001_GlossaryLLM"}
 
-    def test_session_id_override(self, proj_dir):
+    def test_session_id_override(self, proj_dir_with_segments):
         client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]))
-        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
+        rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments, client,
                              "openai/gpt-5.6-luna", "TEST_0001", session_id="custom-session")
         extra_body = client.chat.completions.create.call_args.kwargs["extra_body"]
         assert extra_body == {"session_id": "custom-session"}
+
+
+class TestReviseGlossaryRequiresSegments:
+    """Rule 5 of the prompt tells the LLM every DE value must be attested in
+    `segments`, no exceptions. Without a *_translated.xlsx there are zero
+    segments, which would make rule 5 unsatisfiable for every existing row —
+    so revise_glossary must refuse to run rather than silently reviewing
+    ungrounded and risking a mass wipeout that only a print()ed warning would
+    catch (see TestReviseGlossaryWarning)."""
+
+    def test_raises_when_no_translated_xlsx(self, proj_dir):
+        client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]))
+        with pytest.raises(ValueError, match="segment corpus"):
+            rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
+                                 "openai/gpt-5.6-luna", "TEST_0001")
+        client.chat.completions.create.assert_not_called()
+
+
+class TestReviseGlossaryWarning:
+    """The <70%-of-original-row-count safety net must reach the caller as a
+    return value, not just a server-side print(), so the frontend can show it."""
+
+    def test_warning_none_when_row_count_stable(self, proj_dir_with_segments):
+        client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]))
+        _, warning = rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments,
+                                          client, "openai/gpt-5.6-luna", "TEST_0001")
+        assert warning is None
+
+    def test_warning_set_when_row_count_drops_sharply(self, proj_dir_with_segments):
+        glossary_text = "EN,DE\n" + "\n".join(f"term{i},Begriff{i}" for i in range(10))
+        client = _mock_client(json.dumps([{"en": "term0", "de": "Begriff0"}]))
+        _, warning = rev.revise_glossary(glossary_text, "{INPUT_JSON}", proj_dir_with_segments,
+                                          client, "openai/gpt-5.6-luna", "TEST_0001")
+        assert warning is not None and "down from 10" in warning
 
 
 class TestReviseGlossaryTruncationGuard:
@@ -204,23 +261,33 @@ class TestReviseGlossaryTruncationGuard:
     the token budget — the real bug hit live during the one-shot test, see
     memory) must raise a clear error, not silently proceed with garbage."""
 
-    def test_truncated_empty_response_raises(self, proj_dir):
+    def test_truncated_empty_response_raises(self, proj_dir_with_segments):
         client = _mock_client("", finish_reason="length")
         with pytest.raises(ValueError, match="truncated"):
-            rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
+            rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments, client,
                                  "openai/gpt-5.6-luna", "TEST_0001")
 
-    def test_normal_stop_with_content_proceeds(self, proj_dir):
+    def test_truncated_partial_content_raises(self, proj_dir_with_segments):
+        # The more common truncation shape: max_tokens cuts the response off
+        # mid-array, so content is non-empty but not valid/complete JSON.
+        # This must still raise the truncation-specific error, not fall
+        # through to the generic "could not be parsed" error.
+        client = _mock_client('[{"en": "widget", "de": "Wid', finish_reason="length")
+        with pytest.raises(ValueError, match="truncated"):
+            rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments, client,
+                                 "openai/gpt-5.6-luna", "TEST_0001")
+
+    def test_normal_stop_with_content_proceeds(self, proj_dir_with_segments):
         client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]), finish_reason="stop")
-        result = rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
-                                      "openai/gpt-5.6-luna", "TEST_0001")
+        result, _ = rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments,
+                                         client, "openai/gpt-5.6-luna", "TEST_0001")
         assert "widget,Widget" in result
 
-    def test_length_finish_reason_with_content_still_parses(self, proj_dir):
+    def test_length_finish_reason_with_content_still_parses(self, proj_dir_with_segments):
         # A response can hit the token cap after emitting complete, valid
-        # JSON (e.g. right at the boundary) — only empty content + non-stop
-        # is treated as the truncation failure.
+        # JSON (e.g. right at the boundary) — only a non-stop finish that
+        # fails to parse into a JSON array is treated as truncation.
         client = _mock_client(json.dumps([{"en": "widget", "de": "Widget"}]), finish_reason="length")
-        result = rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir, client,
-                                      "openai/gpt-5.6-luna", "TEST_0001")
+        result, _ = rev.revise_glossary("EN,DE\nwidget,Widget\n", "{INPUT_JSON}", proj_dir_with_segments,
+                                         client, "openai/gpt-5.6-luna", "TEST_0001")
         assert "widget,Widget" in result
