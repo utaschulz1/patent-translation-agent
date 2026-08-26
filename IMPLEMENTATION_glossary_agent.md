@@ -630,3 +630,44 @@ section. Tests: `tests/test_glossary_agent.py::TestGetFullState` (not-started, c
 a field `/status` never surfaces at all, paused exposing the raw interrupt payload) +
 `tests/test_glossary_agent_api.py::TestStatePassthrough`. Same gap likely exists on
 `/review-agent` — not fixed here, flagged for whenever that agent is next touched.
+
+**2026-08-25, later still — architecture correction: the report is not the end state.** After
+watching the live runs, the user pointed out a real design flaw in the original 2b.1 build (and in
+my own first proposal for post-report feedback, which I'd deliberately taken OUT of the graph as a
+stateless side mechanism): the run completing right after `report_node` means the model decides
+when learning happens (via its own confidence rating), when it should be the human's call. **The
+user's correction, implemented as specified:** `report` no longer routes straight to
+`write_glossary`. It now routes to a new `await_agreement` interrupt — the one interrupt in this
+graph explicitly designed to be re-entered any number of times, not fire-once. Resume with
+`{"decision": "agree"}` to actually finalize (only now does `write_glossary` run), or
+`{"decision": "feedback", "en", "de", "feedback"}` to comment on a specific row — routed to a new
+`handle_agreement_feedback` node (one LLM call: propose a corrected `de` or confirm the existing
+one after reconsidering, AND separately judge whether the feedback generalizes into a rule) — which
+then reuses `confirm_glossary_rule`/`append_to_learning_doc`/`apply_verdicts` **completely
+unchanged**, looping back through `report` to `await_agreement` again. Every round is a real
+verdict (`origin: "human_feedback"`), so `apply_verdicts`' existing merge-by-EN-key logic naturally
+makes the latest round win if the same term gets feedback twice — no new merge logic needed.
+
+One real bug I had to design around, not just implement: `append_to_learning_doc`'s existing
+"loop back to `audit_flagged` if `flagged` remains" check would misfire here — by the time a run
+reaches `report`, `state["flagged"]` still holds whatever the *original* audit batch left in it
+(nothing clears it after `audit_flagged` processes it; only the *mid-run* clarification path ever
+narrows it). `handle_agreement_feedback` explicitly sets `flagged: []` on every exit path, so this
+new loop can never accidentally re-trigger a wasteful full re-audit of the original batch.
+
+State: new `pending_report_feedback: dict | None` field. Graph: `report → await_agreement`
+(was → `write_glossary` directly); `await_agreement`/`handle_agreement_feedback` both dynamic
+(Command), no static edges, same pattern as every other interrupt/feedback node here.
+`get_status`/`api.py` extended for the new pause (`payload.agreement_question`) and resume shape
+(`ResumeBody.en/de/feedback`); the sub-app's top-level description rewritten since `"completed"`
+is now only reachable after an explicit agreement, not automatically.
+
+Five existing graph-flow tests needed a `{"decision": "agree"}` resume added before their
+`"completed"` assertion (they were asserting the old, now-wrong terminal behavior) — not
+regressions, just the test fixture catching up to the new contract. New:
+`TestAwaitAgreementDecisionLogic`, `TestHandleAgreementFeedback` (6 tests — real correction,
+model-confirms-existing-is-fine, rule-drafted routing, malformed-output/exception/BudgetExceeded
+all degrade or stop correctly, `flagged` always cleared), `TestAgreementLoopRoundTrip` (two
+feedback rounds — one plain, one that also learns a rule — then agree; asserts the CSV reflects
+the *latest* correction and the rule landed on disk). Full outer (230 + 4 llm_live skips) +
+submodule (405) suites green.

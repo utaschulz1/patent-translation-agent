@@ -277,6 +277,25 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   `/status` never surfaces, e.g. `draft_rows`; paused exposing the raw interrupt payload) +
   `tests/test_glossary_agent_api.py::TestStatePassthrough`. Same gap exists on `/review-agent` —
   not fixed, flagged for later.
+- [x] **`await_agreement` HITL gate — the report is not the end state** — architecture correction,
+  2026-08-25, user-specified (rejected an earlier out-of-graph proposal): `report` routes to a new
+  `await_agreement` interrupt instead of straight to `write_glossary`. Resume `{"decision":
+  "agree"}` to finalize, or `{"decision": "feedback", "en", "de", "feedback"}` to comment on a row
+  — routed to `handle_agreement_feedback` (one LLM call: propose a corrected `de` or confirm the
+  existing one, plus the same one-off-vs-generalizable rule judgment), reusing
+  `confirm_glossary_rule`/`append_to_learning_doc`/`apply_verdicts` unchanged, looping back through
+  `report` to `await_agreement` again — repeatable indefinitely, the only interrupt here designed
+  to fire more than once. `handle_agreement_feedback` always clears `flagged` on exit, since
+  `append_to_learning_doc`'s existing "loop back to `audit_flagged` if rows remain" check would
+  otherwise misfire against the *original* run's leftover flagged list (nothing else clears it).
+  Tests: `TestAwaitAgreementDecisionLogic`; `TestHandleAgreementFeedback` (6 — real correction,
+  model reconsiders and confirms existing value, rule-drafted routing, malformed output / LLM
+  exception both degrade to a `"keep"` verdict without crashing, `BudgetExceeded` stops the run
+  honestly, `flagged` always cleared); `TestAgreementLoopRoundTrip` (two feedback rounds — one
+  plain, one that also confirms a rule — then agree; asserts the final CSV has the *latest*
+  correction and the rule is on disk). Five pre-existing graph-flow tests updated to resume with
+  `{"decision": "agree"}` before asserting `"completed"` (the old, now-wrong direct-completion
+  contract, not a regression). Not yet done: an `@llm_live` version of the round-trip.
 
 ## Phase 3 — workflow integration (PRD §5)
 
