@@ -614,5 +614,19 @@ untested-live behavior:
    through.
 7. **Tests**: `tests/test_glossary_agent_phase2.py::TestNoOpAmendGuard` (4 tests — retry-then-
    resolves, retry-exhausted-then-deleted, a genuine amend is never flagged, "keep" is never
-   flagged) and `TestReportAndBackfill::test_low_confidence_marker_shown_high_confidence_silent`.
-   Full outer (216 + 4 llm_live skips) + submodule (405) suites green throughout.
+   flagged) and `TestReportAndBackfill` (confidence shown on every verdict, not just low; C15/
+   report-only rows carry it too). Full outer (217+ llm_live skips) + submodule (405) suites
+   green throughout.
+
+**2026-08-25, later still — `GET /state` added, a real gap the user caught.** Watching the live
+runs above, the user asked directly whether there's an endpoint for the checkpoint thread itself —
+there wasn't (checked: the review agent has the identical gap). `/status` is deliberately curated
+by `stop_reason` and shows an empty payload the entire time a run is `"in_progress"` — no way to
+actually watch verdicts accumulate, evidence get gathered, or the report build, while it's
+happening. New `graph.get_full_state(project_id)` returns the complete raw checkpoint
+(`values`/`next`/`interrupts`, unfiltered) regardless of stop_reason; `GET /projects/{id}/state`
+exposes it. Documented in the sub-app's top-level description under a new "Watching a run live"
+section. Tests: `tests/test_glossary_agent.py::TestGetFullState` (not-started, completed exposing
+a field `/status` never surfaces at all, paused exposing the raw interrupt payload) +
+`tests/test_glossary_agent_api.py::TestStatePassthrough`. Same gap likely exists on
+`/review-agent` — not fixed here, flagged for whenever that agent is next touched.

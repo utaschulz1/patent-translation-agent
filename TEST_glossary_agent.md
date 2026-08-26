@@ -269,6 +269,14 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   (unlike a human colleague) confidence has no other channel, so it should never be threshold-gated
   out of the output. `TestReportAndBackfill` covers both the always-shown behavior and C15/
   report-only rows carrying it too.
+- [x] **`GET /state` (raw checkpoint inspection)** — added 2026-08-25, user-requested: `/status`
+  shows an empty payload the entire time a run is `"in_progress"`, no way to actually watch it
+  work. `graph.get_full_state(project_id)` returns the complete, unfiltered checkpoint
+  (`values`/`next`/`interrupts`) regardless of stop_reason.
+  `tests/test_glossary_agent.py::TestGetFullState` (not-started; completed exposing a field
+  `/status` never surfaces, e.g. `draft_rows`; paused exposing the raw interrupt payload) +
+  `tests/test_glossary_agent_api.py::TestStatePassthrough`. Same gap exists on `/review-agent` —
+  not fixed, flagged for later.
 
 ## Phase 3 — workflow integration (PRD §5)
 
