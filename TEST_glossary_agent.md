@@ -263,9 +263,12 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   retry (naming the specific row, clarifying that a 0-attestation `check_entry` result on the
   model's OWN proposed correction is expected, not a reason to revert) before forcing
   `action: "delete"`, `de: ""`, `confidence: "low"` on persistent failure — reuses the
-  self-learning loop rather than a new mechanism. Also: `report_node` now marks
-  `[low confidence]` on any verdict line where `confidence == "low"` (was previously invisible in
-  the finished report, only shown live at `await_clarification`).
+  self-learning loop rather than a new mechanism. Also: `report_node` now shows
+  `(confidence: high|medium|low)` on **every** verdict line, not just "low" ones — corrected from
+  a first pass that only flagged "low" as noise-avoidance, per direct user feedback: with a model
+  (unlike a human colleague) confidence has no other channel, so it should never be threshold-gated
+  out of the output. `TestReportAndBackfill` covers both the always-shown behavior and C15/
+  report-only rows carrying it too.
 
 ## Phase 3 — workflow integration (PRD §5)
 

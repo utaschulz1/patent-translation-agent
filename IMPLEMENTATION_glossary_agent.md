@@ -600,14 +600,18 @@ untested-live behavior:
    mechanism: the row surfaces at `await_clarification` (if that hasn't already fired this run) or
    in the final report's `[low confidence]` marker (new — see below), and a human can override it
    with the real corrected value through the existing resolution path.
-6. **Confidence was invisible in the finished report — fixed alongside this.** The user asked
-   directly whether confidence is shown anywhere; it wasn't — only used internally for routing,
-   visible only in the live `await_clarification` pause payload. Matters especially for the
-   no-op-amend fallback: if it fires on a loop-back re-audit *after* `clarification_done` has
-   already latched True this run, that low-confidence verdict never gets a live pause of its own
-   and would otherwise ship into the final report with no visible marker. `report_node` now
-   appends `[low confidence]` to any verdict line where `confidence == "low"` (silent for
-   "medium"/"high" — not worth the noise).
+6. **Confidence was invisible in the finished report — fixed alongside this, then corrected again
+   per direct user feedback.** First pass: `report_node` appended `[low confidence]` only to
+   verdicts where `confidence == "low"`, silent for "medium"/"high" — reasoned as "not worth the
+   noise." **The user pushed back, and the pushback is right**: with a human colleague you can
+   perceive confidence through the interaction itself; with a model, the only way is to say it
+   explicitly, and every row in the glossary is a real judgment call, not just the ones that cross
+   an alarm threshold. Changed to show confidence on EVERY verdict line, unconditionally —
+   `(confidence: high|medium|low)` — across all sections: C15 drops, delete/amend/add, confirmed
+   kept, and report-only findings. This is a real design principle for this whole agent going
+   forward, not a one-off report tweak: don't design output as "surface it only past a threshold"
+   when the underlying thing (a model's own confidence) has no other channel a human can read it
+   through.
 7. **Tests**: `tests/test_glossary_agent_phase2.py::TestNoOpAmendGuard` (4 tests — retry-then-
    resolves, retry-exhausted-then-deleted, a genuine amend is never flagged, "keep" is never
    flagged) and `TestReportAndBackfill::test_low_confidence_marker_shown_high_confidence_silent`.
