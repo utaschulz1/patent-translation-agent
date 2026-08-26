@@ -312,6 +312,21 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   still use the plain literal check, since only C15 *deletes* outright and needs the stronger bar.
   Tests: `TestLemmaAttested` (5), `TestClassifyUnattested` +3, `TestTriageNodeC15` +1 (real shipped
   lemma tables, the exact `include`/`including` shape from the live incident).
+- [x] **`evidence.lemma_attested` surfaced to the audit LLM itself, not just C15's gate** —
+  live-caught 2026-08-26, same day as the C15 fix, re-running the same project: fixing C15 alone
+  let `comprise`/`configure`/`connect`/`associate` reach `audit_flagged`, but the audit then
+  deleted them anyway with "unattested" reasoning — confirmed all four genuinely attested via
+  inflection, the *exact same* evidence gap, just one level up (the audit's own `flagged_rows`
+  payload only ever carried the literal `attestation.en_benchmark`/`de_benchmark` counts).
+  `triage_node` now annotates every surviving flagged row with `evidence.lemma_attested` (same
+  `ev.lemma_attested` call, new call site); `_AUDIT_SYSTEM_PROMPT` rule 7 amended to name the
+  literal counts as literal-only and defer to `lemma_attested: true` when set. Also confirmed
+  live, real wins from the original C15 fix: the earlier `including → "unter Einschluss von"`
+  fabrication is gone (resolves correctly to `einschließlich` now), and the learned
+  `appendage → Glied` rule was applied automatically in this separate run — first live proof the
+  self-learning loop actually works cross-run, not just that it's wired. Tests: `TestTriageNodeC15`
+  +2, `TestLearningsInAuditPrompt` +1 (`_audit_batch` actually forwards the field into the real
+  JSON payload). Full outer (241 + 4 llm_live skips) + submodule (405) suites green.
 
 ## Phase 3 — workflow integration (PRD §5)
 

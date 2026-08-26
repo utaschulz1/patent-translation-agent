@@ -714,3 +714,40 @@ gained 3 (lemma rescue prevents deletion, rescue respects the benchmark range, o
 args preserves pre-fix behavior); `TestTriageNodeC15` gained one graph-level wiring test using the
 real shipped lemma tables with the exact `include`/`including` shape from the live incident.
 Full outer (239 + 4 llm_live skips) + submodule (405) suites green.
+
+**2026-08-26, later — the evidence gap C15's own fix left behind, live-caught the same day it was
+fixed.** Re-ran FRKE_2604_P0334 (project id `-3`) and reviewed the raw thread state again. Real
+wins confirmed live: `comprise`/`configure`/`connect`/`associate`/`have`/`include` all reached
+`audit_flagged` this time (C15 fix working); the earlier `including → "unter Einschluss von"`
+fabrication was GONE, resolved instead to the correct `einschließlich` — a side effect of `include`
+no longer being silently erased; and the learned rule (`appendage → Glied`) was applied
+automatically in this completely separate run, with the audit's own reasoning explicitly citing
+it — the first live, cross-run proof the self-learning loop actually works, not just that it's wired.
+
+But `comprise`, `configure`, `connect`, `associate` then got DELETED anyway — by the audit itself
+this time, with "the bare source term is unattested" reasoning. Confirmed directly against the
+source text: all four genuinely attested via inflected forms (`comprising`/`comprises`,
+`configured`, `connected`, `associated`). Root cause: the previous fix only made C15's own
+deterministic delete-gate lemma-aware — the evidence *payload the audit LLM itself sees*
+(`flagged_rows` in `_audit_batch`) still only carried the literal `attestation.en_benchmark`/
+`de_benchmark` counts. The model reasoned correctly from the same incomplete evidence that used to
+fool C15 — not badly, from bad input.
+
+**Fix: surface the same `lemma_attested` check to the LLM's own evidence, not just C15's gate.**
+`triage_node` now annotates every row that survives triage with `evidence.lemma_attested` (reusing
+`ev.lemma_attested` unchanged — same call, new call site) before it reaches `audit_flagged`.
+`_AUDIT_SYSTEM_PROMPT` rule 7 amended: literal `en_benchmark`/`de_benchmark` counts are explicitly
+named as literal-only and can show empty for a genuinely claims-attested verb whose stored key is
+the bare infinitive; `lemma_attested: true` settles the question regardless of what the literal
+counts show. Tests: `TestTriageNodeC15` +2 (the `connect`-class rescue now also carries
+`lemma_attested: true` into its evidence; a genuinely-unattested term still gets `lemma_attested:
+false` and is still correctly C15-dropped); `TestLearningsInAuditPrompt` +1 (`_audit_batch` forwards
+the field into the real JSON payload, not just that `triage_node` sets it). Full outer (241 + 4
+llm_live skips) + submodule (405) suites green.
+
+**Also worth a small, separate note (not fixed this session):** `guard closing direction`'s "keep"
+verdict this run claimed the stored value "is attested in the target text" when only a different
+variant actually is — the *outcome* was fine (it landed on the internally-consistent form), but the
+stated justification was inaccurate, suggesting the model sometimes asserts attestation without
+actually calling `check_entry` to verify it. Smaller and not obviously harmful yet; flagged for
+awareness, not addressed.
