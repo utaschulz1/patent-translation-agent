@@ -671,3 +671,46 @@ all degrade or stop correctly, `flagged` always cleared), `TestAgreementLoopRoun
 feedback rounds — one plain, one that also learns a rule — then agree; asserts the CSV reflects
 the *latest* correction and the rule landed on disk). Full outer (230 + 4 llm_live skips) +
 submodule (405) suites green.
+
+**2026-08-26 — C15 lemma-attestation fix, live-caught the same session it was found.** Reviewing
+the raw thread state (`GET /state`) from the FRKE_2604_P0334-2 live run, as the skill's own owner,
+found C15 had wrongly deleted six genuinely claims-attested verbs — `comprise`, `configure`,
+`connect`, `associate`, `have`, `include` — none of which literally match their bare-infinitive
+stored key in the source text; they only occur inflected (`comprising`, `configured`,
+`connected`, `associated`, `has`/`having`, `includes`/`including`). Confirmed by grepping the real
+source text directly: all six genuinely present. Directly violates `_AUDIT_SYSTEM_PROMPT` rule 7
+("claims-attested verbs are kept by default") — the rows never reached the audit LLM at all,
+because C15 deleted them first. Likely cascaded into a second, connected defect the audit produced
+in the same run: an `including → "unter Einschluss von"` amend, fabricated (confirmed:
+`"Einschluss"` appears nowhere in the target text; the real attested rendering is `einschließt`) —
+plausibly the model reasoning about a "bidirectional collision" with `include` that C15 had
+already silently erased.
+
+Root cause confirmed directly against the shipped tables: `EN_verb_lemma_lookup.json`/
+`DE_verb_lemma_lookup.json` already have every mapping needed (`has`/`having`→`have`, `includes`/
+`including`→`include`, etc.) — C15's trigger just never consulted them, relying only on
+`attest_rows`'s plain literal word-boundary matching (`en_benchmark`/`de_benchmark`), the exact
+verb-specific gap SKILL.md Step 2 warns about.
+
+**Fix, narrow and reuses existing infrastructure — does not touch `attest_rows`'s broader
+semantics** (C14 and other triage flags still depend on the literal check as-is; only C15's
+delete decision gets the stronger bar): new `glossary_agent/evidence.py::lemma_attested(en, de,
+segments, benchmark_range, lemma_tables)` reuses `glossary_lib.matching._count_lemmas` (the same
+counter the production checker and `ev.lemma_sweep` already use) over the benchmark text for both
+EN and DE. `classify_unattested` gained optional `segments`/`benchmark_range`/`lemma_tables`
+params (`None` skips the check, backward-compatible with existing callers/tests); before dropping
+a literally-unattested row, it now checks `lemma_attested` first — if the lemma genuinely occurs,
+the row routes to `still_flagged` (normal audit judgment) instead of being deleted outright.
+Reasoning for the asymmetry (C15 gets the stronger check, C14 doesn't): C15 deletes rows
+outright — the most destructive, least reversible action this pipeline takes on a row before a
+human sees it — so it should have to clear a higher bar than C14, which only ever routes to
+judgment, never deletes anything itself. `triage_node` now loads the full `(en_table, de_table)`
+tuple (previously only unpacked `en_table`) and passes `state["segments"]`/
+`state["benchmark_range"]` through.
+
+Tests: `TestLemmaAttested` (5 — EN-side rescue, DE-side rescue, genuinely-unattested still
+returns False, benchmark-range respected, term not in the lemma table at all); `TestClassifyUnattested`
+gained 3 (lemma rescue prevents deletion, rescue respects the benchmark range, omitting the new
+args preserves pre-fix behavior); `TestTriageNodeC15` gained one graph-level wiring test using the
+real shipped lemma tables with the exact `include`/`including` shape from the live incident.
+Full outer (239 + 4 llm_live skips) + submodule (405) suites green.

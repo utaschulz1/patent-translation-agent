@@ -296,6 +296,22 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   correction and the rule is on disk). Five pre-existing graph-flow tests updated to resume with
   `{"decision": "agree"}` before asserting `"completed"` (the old, now-wrong direct-completion
   contract, not a regression). Not yet done: an `@llm_live` version of the round-trip.
+- [x] **C15 lemma-attestation fix** — live-caught 2026-08-26 reviewing a real thread's raw state
+  (`GET /state`) from the FRKE_2604_P0334-2 run: C15 wrongly deleted six genuinely claims-attested
+  verbs (`comprise`, `configure`, `connect`, `associate`, `have`, `include`) whose bare-infinitive
+  stored key never literally matches their real inflected/irregular occurrences (`comprising`,
+  `configured`, `connected`, `associated`, `has`/`having`, `includes`/`including`) — confirmed
+  against the real source text directly. Violated the audit's own rule 7 ("claims-attested verbs
+  kept by default") since the rows were deleted before the audit ever saw them; plausibly caused a
+  second, connected defect the same run (a fabricated `including → "unter Einschluss von"` amend —
+  confirmed unattested anywhere in the target text). New `evidence.lemma_attested(en, de, segments,
+  benchmark_range, lemma_tables)` reuses the exact `_count_lemmas` counter the production checker
+  already uses; `classify_unattested` checks it before deleting a literally-unattested row —
+  genuinely lemma-attested rows route to normal audit judgment instead. Deliberately scoped to C15
+  only (optional args, `None` skips the check, backward-compatible) — C14 and the rest of `triage`
+  still use the plain literal check, since only C15 *deletes* outright and needs the stronger bar.
+  Tests: `TestLemmaAttested` (5), `TestClassifyUnattested` +3, `TestTriageNodeC15` +1 (real shipped
+  lemma tables, the exact `include`/`including` shape from the live incident).
 
 ## Phase 3 — workflow integration (PRD §5)
 
