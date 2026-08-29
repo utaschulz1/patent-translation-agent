@@ -337,7 +337,23 @@ def load_cleanup_inputs(proj_dir: Path, project_id: str) -> CleanupInputs:
     noun_can_path    = proj_dir / "noun_canonical_glossary.csv"
     noun_incon_path  = proj_dir / "noun_inconsistency_table.csv"
     cap_pairs_path   = proj_dir / "capability_segment_pairs.csv"
-    glossary_path       = proj_dir / f"glossary_{project_id}.csv"
+    # Folder-scoped, like every other input above — NOT tied to project_id
+    # (2026-08-29 fix): glossary_<PID>.csv is written once by the extraction
+    # pipeline against the document's own id. A rebuild/retry run started
+    # under a suffixed project_id (e.g. "HALA_2608_P0655-1", same folder)
+    # never gets its own copy of that file, so the old exact-match path
+    # silently missed it — read_epo_title() got called on a nonexistent
+    # file, returned ("", ""), and check_epo_title correctly (per its own
+    # "never invent" contract) reported a title that was actually right
+    # there in the folder as "missing". Exact match still wins when present
+    # (keeps clean_glossary_path's write-target semantics — that one DOES
+    # need to stay project_id-suffixed — untouched); only the read falls
+    # back to a folder-wide glob.
+    glossary_path = proj_dir / f"glossary_{project_id}.csv"
+    if not glossary_path.exists():
+        _glossary_candidates = sorted(proj_dir.glob("glossary_*.csv"))
+        if _glossary_candidates:
+            glossary_path = _glossary_candidates[0]
     clean_glossary_path = proj_dir / f"clean_glossary_{project_id}.csv"
 
     for p in [verb_pairs_path, verb_can_path, noun_can_path, noun_incon_path]:

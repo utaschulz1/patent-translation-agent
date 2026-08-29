@@ -221,3 +221,42 @@ class TestLoadCleanupInputs:
             "epo_title", "standard_glossary", "consistent_terms",
             "inconsistent_verbs", "inconsistent_nouns", "inconsistent_capabilities",
         }
+
+
+def _minimal_extraction_files(proj_dir):
+    for name in ("verb_segment_pairs.csv", "verb_canonical_glossary.csv",
+                 "noun_canonical_glossary.csv", "noun_inconsistency_table.csv"):
+        (proj_dir / name).write_text("a,b\n", encoding="utf-8")
+
+
+class TestLoadCleanupInputsGlossaryPathFallback:
+    """2026-08-29 fix: glossary_<PID>.csv is written once by the extraction
+    pipeline against the document's own id — a rebuild/retry run started
+    under a suffixed project_id (e.g. "BASEID-1", same folder) never gets
+    its own copy, so an exact-match-only lookup silently lost the EPO
+    title (read_epo_title got called on a nonexistent path, returned
+    ("", ""), and check_epo_title correctly reported a title that was
+    actually right there in the folder as "missing")."""
+
+    def test_glob_fallback_when_project_id_suffix_mismatches(self, tmp_path):
+        _minimal_extraction_files(tmp_path)
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("A TITLE", "EIN TITEL")
+
+    def test_exact_match_still_wins_over_glob(self, tmp_path):
+        _minimal_extraction_files(tmp_path)
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: WRONG","EPO DE: FALSCH"\n', encoding="utf-8")
+        (tmp_path / "glossary_BASEID-1.csv").write_text(
+            '"EPO EN: RIGHT","EPO DE: RICHTIG"\n', encoding="utf-8")
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("RIGHT", "RICHTIG")
+
+    def test_no_glossary_file_at_all_still_degrades_to_missing(self, tmp_path):
+        """No glossary_*.csv anywhere — must still degrade to ("", ""),
+        never raise, matching read_epo_title's own "never invent" contract."""
+        _minimal_extraction_files(tmp_path)
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("", "")
