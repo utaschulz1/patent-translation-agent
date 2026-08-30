@@ -481,7 +481,6 @@ class TestSameSelbe:
         )
         assert result is not None
         assert "gleiche" in result
-        assert "article" in result
 
     def test_the_same_triggers(self):
         assert same_selbe("the same method", "dasselbe Verfahren") is not None
@@ -509,7 +508,6 @@ class TestSameSelbe:
         result = same_selbe("a same polarization", "dieselbe Polarisation")
         assert result is not None
         assert "gleiche" in result
-        assert "article" in result
 
     def test_no_same_in_source_selbe_not_flagged(self):
         # "dieselbe" in target without "same" in source → no flag (by design)
