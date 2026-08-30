@@ -173,6 +173,44 @@ class TestCsvRoundTrip:
         assert csv_io.read_epo_title(tmp_path / "nope.csv") == ("", "")
 
 
+class TestResolveEpoTitle:
+    """2026-08-30: resolve_epo_title (glossary_lib.csv_io) is the shared
+    exact-match-plus-fallback lookup both llm_glossary_cleanup.py and
+    llm_glossary_revise.py now use — same helper, not two copies."""
+
+    def test_exact_match_wins(self, tmp_path):
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: RIGHT","EPO DE: RICHTIG"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID") == ("RIGHT", "RICHTIG")
+
+    def test_falls_back_when_exact_match_missing(self, tmp_path):
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID-1") == ("A TITLE", "EIN TITEL")
+
+    def test_falls_back_when_exact_match_exists_but_is_empty(self, tmp_path):
+        """The gap a plain .exists() check misses: a placeholder/empty file
+        at the exact suffixed path (e.g. left behind by an unrelated
+        script) must not shadow a real title sitting under another id in
+        the same folder."""
+        (tmp_path / "glossary_BASEID-1.csv").write_text("term,de\n", encoding="utf-8")
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID-1") == ("A TITLE", "EIN TITEL")
+
+    def test_skips_a_title_less_candidate_to_find_the_real_one(self, tmp_path):
+        """Every candidate is tried in turn, not just the alphabetically
+        first one — an empty file that happens to sort first must not
+        shadow a real title in a later-sorting file."""
+        (tmp_path / "glossary_AAA_empty.csv").write_text("term,de\n", encoding="utf-8")
+        (tmp_path / "glossary_ZZZ_real.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "NEITHER_OF_THESE") == ("A TITLE", "EIN TITEL")
+
+    def test_no_file_at_all_degrades_to_missing(self, tmp_path):
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID") == ("", "")
+
+
 # ── parse_json_lenient (new shared parser, PRD §8) ───────────────────────────
 
 class TestParseJsonLenient:
