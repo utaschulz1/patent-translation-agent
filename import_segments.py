@@ -122,15 +122,15 @@ def run(project_id: str) -> None:
             match_quality = "leveraged-tm"
             pretranslation = _plain_text(target_el) if target_el is not None else None
             status = "100%"
-        elif state_qualifier == "fuzzy-match":
-            match_quality = "fuzzy-match"
-            pretranslation = None
-            status = "PENDING"
         elif state in ("final", "signed-off"):
             match_quality = state
             pretranslation = None
             revision = _plain_text(target_el) if target_el is not None else None
             status = "CONFIRMED"
+        elif state_qualifier == "fuzzy-match":
+            match_quality = "fuzzy-match"
+            pretranslation = None
+            status = "PENDING"
         else:
             match_quality = state_qualifier or "mt-suggestion"
             pretranslation = None

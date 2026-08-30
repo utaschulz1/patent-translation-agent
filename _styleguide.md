@@ -111,8 +111,8 @@ When in doubt, prefer stative passive.
 | at the / in the / from the / to the | **bei dem / in dem / von dem / zu dem** | Avoid contracted forms: beim/im/vom/zum etc. — see §5.1 |
 | based on | **basierend auf** | |
 | be (is/are) expressing a value or state | **ist / sind** | NOT: "beträgt" — use "beträgt" only if it can be applied consistently throughout the entire patent (rarely possible) |
-| characterized in that | **dadurch gekennzeichnet, dass** | |
-| characterized by | **gekennzeichnet durch** | |
+| characterized in that | **dadurch gekennzeichnet, dass** (default) | Inspect the preceding and following claim segments before flagging an alternative as wrong — depending on the grammatical continuation and applicable national drafting convention, "charakterisiert durch" may also be acceptable; do not flag it as an error solely for not being a literal rendering. Preserve the country-specific punctuation convention, since the two constructions can require different punctuation. Example: "A device comprising …, characterized in that it comprises …" → "Vorrichtung, umfassend …, charakterisiert durch …" when this construction fits the surrounding claim segments. |
+| characterized by | **gekennzeichnet durch** (default) | Same caveat as "characterized in that" above — "charakterisiert durch" may already be the natural choice here; judge by surrounding context, not literalness. |
 | comprising | **umfassend** | see §2.2 |
 | comprise | **umfassen** | |
 | configured to | **konfiguriert ist, ... zu [Infinitiv]** (main clauses) | NOT: "so/dazu konfiguriert ist/sind, dass". "konfiguriert ist, um ... zu [Infinitiv]" or "dazu konfiguriert ist, (um) ... zu [Infinitiv]" is optional/either acceptable — but the construction must be used consistently across the patent. |
@@ -143,7 +143,7 @@ When in doubt, prefer stative passive.
 | provide | **bereitstellen** | |
 | respectively | **beziehungsweise** | NOT abbreviated as "bzw." |
 | said | **der / die / das** (definite article) | NOT: "besagte/r/s", "dieser/genannter" |
-| same (adjective, identical) | **gleiche/r/s** (check article) | NOT: "dieselbe/derselbe/dasselbe" — "dieselbe" implies identity of the exact same object, "gleiche" means of the same kind |
+| same (adjective) | **gleiche/r/s** (same kind/type) or **derselbe/dieselbe/dasselbe** (exact same object/component) | Determine intended meaning from technical context, not by default — "gleiche/r/s" (check article) means of the same kind/type (replaceable by "gleichartig"); "derselbe/dieselbe/dasselbe" means the exact same object. Example: "other subpixels electrically connected to the same data lines" → "andere Teilpixel, die elektrisch mit denselben Datenleitungen verbunden sind" (exact same lines), but "data lines of the same type" → "Datenleitungen der gleichen Art" (same type only). |
 | so that | **so dass** | NOT: "derart dass" |
 | state of the art | **Stand der Technik** | |
 | subject (medical/chemical context) | **Subjekt** | NOT: "Patient" |
