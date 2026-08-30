@@ -26,6 +26,17 @@ copy, never the real files.
 
 Run with:  pytest test_verb_lemma_sync.py -v -s
 (-s to see the sync_verb_lemma_tables() progress prints)
+
+Run this file ALONE, not combined with test_llm_glossary_cleanup.py in the
+same pytest process: that file installs a module-level MagicMock into
+sys.modules["openai"] (needed to import llm_glossary_cleanup without a real
+API key) which, if imported first, poisons the `openai` module for every
+other test file in the same process for the rest of the run — `OpenAI` here
+would silently become a mock class instead of the real SDK. real_client
+below detects this (isinstance(OpenAI, type) is False for a Mock attribute)
+and skips with an explicit message rather than failing confusingly deep
+inside a "real" LLM call. Confirmed pre-existing, not a regression: this
+happens on unchanged code whenever both files run in one pytest invocation.
 """
 import json
 import os
@@ -93,6 +104,17 @@ def tmp_real_lemma_tables(tmp_path):
 
 @pytest.fixture
 def real_client():
+    if not isinstance(OpenAI, type):
+        # A real `from openai import OpenAI` binds a class; another test
+        # file's sys.modules["openai"] = MagicMock() (see the module
+        # docstring) makes this a Mock instance instead, which would
+        # silently accept any call and fail later with a confusing error
+        # deep inside a "real" LLM round trip — skip explicitly instead.
+        pytest.skip(
+            "openai is mocked in this process (another test file replaced "
+            "sys.modules['openai'] before this one imported it) — run this "
+            "file alone: pytest test_verb_lemma_sync.py -v -s"
+        )
     api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not api_key:
         pytest.skip("OPENROUTER_API_KEY not set — skipping live LLM test")

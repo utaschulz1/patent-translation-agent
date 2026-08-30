@@ -299,3 +299,6 @@ Add to §4.1 or as a new subsection following §4.2: When “configured to:” i
 
 
 When a colon introduces a list, use the appropriate inflected form of “Folgend-” before the list, regardless of whether the list follows a finite verb or a participial/configuration construction, e.g. “Folgendes umfasst:”, “Folgendes umfassend:” or “zu Folgendem konfiguriert ist:”. Do not add “Folgend-” or a colon when the source has no colon. Example: EN “a method comprising: determining a value; and generating a signal” → DE “ein Verfahren, Folgendes umfassend: Bestimmen eines Werts; und Erzeugen eines Signals”.
+
+
+In a claim preamble, when “for” in the English source introduces a nominalized action, both “zur + noun” and “zum + nominalized verb” are acceptable conventional translations, despite the general preference for nominalized verbs and the prohibition on contractions before regular nouns. Example: EN “a device for data input” → DE “Vorrichtung zur Dateneingabe” or “Vorrichtung zum Eingeben von Daten”.

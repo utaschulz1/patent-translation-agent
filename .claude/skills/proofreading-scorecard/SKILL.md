@@ -91,13 +91,138 @@ python finalize_scorecard.py <project_dir> <path_to_json>
 
 Same as `scorecard-analysis`: if a diff's classification is genuinely ambiguous (vague, could be either category, or you can't tell if it's preferential vs. an actual error), say so to the user rather than guessing — a wrong Critical/Major call has real consequences for the translator's record.
 
-## Calibration example — a real correction (HALA_2608_P0659, 2026-08-25)
+## Calibration lessons (from real user corrections — HALA_2608_P0659, SNSW_2608_P0018)
 
-Severity/category judgment here resists being reduced to clean rules — the user reworked a first attempt at Part Two/Three by hand and called out several misses. These aren't rules to apply mechanically, but patterns to weigh next time:
+The user has twice hand-corrected Claude's Part Two/Three and asked Claude to learn from the differences. This is an ongoing, living calibration — more rounds will be added over time. Priority order, most important first:
 
-- **Terminology errors on claim-defining component names lean Major, not Minor.** Claude rated a wrong/inconsistent compound noun for a claimed component ("Datensignal-Signalleitungen" instead of the term used everywhere else, "Datensignaleingangsleitungen") as Minor because a reader could infer intent from context. The user corrected it to Major: wrong naming for a claimed component affects claim definiteness even when it's locally inferable.
-- **Classify what the diff is a symptom of, not just the visible delta.** Claude filed a recurring "an"→"auf" preposition swap as Terminology/register preference. The user's read: the real defect is modifier-attachment ambiguity — "von dem Substrat der aktiven Schicht abgewandten Seite" reads as if the *active layer* faces away from the substrate, when it's *the side* (of the active layer) that does. That's Accuracy, not word choice — and it was mis-set as Terminology throughout. Before categorizing a recurring pattern, ask what's grammatically/logically wrong, not just which two words swapped.
-- **A grammar-looking fix can flag a real mistranslation underneath.** "zweiten Drain" → "zweite Drain" looks like an adjective-ending slip (Fluency). The user identified it as a fuzzy-TM-match mixup that confused the Drain/Source referents in that claim — a real Accuracy risk, not cosmetic agreement. When a correction touches a component-reference word (Drain/Source/Gate/etc.), check whether the *referent* changed, not just the ending.
+- **Documented rule violations first.** A missing article, a misplaced reference number, an inconsistent component name — these are concrete, checkable, and what reviewers actually spend their time on. Lead with these before reaching for a subtler semantic/pragmatic argument.
+- **What reviewers are actually obsessed with** (use this to gauge what's worth a slot):
+  - **Word forms not matching the source's grammatical construction** — e.g. source uses an infinitive purpose-clause, translation uses a nominalization instead.
+  - **Added, omitted, or wrong articles.**
+  - **Numbers wrong or in the wrong place** — reference numerals must sit directly after the noun/part they refer to.
+  - **A claimed component/part translated inconsistently across the document** — the split that matters: if the inconsistent rendering makes the part **unrecognizable**, that's a **Mistranslation, Major/Critical**; if it's still recognizable as the same part (just an inconsistent term), that's a **Terminology inconsistency, Minor**.
+- **Omissions are Accuracy, not Fluency** — a dropped indefinite article, a missing word, anything that's technically an omission files under Accuracy per the category rubric's own definition ("omission" is explicitly listed there), even when it *reads* like a plain grammar slip.
+- **Word-form drift from the source's grammatical construction is an Accuracy question, not just style** — e.g. an English infinitive purpose-clause ("a mount **to couple** X to Y") rendered as a German nominalization ("eine Fassung **zur Befestigung**...") is "too far off the word form in the source" even when both are grammatical and mean the same thing. Don't wave this off as a preferential/consistency-only change per §9 without first asking whether it's actually a fidelity problem.
+- **When a diff bundles a structural rewrite with word substitutions, check the word substitutions for outright mistranslation first — the structure is rarely the real defect.** A dense rewrite that also happens to convert a "dass"-clause into the preferred nominalized-verb construction (§2.2/2.3) can be hiding an actual wrong-verb mistranslation inside it (e.g. "Durchführen" used where the source said "transmitting"/"Übertragen"). Classify what the diff is a symptom of, not its surface syntactic shape.
+- **A styleguide "wrong: X / correct: Y" table entry is not automatically slot-worthy.** Even a documented rule (missing "Folgendes" before a colon-introduced list; dass-clause vs. nominalized "umfassend") can lose out to real Accuracy findings when slots are scarce — the user has dropped both entirely in favor of Accuracy-caliber issues. Weigh documented style rules against what's actually consequential for this delivery; don't let them crowd out Accuracy findings.
+- **Reference-numeral placement is a real, slot-worthy Compliance issue** — a numeral displaced away from the noun it refers to (e.g. "...anzuzeigen (115)" instead of "...(115) anzuzeigen") deserves its own slot, not just a mention in General Comments.
+- **Bundle the long tail aggressively.** Small recurring grammar/word-choice issues (contracted prepositions, gender agreement, passive-voice agent prepositions, glossary word-choice, article-on-nominalization) should go into a single catch-all slot under one pragmatic category, even when they're technically different phenomena — this frees the remaining slots for Accuracy/Major-caliber findings. Don't split these across 2-3 slots just to keep categories taxonomically clean.
+- **Don't dwell on a subtle scope/timing/pragmatic nuance call that has no documented rule behind it.** ("sobald" vs. "während" for "as X is modified" — is that really a scope change, or just a nuance? Genuinely hard to say, and not worth spending time on either way.) These calls are inherently hard to weigh, right or wrong, and time is better spent on the documented-rule-violation categories above. If one surfaces, it's fine to mention it with appropriately low confidence rather than slotting it as a confident Major finding — see the Certainty rule.
 - **"At least one of X and Y" (Markush and Markush-like constructions) renders hyper-literally as "von dem A und dem B"** — even where a more natural alternative ("A oder B") would be legally/semantically fine and even EPO-acceptable. This client's reviewers apply a hyper-literal check; any addition or paraphrase that isn't strictly literal fails it regardless of whether it changes meaning. Related: [[feedback_patent_glossary_verb_and_category_rules]].
-- **When slots are scarce and there are several small, real, recurring issues, bundle them into one itemized slot rather than cherry-picking a single isolated instance.** Claude used a slot on one isolated grammar fix ("jeder eine"→"jede"). The user's replacement bundled six distinct recurring inconsistencies into one "Inconsistencies" list (Zeitintervalle/Zeitabschnitte, Signalanschlussgruppe/Signalzugangsanschlussgruppe, die/der Drain, jeweils/beziehungsweise, Randbereich/Randbereich der Region, the zweiten-Drain-vs-Source mixup) — more informative than one arbitrary single-instance pick.
-- **Pass/Fail is a qualitative call, not just the WWC-per-1000 arithmetic.** The Instructions sheet's numeric thresholds are explicitly guidelines — "the overall severity of the errors, their location, and the additional effort required during the CE step will also be considered." On this job the strict per-1000-WWC math stayed under the Fail line even after reclassifying one error to Major, but the user's verdict was Fail: "Because there where major errors and many smaller ones, this would have accumulated into a Fail." Don't default to Pass just because the arithmetic clears — weigh accumulated volume and CE effort the way a human copy editor would, and lean Fail when in doubt rather than Pass.
+- **Pass/Fail is a qualitative call, not just the WWC-per-1000 arithmetic.** The Instructions sheet's numeric thresholds are explicitly guidelines — "the overall severity of the errors, their location, and the additional effort required during the CE step will also be considered." On the HALA_2608_P0659 job the strict per-1000-WWC math stayed under the Fail line even after reclassifying one error to Major, but the user's verdict was Fail: "Because there where major errors and many smaller ones, this would have accumulated into a Fail." Don't default to Pass just because the arithmetic clears — weigh accumulated volume and CE effort the way a human copy editor would, and lean Fail when in doubt rather than Pass.
+
+### Worked example (SNSW_2608_P0018, 2026-08-26) — Claude's draft vs. the user's correction
+
+| # | Claude's draft (wrong) | User's correction (right) | Why |
+|---|---|---|---|
+| 1 | Claim 8, "sobald"→"während": **Major/Accuracy**, argued as a scope/timing change | **Dropped entirely** — does not appear anywhere in the corrected version | A genuinely close call ("as"="während", "as soon as"="sobald" — Claude's grammar was right) but whether it's actually a scope change is legitimately unclear, and this kind of nuance call isn't where reviewer time goes. Not a mistake to have noticed it — just not worth a confident Major slot or much time either way. Documented-rule violations (below) are the better use of the 5 slots |
+| 2 | Claims 11/13/14, dass-clause vs. required nominalized "umfassend" construction: **Major/Compliance** | Segment 34 specifically, "Durchführen" used for "transmitting" instead of "Übertragen": **Major/Accuracy** — "Mistranslation" | Claude classified the sentence's *restructuring* (which happens to match a styleguide-preferred pattern); the user ignored the structure entirely and found the actual wrong-verb error buried inside the same diff |
+| 3 | Claims 1/11, missing "Folgendes" before colon: **Minor/Compliance** | **Dropped entirely** | A documented styleguide rule, but not consequential enough to out-compete Accuracy findings for a scarce slot |
+| 4 | Claims 12/14, missing dative articles in Markush "eines von X": **Minor/Fluency** | Same segments: **Minor/Accuracy** — "5 indefinite articles omitted" | Omission is an Accuracy subtype per the category rubric, not a Fluency/grammar-completeness issue |
+| 5 | Claims 9/12, "das Empfangen"→"Empfangen": **Minor/Compliance** (one of two separate slots for recurring items) | One single slot bundling six unrelated recurring items (im→in dem, gender, von/durch, an/auf, darstellen/anzeigen, Empfang/Empfangen): **Minor/Terminology** | The long tail of small issues gets bundled into one slot regardless of how taxonomically different each item is, to keep slots free for higher-value findings |
+| — | Claim 7's "zur Befestigung" vs. "um...zu befestigen" word-form drift: found, but dismissed as preferential/consistency-only, not slotted | Given its own slot: **Minor/Accuracy** — "too far off the word form in the source" | See the word-form-drift lesson above |
+| — | Claim 7 reference-numeral placement fix: found, but left unslotted (mentioned only in General Comments) | Given its own slot: **Minor/Compliance** | A real, distinct defect class (numeral displaced from its noun) — don't downgrade it to a footnote just because it seems small |
+
+Net pattern: **3 of Claude's 5 original slots were dropped entirely**, replaced by two items Claude had found but declined to slot. Zero Compliance-only findings survived. Lesson: lead with documented-rule violations (missing articles, misplaced reference numbers, inconsistent component names, word-form drift from source) — they're what fill a scorecard's slots in practice. A semantic/scope nuance call with no rule behind it is fine to mention, but don't spend much effort on it or expect it to hold a slot against rule-clear findings.
+
+### Worked example (HALA_2608_P0659, 2026-08-25) — Claude's draft vs. the user's correction
+
+Reconstructed from the user's corrections at the time (exact original wording not preserved, but the categorization mismatch is):
+
+| # | Claude's draft (wrong) | User's correction (right) | Why |
+|---|---|---|---|
+| 1 | Not slotted / under-weighted | Claim 6, "at least one of the first portion and the second portion" mistranslated with an unsourced explanatory dash-clause and "oder" instead of "und": **Major/Accuracy** | The client's hyper-literal Markush rule ("at least one of X and Y" → "von dem A und dem B") wasn't applied |
+| 2 | Claim 9, "Datensignal-Signalleitungen" (wrong/redundant compound) inconsistent with the term used elsewhere: **Minor/Terminology** | Same finding: **Major/Terminology** | Wrong/inconsistent naming for a claim-defining component hurts claim definiteness even when a human reader can infer intent — don't under-rate just because it's inferable from context |
+| 3 | A recurring "an"→"auf" preposition swap: **Terminology/register** | Same finding, reframed: **Accuracy** — the real defect is modifier-attachment ambiguity (which noun "faces away from the substrate" attaches to) | Classify what the diff is a symptom of (an ambiguity that changes what's being claimed), not the surface word choice |
+| 4 | "zweiten Drain"→"zweite Drain": **Fluency** (adjective-ending slip) | Bundled into a "Inconsistencies" slot: **Minor/Terminology**, flagged internally as a fuzzy-TM-match mixup confusing the Drain/Source referents | A grammar-looking fix can be flagging a real mistranslation — check what got mixed up, not just what changed form |
+| 5 | One isolated grammar fix given its own slot | Six distinct recurring inconsistencies bundled into one "Inconsistencies" slot | Bundling beats cherry-picking a single instance when slots are scarce |
+
+### What good looks like — verbatim text from the user's finished cards
+
+The comparisons above are Claude's own paraphrase. The actual phrasing the user writes is terser and more clipped than Claude's default style — match this register, not a fuller explanatory prose style, when filling Part Two/Three.
+
+SNSW_2608_P0018, Part Two (5 slots, verbatim):
+
+```
+1. Segement 7: to couple => zur Befestigung instead of "um zu befestigen"
+   That is too far off the word form in the source.
+   Error: Minor | Categorization: Accuracy
+
+2. Seg. 10: Darstellungsvorrichtung anzuzeigen (115);
+   Reference number is not directly after the part.
+   Error: Minor | Categorization: Compliance
+
+3. Seg. 12/14: 5 indefinite articles omitted in the translation
+   Error: Minor | Categorization: Accuracy
+
+4. Recurrently:
+   - "im" instead of "in dem"
+   -  wrong gender
+   - by => von/durch
+   - an/auf der Darstellungsvorrichtung
+   - present => darstellen/anzeigen
+   - receiving => Empfang (wrong)/Empfangen (correct)
+   - added definite article for "receiving" where no addition would also work in German and no prior mention of this exact step can be found
+   Error: Minor | Categorization: Terminology
+
+5. segment 34: Mistranslation
+   and/or periodically transmitting the one or more signals => und/oder das regelmäßige Durchführen der Signale
+   Error: Major | Categorization: Accuracy
+```
+
+SNSW_2608_P0018, Part Three (verbatim):
+
+```
+Pass/Fail: Fail
+General Comments: Over all a good translation.
+   But because it is short, only the minors would probably have accumulated into a fail,
+   and then there is still the major from segment 34.
+```
+
+HALA_2608_P0659, Part Two (5 slots, verbatim):
+
+```
+1. Claim 6: "...electrically connected to at least one of the first portion (141) and the second
+   portion (142)" — mistranslated as "mindestens einem der beiden Abschnitte – dem ersten
+   Abschnitt (141) oder dem zweiten Abschnitt (142) –"
+   Wrong: added "beiden, Abschnitt" and "oder" instead of "und", plus an unsourced explanatory
+   dash-clause; missed the Markush-like 'at least one of X and Y' construction.
+   Error: Major | Categorization: Accuracy
+
+2. Claim 7 (id 77): "the first sub-layer ... are in the same layer as the source" —
+   'Teilschicht' (sub-layer) mistranslated as the non-existent/wrong word 'Teilsicht' (partial
+   view), repeated 4x for all five sub-layer instances in the same segment, and also as "Schicht".
+   Error: Major | Categorization: Terminology
+
+3. Claim 9 (id 88): "the first data signal input lines ... are in the same layer as the gate" —
+   'Datensignal-Signalleitungen' (wrong/redundant compound) corrected to the term used
+   consistently elsewhere in the claim, 'Datensignaleingangsleitungen'.
+   Error: Major | Categorization: Terminology
+
+4. Inconsistencies:
+   - Zeitintervalle/Zeitabschnitte
+   - Signalanschlussgruppe/Signalzugangsanschlussgruppe
+   - die Drain/der Drain
+   - jeweils/beziehungsweise (introduced ambiguitiy where there was none in the source)
+   - in dem Randbereich/in dem Randbereich der Region
+   - "zweiten" modifying "Drain" instead of "Source" => Mistranslation (mixed up fuzzy match)
+   Error: Minor | Categorization: Terminology
+
+5. Recurring throughout the claims:
+   "at a side, away from the substrate (01; 10), of the active layer" or similar
+   Wrong: "auf einer von dem Substrat der aktiven Schicht abgewandten Seite"
+   meaning: the side of the active layer that faces away from substrate,
+   not the substrate is possesive of the acitve layer, but the side is
+   Correct: auf einer von dem Substrat abgewandten Seite der aktiven Schicht
+   Error: Minor | Categorization: Accuracy
+```
+
+HALA_2608_P0659, Part Three (verbatim):
+
+```
+Pass/Fail: Fail
+General Comments: Because there where major errors and many smaler ones, this would have
+   accululated into a Fail.
+```
+
+Note the register in both: short, telegraphic, `source phrase => wrong translation` or `Wrong: X / Correct: Y` shorthand, no hedging, General Comments is 1-2 sentences that just states the volume/severity logic behind Pass/Fail — not a recap of every slot.

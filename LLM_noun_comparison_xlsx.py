@@ -141,7 +141,12 @@ def build_batch_prompt(segments):
         "and their German translation equivalents in the DE text.\n\n"
         "Extraction rules:\n"
         "  - Extract every noun phrase: technical terms, device names, method names, "
-        "component names, parameter names, and general structural terms (e.g. 'method', 'device', 'system').\n"
+        "component names, parameter names, and general structural terms (e.g. 'method', 'device', 'system'). "
+        "This also includes temporal, quantity, and measurement phrases (e.g. 'time period', "
+        "'predetermined value', 'threshold value', 'first side') — do not skip a phrase just because "
+        "it reads as ordinary English rather than domain jargon. The test is never how technical it "
+        "sounds: it's whether the SAME phrase recurs across segments and its German rendering could "
+        "plausibly vary.\n"
         "  - Always take the LONGEST enclosing phrase per concept. "
         "If the text contains 'grain drying device', extract 'grain drying device', not 'device'.\n"
         "  - Do NOT list sub-phrases of a phrase you already extracted "
@@ -230,7 +235,13 @@ for batch_num, batch in enumerate(batches, 1):
     try:
         response = client.chat.completions.create(
             model=MODEL,
-            max_tokens=2048,
+            # 2048 -> 4096 (2026-08-30): the widened extraction rule below
+            # (temporal/quantity/measurement phrases now count too) grows
+            # how many pairs a BATCH_SIZE=10 batch is expected to return;
+            # a truncated response here silently drops the whole batch's
+            # pairs (see the JSONDecodeError handling below), so the
+            # extraction net getting wider raises the truncation stakes.
+            max_tokens=4096,
             temperature=0,
             messages=[{"role": "user", "content": prompt}],
         )

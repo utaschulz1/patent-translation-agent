@@ -26,6 +26,7 @@ import csv
 import re
 import shutil
 import sys
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -113,9 +114,40 @@ def diff_rich_text(old: str, new: str) -> CellRichText:
         elif tag == "insert":
             parts.append(TextBlock(FONT_INS, "".join(new_tok[j1:j2])))
         elif tag == "replace":
-            parts.append(TextBlock(FONT_DEL, "".join(old_tok[i1:i2])))
+            parts.append(TextBlock(FONT_DEL, "".join(old_tok[i1:i2]) + " "))
             parts.append(TextBlock(FONT_INS, "".join(new_tok[j1:j2])))
-    return CellRichText(*parts)
+
+    # Excel requires xml:space="preserve" on any <t> whose text is pure
+    # whitespace, but openpyxl only adds it based on leading/trailing space of
+    # non-empty text — a run that is *entirely* whitespace (e.g. a lone
+    # equal-token space between two adjacent replace/delete/insert hunks)
+    # gets written without it, which is invalid and triggers Excel's repair
+    # dialog on open (confirmed via raw XML: <r><t> </t></r>, no preserve
+    # attribute). Fold any whitespace-only fragment into its neighbor so no
+    # run is ever pure whitespace.
+    merged: list = []
+    pending = ""
+    for p in parts:
+        if isinstance(p, str) and p != "" and p.isspace():
+            if merged:
+                prev = merged[-1]
+                if isinstance(prev, TextBlock):
+                    merged[-1] = TextBlock(prev.font, prev.text + p)
+                else:
+                    merged[-1] = prev + p
+            else:
+                pending += p  # no prior run yet — carry forward onto the next one
+            continue
+        if pending:
+            if isinstance(p, TextBlock):
+                p = TextBlock(p.font, pending + p.text)
+            else:
+                p = pending + p
+            pending = ""
+        merged.append(p)
+    if pending:  # the whole cell's diff was pure whitespace (shouldn't happen, but be safe)
+        merged.append(pending)
+    return CellRichText(*merged)
 
 
 def diff_plain_text(old: str, new: str) -> str:
@@ -302,6 +334,39 @@ def fill_task_details(wb: openpyxl.Workbook, values: dict) -> None:
     for key, cell in TASK_DETAIL_CELLS.items():
         if key in values:
             ws[cell] = values[key]
+
+
+def restore_original_drawings(saved_path: Path) -> None:
+    """Openpyxl doesn't round-trip xl/drawings/*.xml cleanly (it re-derives the
+    XML from its own drawing model — drops the extLst, injects a spurious
+    <a:ln> outline, changes the namespace-prefix style) — every load+save of
+    this template mangles the two logo images enough that Excel flags them for
+    repair on open, even though they still render fine after the auto-repair.
+    Patch the saved zip's drawing parts back to the template's pristine bytes
+    (same rIds/targets, so this is a safe drop-in — verified by diffing
+    sheet*.xml.rels and drawing*.xml.rels, which openpyxl leaves referencing
+    the same rId1/rId2 image relationships either way)."""
+    if not TEMPLATE_PATH.exists():
+        return
+    with zipfile.ZipFile(TEMPLATE_PATH) as ztpl:
+        pristine = {
+            name: ztpl.read(name)
+            for name in ztpl.namelist()
+            if name.startswith("xl/drawings/") and name.endswith(".xml")
+        }
+    if not pristine:
+        return
+
+    with zipfile.ZipFile(saved_path) as zsrc:
+        entries = [(item, zsrc.read(item.filename)) for item in zsrc.infolist()]
+
+    tmp_path = saved_path.with_suffix(".tmp.xlsx")
+    with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zdst:
+        for item, data in entries:
+            if item.filename in pristine:
+                data = pristine[item.filename]
+            zdst.writestr(item, data)
+    tmp_path.replace(saved_path)
 
 
 # ── main ──────────────────────────────────────────────────────────────────────

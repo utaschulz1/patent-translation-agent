@@ -4,15 +4,25 @@
 # Optional second-pass LLM review of an already-cleaned project glossary
 # (clean_glossary_<id>.csv), triggered on demand from the "Use LLM" button
 # in the GLOSSARY_REVIEWED step of the frontend — never run automatically.
+# Deliberately a plain function call, not a graph: this step has no
+# multi-turn state to track, so a LangGraph agent (see glossary_agent/)
+# would only add ceremony here.
 #
-# Reviews three quality patterns a human catches by eye but the first
-# consolidation pass (llm_glossary_cleanup.py) doesn't specifically look
-# for: ordinal-duplicate entries ("first X"/"second X") that break the
-# glossary checker's contiguous-phrase matching, generic modifiers fused
-# into a noun-phrase entry that lose consistency coverage for the bare
-# noun elsewhere, and impractical verb-form assignments where a low-
-# frequency verb got the clean German form and a high-frequency verb got
-# the awkward one. See glossary_revise_prompt.md for the exact rules.
+# Grounded, single-pass consolidation+audit review (rewritten 2026-08-26
+# after a real one-shot-vs-multi-node-agent comparison — see
+# corrected_PRD_GLOSSARY_AGENT.md and the memory entry it links — showed a
+# single well-grounded call is competitive with a 7-9-call agent pipeline
+# on quality and ~3.5x cheaper). Originally this pass reviewed only three
+# narrow structural patterns (ordinal duplicates, fused generic modifiers,
+# verb-form rebalancing) against the already-consolidated glossary plus
+# bare frequency counts, deliberately WITHOUT raw source/target sentences
+# (2026-08-02 decision: "raw context risked diluting focus and adding
+# echo-risk for a benefit the manual-review track record didn't support").
+# That decision is superseded here: real testing showed the raw segment
+# corpus, EPO title, styleguide, standard glossary, and the agent's
+# learnings doc are exactly what's needed to catch fabricated entries and
+# dropped-but-attested terms — the two real failure modes that testing
+# found. See glossary_revise_prompt.md for the full rule set.
 #
 # The EPO title row (if present) is cleaned deterministically in Python —
 # stripping the "EPO EN:"/"EPO DE:" label and any inner commas is a plain
@@ -24,7 +34,8 @@
 #   load_prompt(proj_dir) -> (text, is_override)
 #   save_prompt_override(proj_dir, text)
 #   reset_prompt_override(proj_dir)
-#   revise_glossary(glossary_text, prompt_text, proj_dir, client, model) -> str
+#   revise_glossary(glossary_text, prompt_text, proj_dir, client, model,
+#                    project_id, session_id=None) -> (revised_text, warning)
 # ============================================================
 
 import csv
@@ -35,9 +46,14 @@ from pathlib import Path
 
 import pandas as pd
 
+from glossary_lib.attestation import load_segments
+from glossary_lib.csv_io import filter_relevant_standard, load_standard_glossary, resolve_epo_title
+
 HERE = Path(__file__).parent
 DEFAULT_PROMPT_PATH = HERE / "glossary_revise_prompt.md"
 OVERRIDE_PROMPT_FILENAME = "glossary_revise_prompt_override.md"
+STYLEGUIDE_PATH = HERE / "_styleguide.md"
+LEARNINGS_PATH = HERE / "_glossary_agent_learnings.md"
 
 SYSTEM_PROMPT = """\
 You are a German patent translator specialising in EP patent claims and \
@@ -73,88 +89,17 @@ def reset_prompt_override(proj_dir: Path) -> None:
 # ── clean_glossary_<id>.csv parsing / reassembly ────────────────────────────
 # Format written by llm_glossary_cleanup.py: header row, optional EPO title
 # row, blank line, main resolved terms, blank line, appended standard terms.
+# The implementations moved to glossary_lib/csv_io.py (PRD_glossary_agent.md
+# §4, Phase 0) and are re-exported here unchanged.
 
-def parse_clean_glossary(
-    text: str,
-) -> tuple[tuple[str, str] | None, list[tuple[str, str]], list[tuple[str, str]]]:
-    """Split glossary CSV text into (epo_row, main_rows, standard_rows).
-
-    epo_row is only extracted when a cell literally starts with "EPO EN:" or
-    "EPO DE:" — the current on-disk format. Once cleaned (see
-    clean_epo_title_row), a re-run of this parser no longer finds it, and it
-    correctly becomes a normal member of main_rows from then on.
-    """
-    rows = list(csv.reader(io.StringIO(text)))
-    if not rows:
-        return None, [], []
-    rows = rows[1:]  # drop "EN,DE" header
-
-    sections: list[list[list[str]]] = [[]]
-    for row in rows:
-        is_blank = not row or all(not c.strip() for c in row)
-        if is_blank:
-            if sections[-1]:
-                sections.append([])
-            continue
-        sections[-1].append(row)
-    sections = [s for s in sections if s]
-
-    if not sections:
-        return None, [], []
-
-    epo_row: tuple[str, str] | None = None
-    first = sections[0]
-    if first and len(first[0]) >= 2 and (
-        first[0][0].strip().upper().startswith("EPO EN:")
-        or first[0][1].strip().upper().startswith("EPO DE:")
-    ):
-        epo_row = (first[0][0].strip(), first[0][1].strip())
-        sections[0] = first[1:]
-    sections = [s for s in sections if s]
-
-    def _pairs(section: list[list[str]]) -> list[tuple[str, str]]:
-        return [(r[0].strip(), r[1].strip()) for r in section if len(r) >= 2]
-
-    main_rows = _pairs(sections[0]) if sections else []
-    standard_rows = _pairs(sections[1]) if len(sections) > 1 else []
-    return epo_row, main_rows, standard_rows
+from glossary_lib.csv_io import (  # noqa: E402, F401
+    clean_epo_title_row,
+    parse_clean_glossary,
+    reassemble_glossary,
+)
 
 
-def clean_epo_title_row(en: str, de: str) -> tuple[str, str]:
-    """Deterministic (non-LLM) cleanup: strip 'EPO EN:'/'EPO DE:' labels and
-    inner commas — a plain mechanical transform, not a judgement call."""
-    en = re.sub(r"^EPO\s+EN:\s*", "", en, flags=re.IGNORECASE).strip()
-    de = re.sub(r"^EPO\s+DE:\s*", "", de, flags=re.IGNORECASE).strip()
-    en = re.sub(r",\s*", " ", en).strip()
-    de = re.sub(r",\s*", " ", de).strip()
-    return en, de
-
-
-def reassemble_glossary(
-    epo_row: tuple[str, str] | None,
-    main_rows: list[tuple[str, str]],
-    standard_rows: list[tuple[str, str]],
-) -> str:
-    # No blank line after epo_row: once cleaned it's just a normal row (see
-    # clean_epo_title_row), and a blank line here would create a false extra
-    # section boundary on the *next* parse — a second "Use LLM" click would
-    # then misread the rest of the glossary as the standard-vocab tail and
-    # silently exclude it from review.
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(["EN", "DE"])
-    if epo_row:
-        writer.writerow(list(epo_row))
-    for en, de in main_rows:
-        writer.writerow([en, de])
-    if standard_rows:
-        writer.writerow([])
-        for en, de in standard_rows:
-            writer.writerow([en, de])
-    return buf.getvalue()
-
-
-# ── Frequency reference data (structured counts only — no raw sentences) ────
+# ── Frequency reference data (majority-vote counts, not verdicts) ──────────
 
 def _load_frequency_csv(path: Path, en_col: str, de_col: str) -> list[dict]:
     if not path.exists():
@@ -174,15 +119,59 @@ def _load_frequency_csv(path: Path, en_col: str, de_col: str) -> list[dict]:
     return rows
 
 
-def load_frequency_data(proj_dir: Path) -> tuple[list[dict], list[dict]]:
-    """Returns (verb_frequency_data, noun_frequency_data) from the canonical
-    glossary CSVs already produced by the extraction pipeline. Structured
-    counts only, by design — no source/target sentences (see conversation
-    2026-08-02: raw context risked diluting focus and adding echo-risk for
-    a benefit the manual-review track record didn't support)."""
+def load_frequency_data(proj_dir: Path) -> tuple[list[dict], list[dict], list[dict]]:
+    """Returns (verb_frequency_data, noun_frequency_data, capability_frequency_data)
+    from the canonical glossary CSVs already produced by the extraction
+    pipeline — raw majority-vote observations, not verdicts (a majority can
+    be systematically wrong, e.g. a repeated mistranslation)."""
     verb_data = _load_frequency_csv(proj_dir / "verb_canonical_glossary.csv", "EN Verb", "DE Verb")
     noun_data = _load_frequency_csv(proj_dir / "noun_canonical_glossary.csv", "EN Phrase", "DE Phrase")
-    return verb_data, noun_data
+    cap_data = _load_frequency_csv(proj_dir / "capability_canonical_glossary.csv", "EN Verb", "DE Verb")
+    return verb_data, noun_data, cap_data
+
+
+def _find_translated_xlsx(proj_dir: Path) -> Path | None:
+    candidates = sorted(
+        f for f in proj_dir.glob("*_translated.xlsx")
+        if not f.name.startswith("~$")
+    )
+    if len(candidates) > 1:
+        print(f"[glossary-revise] Multiple translated files found, using: {candidates[0]}", flush=True)
+    return candidates[0] if candidates else None
+
+
+def load_raw_context(proj_dir: Path, project_id: str) -> dict:
+    """Everything a grounded, single-pass review needs beyond the
+    already-consolidated glossary: the real bilingual segment corpus (for
+    attestation — the only real defense against a fabricated DE value or a
+    dropped-but-attested verb), the EPO title, the styleguide, the
+    project-relevant slice of the standard glossary, and this project's own
+    learned rules. All read directly off disk, no LLM calls, safe to call
+    unconditionally — missing files degrade to empty/blank, never an error,
+    since this review pass is optional by design and must still run on a
+    minimal project.
+    """
+    xlsx_path = _find_translated_xlsx(proj_dir)
+    segments = load_segments(xlsx_path) if xlsx_path else []
+
+    epo_en, epo_de = resolve_epo_title(proj_dir, project_id)
+    if epo_en and epo_de:
+        epo_en, epo_de = clean_epo_title_row(epo_en, epo_de)
+
+    standard = load_standard_glossary(HERE)
+    source_text = " ".join(en for _, en, _ in segments).lower()
+    relevant_standard = filter_relevant_standard(standard, source_text)
+
+    styleguide_text = STYLEGUIDE_PATH.read_text(encoding="utf-8") if STYLEGUIDE_PATH.exists() else ""
+    learnings_text = LEARNINGS_PATH.read_text(encoding="utf-8") if LEARNINGS_PATH.exists() else ""
+
+    return {
+        "segments": [{"id": sid, "en": en, "de": de} for sid, en, de in segments],
+        "epo_title": {"en": epo_en, "de": epo_de},
+        "standard_glossary": [{"en": en, "de": de} for en, de in relevant_standard.items()],
+        "styleguide_text": styleguide_text,
+        "learnings_text": learnings_text,
+    }
 
 
 # ── LLM call ─────────────────────────────────────────────────────────────────
@@ -243,26 +232,44 @@ def revise_glossary(
     proj_dir: Path,
     client,
     model: str,
-) -> str:
-    """Runs the second-pass review and returns the revised glossary CSV text.
-    Never writes to disk — the caller (the /glossary/llm-revise endpoint)
-    hands the result back to the frontend for the user to review/edit/save,
-    same as any other manual edit in this step.
+    project_id: str,
+    session_id: str | None = None,
+) -> tuple[str, str | None]:
+    """Runs the grounded consolidation+audit review and returns
+    (revised_glossary_csv_text, warning). Never writes to disk — the caller
+    (the /glossary/llm-revise endpoint) hands the result back to the frontend
+    for the user to review/edit/save, same as any other manual edit in this
+    step. warning is None when nothing looked off; otherwise a
+    human-readable message the caller should surface to the user (e.g. a
+    suspiciously large row-count drop) rather than only logging server-side.
     """
     epo_row, main_rows, standard_rows = parse_clean_glossary(glossary_text)
     if epo_row:
         epo_row = clean_epo_title_row(*epo_row)
 
-    verb_freq, noun_freq = load_frequency_data(proj_dir)
+    verb_freq, noun_freq, cap_freq = load_frequency_data(proj_dir)
+    raw_context = load_raw_context(proj_dir, project_id)
+    if not raw_context["segments"]:
+        raise ValueError(
+            "No *_translated.xlsx found for this project — the grounded review "
+            "cannot run without the segment corpus (rule 5's fabrication check "
+            "would treat every existing glossary entry as unattested and delete "
+            "it). Run translation first, or restore the translated file, then "
+            "retry."
+        )
 
     input_data = {
         "current_glossary": [{"en": en, "de": de} for en, de in main_rows],
         "verb_frequency_data": verb_freq,
         "noun_frequency_data": noun_freq,
+        "capability_frequency_data": cap_freq,
+        **raw_context,
     }
     prompt = prompt_text.replace(
         "{INPUT_JSON}", json.dumps(input_data, ensure_ascii=False, indent=2)
     )
+
+    session_key = session_id or f"{project_id}_GlossaryLLM"
 
     def _call(messages: list[dict]) -> str:
         resp = client.chat.completions.create(
@@ -271,8 +278,17 @@ def revise_glossary(
             temperature=0,
             timeout=300,
             messages=messages,
+            extra_body={"session_id": session_key},
         )
-        return resp.choices[0].message.content.strip()
+        finish_reason = resp.choices[0].finish_reason
+        content = (resp.choices[0].message.content or "").strip()
+        if finish_reason != "stop" and (not content or not _parse_json_array_lenient(content)):
+            raise ValueError(
+                f"LLM response was truncated (finish_reason={finish_reason!r}) before a complete "
+                "response was produced — the glossary was left unchanged. Try again or reduce "
+                "the amount of context (a smaller benchmark range/segment corpus)."
+            )
+        return content
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -303,11 +319,12 @@ def revise_glossary(
             "— the glossary was left unchanged."
         )
 
+    warning = None
     if len(revised_rows) < len(main_rows) * 0.7:
-        print(
-            f"[glossary-revise] WARNING: revised list has {len(revised_rows)} rows, "
-            f"down from {len(main_rows)} — review carefully before saving.",
-            flush=True,
+        warning = (
+            f"Revised list has {len(revised_rows)} rows, down from {len(main_rows)} "
+            "— review carefully before saving."
         )
+        print(f"[glossary-revise] WARNING: {warning}", flush=True)
 
-    return reassemble_glossary(epo_row, revised_rows, standard_rows)
+    return reassemble_glossary(epo_row, revised_rows, standard_rows), warning

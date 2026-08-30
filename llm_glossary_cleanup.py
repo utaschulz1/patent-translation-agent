@@ -3,6 +3,13 @@
 # ============================================================
 # Resolves glossary inconsistencies using DeepSeek via OpenRouter.
 #
+# Since Phase 0 of PRD_glossary_agent.md §4 the reusable pieces live in
+# agent/glossary_lib/ (classify, attestation, csv_io, validate, lemma_sync)
+# and are re-exported here; this module keeps the legacy-path orchestration:
+# load_cleanup_inputs() (all reading + deterministic classification, no
+# network — also reused by the glossary agent's load_inputs node) and
+# clean_glossary() (the LLM call, validation retry, and CSV write).
+#
 # INPUT
 #   projects/<id>/verb_segment_pairs.csv          all verb pairs with context
 #   projects/<id>/noun_inconsistency_table.csv    noun conflicts with context
@@ -14,16 +21,15 @@
 #   standard_glossary.csv                         locked anchors
 #
 # OUTPUT
-#   projects/<id>/glossary_<id>.csv            clean, resolved two-column glossary
+#   projects/<id>/clean_glossary_<id>.csv      clean, resolved two-column glossary
 #
-# Library entry point: clean_glossary(proj_dir, project_id) -> Path
+# Library entry point: clean_glossary(proj_dir, project_id) -> GlossaryCleanupResult
 # Run standalone: python llm_glossary_cleanup.py (uses current_project.json)
 # ============================================================
 
 import csv
 import json
 import os
-import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -34,6 +40,21 @@ from openai import OpenAI
 
 import project_log
 from config import LLM_MODEL
+from glossary_lib.attestation import _appears_in  # noqa: F401
+from glossary_lib.classify import (  # noqa: F401
+    ORDINAL_MODIFIERS,
+    SHARED_DE_ALLOWED,
+    _EN_TO_DE_ORDINAL_STEMS,
+    _DE_ADJ_ENDINGS,
+    _is_ordinal_variant,
+    _merge_ordinal_siblings,
+    _shared_de_note,
+    _strip_de_ordinal_word,
+    classify_nouns,
+    classify_pairs,
+)
+from glossary_lib.csv_io import filter_relevant_standard, resolve_epo_title, write_clean_glossary
+from glossary_lib.validate import _norm_en, parse_response, validate_result  # noqa: F401
 
 HERE = Path(__file__).parent
 load_dotenv(dotenv_path=HERE / ".env")
@@ -41,139 +62,6 @@ load_dotenv(dotenv_path=HERE / ".env")
 MODEL              = LLM_MODEL
 
 MAX_INSTANCES      = 1   # max example sentences per (en, de) pair in prompt
-
-# EN pairs that legitimately share the same DE in German patent language.
-# "have" and "having" both → "aufweisen" is standard EPO practice.
-SHARED_DE_ALLOWED: set[frozenset] = {
-    frozenset({"have",    "having"}),
-    frozenset({"comprise", "comprising"}),
-}
-
-
-def _shared_de_note() -> str:
-    """Render SHARED_DE_ALLOWED into prompt text so the LLM is actually told
-    about these sanctioned overlaps, instead of only validate_result()
-    tolerating them after the fact. Without this, the LLM — repeatedly
-    instructed elsewhere in the prompt never to let two EN terms share a DE
-    value — has no way to know these specific pairs are fine, and "resolves"
-    the apparent conflict itself by inventing a wrong alternative DE for one
-    of the two (e.g. "have" → "besitzen" instead of "aufweisen", found live
-    on FRKE_2608_P0736, 2026-08-22)."""
-    if not SHARED_DE_ALLOWED:
-        return ""
-    lines = "\n".join(
-        f"  - {' / '.join(sorted(pair))}"
-        for pair in sorted(SHARED_DE_ALLOWED, key=lambda p: sorted(p))
-    )
-    return (
-        "The following EN term groups are expected to legitimately share one "
-        "DE term — this is standard EPO practice, not a conflict. Do NOT "
-        "invent a different DE value for one of them to avoid the overlap:\n"
-        f"{lines}"
-    )
-
-# Noun phrase leading words that indicate a sequential/relative variant rather
-# than a distinct concept.  A phrase is only filtered when its base (remaining
-# words) exists as a standalone entry, ensuring glossary coverage is never lost.
-ORDINAL_MODIFIERS: frozenset[str] = frozenset({
-    "first", "second", "third", "fourth", "fifth",
-    "other", "additional",
-})
-
-# Expected DE stem(s) for each ORDINAL_MODIFIERS word, used only to verify a
-# sibling's canonical DE actually leads with the translation we'd expect
-# before stripping it — never to guess. Some EN modifiers have more than one
-# acceptable DE rendering.
-_EN_TO_DE_ORDINAL_STEMS: dict[str, tuple[str, ...]] = {
-    "first":      ("erst",),
-    "second":     ("zweit",),
-    "third":      ("dritt",),
-    "fourth":     ("viert",),
-    "fifth":      ("fünft",),
-    "other":      ("ander",),
-    "additional": ("zusätzlich", "weiter"),
-}
-
-# Same adjective-declension endings glossary_compare_revised_translation.py's
-# _DE_ADJ_SUFFIXES strips at check time — kept as a separate local constant
-# rather than imported, since this is a small, self-contained concern.
-_DE_ADJ_ENDINGS: tuple[str, ...] = ("em", "er", "es", "en", "e")
-
-
-def _strip_de_ordinal_word(de_value: str, en_modifier: str) -> str | None:
-    """If de_value's leading word is a (possibly declined) form of the DE
-    word expected for en_modifier, return the remainder of de_value.
-    Otherwise None — a modifier that isn't actually translated as expected
-    means we don't know enough to strip it safely, so this never guesses."""
-    stems = _EN_TO_DE_ORDINAL_STEMS.get(en_modifier)
-    if not stems:
-        return None
-    parts = de_value.split(None, 1)
-    if len(parts) != 2:
-        return None
-    first_word, remainder = parts[0].lower(), parts[1]
-    for stem in stems:
-        if first_word == stem or any(first_word == stem + suf for suf in _DE_ADJ_ENDINGS):
-            return remainder
-    return None
-
-
-def _merge_ordinal_siblings(
-    noun_can: dict[str, dict[str, dict]],
-) -> tuple[dict[str, str], set[str]]:
-    """Collapse ordinal-modifier siblings of the same base noun phrase (e.g.
-    "first image data" / "second image data") into one bare-base entry when
-    they agree on the underlying DE term once each one's own ordinal word is
-    stripped — a purely mechanical merge, no LLM judgment needed (matches
-    the glossary-range-audit skill's Step 4 ordinal-collapse rule).
-
-    Complements, rather than replaces, _is_ordinal_variant(): that function
-    only fires when the bare base is *also* independently attested somewhere
-    in the raw extraction, which never happens for a concept that only ever
-    occurs modified (HALA_2608_P0655, 2026-08-23: "image data" never occurs
-    unmodified — only as first/second/input/output/intermediate image data —
-    so first/second image data survived as fully separate entries). This
-    compares ordinal siblings to *each other* instead, so no third,
-    independently-attested occurrence is required.
-
-    Any mismatch — an unexpected leading DE word, or siblings that strip to
-    different remainders — bails out for that whole group rather than
-    guessing, leaving the phrases to go through normal classification
-    unchanged.
-    """
-    groups: dict[str, list[tuple[str, str]]] = defaultdict(list)  # base -> [(modifier, en_phrase)]
-    for en_phrase in noun_can:
-        words = en_phrase.split()
-        if len(words) < 2 or words[0] not in ORDINAL_MODIFIERS:
-            continue
-        base = " ".join(words[1:])
-        groups[base].append((words[0], en_phrase))
-
-    merged_bases: dict[str, str] = {}
-    consumed: set[str] = set()
-
-    for base, members in groups.items():
-        if len(members) < 2:
-            continue
-        stripped: dict[str, str] = {}
-        ok = True
-        for modifier, en_phrase in members:
-            de_map = noun_can[en_phrase]
-            canonical_de = max(de_map.items(), key=lambda kv: kv[1]["count"])[0]
-            remainder = _strip_de_ordinal_word(canonical_de, modifier)
-            if remainder is None:
-                ok = False
-                break
-            stripped[en_phrase] = remainder
-        if not ok:
-            continue
-        remainders = set(stripped.values())
-        if len(remainders) != 1:
-            continue
-        merged_bases[base] = next(iter(remainders))
-        consumed.update(en_phrase for _, en_phrase in members)
-
-    return merged_bases, consumed
 
 SYSTEM_PROMPT = """\
 You are a German patent translator specialising in EP patent claims and \
@@ -376,160 +264,72 @@ No explanation, no prose, no markdown fences.
 ]
 """
 
-# ── Helpers (pure — no project-specific or shared state) ──────────────────────
 
-
-def _appears_in(en_term: str, text: str) -> bool:
-    term_lower = en_term.lower()
-    if re.search(r"\b" + re.escape(term_lower) + r"\b", text):
-        return True
-    # Catch inflected forms: "form" → "formed", "forming", "forms".
-    # Critical for standard_glossary terms that only appear inflected in patent
-    # source text (e.g. "form" never appears bare — only as "formed in the sled").
-    # Without this, _appears_in("form", text) returns False and the term is
-    # silently excluded from the clean glossary even though it is in the source.
-    # Explicit suffix list avoids false matches like "formal" or "former".
-    if re.search(r"\b" + re.escape(term_lower) + r"(?:s|d|ed|ing|en|es)\b", text):
-        return True
-    if term_lower.startswith("to "):
-        bare = term_lower[3:].strip()
-        if bare and re.search(r"\b" + re.escape(bare) + r"\w*\b", text):
-            return True
-    return False
-
-
-def _is_ordinal_variant(en_phrase: str, known_phrases: set[str]) -> bool:
-    """Return True if en_phrase starts with an ordinal/relative modifier AND
-    its base phrase (modifier removed) exists as a standalone entry.
-    Only filter when the base is present so glossary coverage is never lost."""
-    words = en_phrase.split()
-    if len(words) < 2 or words[0] not in ORDINAL_MODIFIERS:
-        return False
-    base = " ".join(words[1:])
-    return base in known_phrases
-
-
-def parse_response(raw: str) -> list[dict]:
-    # Strip markdown fence wherever it appears (LLM sometimes adds prose before it)
-    fence = raw.find("```")
-    if fence != -1:
-        raw = raw[fence:]
-        raw = raw.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
-    # Fallback: find the JSON array start in case there is still leading prose
-    bracket = raw.find("[")
-    if bracket > 0:
-        raw = raw[bracket:]
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError as e:
-        raise ValueError(
-            f"Could not parse LLM response as JSON: {e}\n"
-            f"Raw response (first 600 chars):\n{raw[:600]}"
-        ) from e
-    if not isinstance(parsed, list):
-        raise ValueError("LLM response is not a JSON array.")
-    return parsed
-
-
-def validate_result(
-    items: list[dict], relevant_standard: dict[str, str]
-) -> tuple[list[tuple[str, str]], list[str]]:
-    """Returns (clean_rows, errors). errors is empty iff the result is valid."""
-    de_seen:    dict[str, str]        = {}
-    en_seen:    dict[str, str]        = {}
-    errors:     list[str]             = []
-    clean_rows: list[tuple[str, str]] = []
-
-    for item in items:
-        en = str(item.get("en", "")).strip()
-        de = str(item.get("de", "")).strip()
-        if not en or not de:
-            errors.append(f"Skipped empty entry: {item!r}")
-            continue
-        de_lower = de.lower()
-        en_lower = en.lower()
-
-        # Skip exact duplicates (same EN and same DE already seen) silently.
-        if en_lower in en_seen and en_seen[en_lower].lower() == de_lower:
-            continue
-
-        if de_lower in de_seen:
-            pair = frozenset({de_seen[de_lower].lower(), en_lower})
-            if pair not in SHARED_DE_ALLOWED:
-                errors.append(
-                    f'DE duplicate: "{de}" assigned to both "{de_seen[de_lower]}" and "{en}"'
-                )
-        else:
-            de_seen[de_lower] = en
-
-        if en_lower in en_seen:
-            if en_seen[en_lower].lower() != de_lower:
-                errors.append(
-                    f'EN duplicate: "{en}" appears with both "{en_seen[en_lower]}" and "{de}"'
-                )
-        else:
-            en_seen[en_lower] = de
-
-        if en_lower in relevant_standard:
-            expected = relevant_standard[en_lower]
-            if expected.lower() != de_lower:
-                errors.append(
-                    f'Standard glossary conflict: "{en}" → "{de}" '
-                    f'(standard requires "{expected}")'
-                )
-
-        clean_rows.append((en, de))
-
-    return clean_rows, errors
-
-
-def _norm_en(en: str) -> str:
-    return re.sub(r"\s*-\s*", "-", en.lower())
-
-
-# ── Main entry point ───────────────────────────────────────────────────────
+# ── Input loading + deterministic classification (no network) ────────────────
 
 
 @dataclass
-class GlossaryCleanupResult:
-    """Everything a caller (or a test) might want to inspect about one run.
+class CleanupInputs:
+    """Everything the consolidation stage needs, loaded and classified —
+    deterministically, with no LLM involved. Produced by load_cleanup_inputs;
+    consumed by clean_glossary here and by the glossary agent's load_inputs/
+    classify_terms nodes."""
+    proj_dir:                  Path
+    project_id:                str
+    clean_glossary_path:       Path
+    standard:                  dict[str, str]
+    relevant_standard:         dict[str, str]
+    source_text:               str
+    xlsx_found:                bool
+    epo_en:                    str
+    epo_de:                    str
+    verb_groups:               dict
+    cap_groups:                dict
+    noun_can:                  dict
+    noun_deviations:           dict
+    consistent_verbs:          dict[str, str]
+    inconsistent_verbs:        list[dict]
+    consistent_capabilities:   dict[str, str]
+    inconsistent_capabilities: list[dict]
+    consistent_nouns:          dict[str, str]
+    inconsistent_nouns:        list[dict]
+    merged_bases:              dict[str, str] = field(default_factory=dict)
 
-    `path` is the only thing production callers need; the rest surfaces the
-    pipeline's intermediate decisions (what the LLM omitted and had to be
-    restored, which standard-glossary terms were relevant, how nouns were
-    classified) without requiring a caller to re-derive them from the CSV.
+    def consistent_terms(self) -> dict[str, str]:
+        """All consistent terms merged, the shape the prompt consumes."""
+        return {**self.consistent_verbs, **self.consistent_nouns, **self.consistent_capabilities}
+
+    def build_input_json(self) -> str:
+        """Assemble the LLM input JSON exactly as the batch prompt expects."""
+        input_data = {
+            "epo_title": {
+                "en": self.epo_en,
+                "de": self.epo_de,
+            },
+            "standard_glossary": [
+                {"en": en, "de": de} for en, de in self.relevant_standard.items()
+            ],
+            "consistent_terms": [
+                {"en": en, "de": de} for en, de in self.consistent_terms().items()
+            ],
+            "inconsistent_verbs": self.inconsistent_verbs,
+            "inconsistent_nouns": self.inconsistent_nouns,
+            "inconsistent_capabilities": self.inconsistent_capabilities,
+        }
+        return json.dumps(input_data, ensure_ascii=False, indent=2)
+
+
+def load_cleanup_inputs(proj_dir: Path, project_id: str) -> CleanupInputs:
+    """Read every consolidation input and run the deterministic classification.
+
+    No network access — safe to call from tests and from the glossary agent's
+    deterministic nodes. Prints progress the same way the legacy pipeline
+    always has (captured as step output by the workflow UI).
+
+    Raises:
+        FileNotFoundError: if any of the four mandatory extraction CSVs is
+            missing.
     """
-    path:               Path
-    clean_rows:         list[tuple[str, str]]
-    extra_standard:     list[tuple[str, str]]
-    filled:             list[tuple[str, str]]
-    standard:           dict[str, str]
-    input_json_str:     str
-    consistent_nouns:   dict[str, str]
-    inconsistent_nouns: list[dict] = field(default_factory=list)
-
-
-def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
-    """Resolve glossary inconsistencies for one project using DeepSeek via
-    OpenRouter, write the clean glossary CSV, and return a result describing
-    what happened.
-
-    Takes the project location as explicit arguments rather than reading the
-    shared current_project.json context, so it's safe to call for different
-    projects from concurrent requests (see llm_glossary_cleanup __main__ for
-    the standalone-script entry point that resolves those from context).
-    """
-
-    # ── Auth ────────────────────────────────────────────────────────────────
-
-    api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY not found in .env.")
-
-    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
-
-    # ── Project paths ───────────────────────────────────────────────────────
-
     print(f"Project: {project_id}")
 
     verb_pairs_path  = proj_dir / "verb_segment_pairs.csv"
@@ -537,7 +337,6 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     noun_can_path    = proj_dir / "noun_canonical_glossary.csv"
     noun_incon_path  = proj_dir / "noun_inconsistency_table.csv"
     cap_pairs_path   = proj_dir / "capability_segment_pairs.csv"
-    glossary_path       = proj_dir / f"glossary_{project_id}.csv"
     clean_glossary_path = proj_dir / f"clean_glossary_{project_id}.csv"
 
     for p in [verb_pairs_path, verb_can_path, noun_can_path, noun_incon_path]:
@@ -574,12 +373,13 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
 
     source_text: str = ""          # full source text, used to filter all terms
     relevant_standard: dict[str, str] = {}
+    xlsx_found = bool(_xlsx_files)
     if _xlsx_files:
         _raw   = pd.read_excel(_xlsx_files[0], header=None, engine="openpyxl")
         _data  = _raw.iloc[3:].reset_index(drop=True)
         _data.columns = ["ID", "Source", "Target"] + list(_data.columns[3:])
         source_text       = " ".join(_data["Source"].dropna().astype(str).tolist()).lower()
-        relevant_standard = {en: de for en, de in standard.items() if _appears_in(en, source_text)}
+        relevant_standard = filter_relevant_standard(standard, source_text)
         print(f"  → {len(relevant_standard)}/{len(standard)} standard terms present in source text.")
     else:
         relevant_standard = dict(standard)
@@ -587,20 +387,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
 
     # ── Read EPO title from project glossary ────────────────────────────────
 
-    epo_en, epo_de = "", ""
-
-    if glossary_path.exists():
-        with open(glossary_path, newline="", encoding="utf-8-sig") as f:
-            for row in csv.reader(f):
-                cells = [c.strip() for c in row]
-                if any(c.upper().startswith("EPO EN:") or c.upper().startswith("EPO DE:") for c in cells):
-                    for c in cells:
-                        if c.upper().startswith("EPO EN:"):
-                            epo_en = c[7:].strip()
-                        elif c.upper().startswith("EPO DE:"):
-                            epo_de = c[7:].strip()
-                    break
-
+    epo_en, epo_de = resolve_epo_title(proj_dir, project_id)
     print(f"EPO title EN: {epo_en[:70]}" + ("..." if len(epo_en) > 70 else ""))
 
     # ── Read verb_segment_pairs ──────────────────────────────────────────────
@@ -701,108 +488,95 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
           + (f" ({skipped_false_positives} evaluator-judged false positive(s) excluded.)"
              if skipped_false_positives else ""))
 
-    # ── Classify verbs ────────────────────────────────────────────────────────
+    # ── Classify (glossary_lib.classify — same logic both paths) ────────────
 
-    consistent_verbs:   dict[str, str] = {}   # en → de
-    inconsistent_verbs: list[dict]     = []
-
-    for en_verb, de_dict in sorted(verb_groups.items()):
-        if len(de_dict) == 1:
-            consistent_verbs[en_verb] = next(iter(de_dict))
-        else:
-            instances = []
-            for de, examples in de_dict.items():
-                for ex in examples[:MAX_INSTANCES]:
-                    instances.append({"de": de, "source": ex["source"], "target": ex["target"]})
-            inconsistent_verbs.append({"en": en_verb, "instances": instances})
-
+    consistent_verbs, inconsistent_verbs = classify_pairs(verb_groups, MAX_INSTANCES)
     print(f"Verbs  — consistent: {len(consistent_verbs)}, inconsistent: {len(inconsistent_verbs)}.")
 
-    # ── Classify capability predicates ───────────────────────────────────────
-
-    consistent_capabilities:   dict[str, str] = {}
-    inconsistent_capabilities: list[dict]     = []
-
-    for en_verb, de_dict in sorted(cap_groups.items()):
-        if len(de_dict) == 1:
-            consistent_capabilities[en_verb] = next(iter(de_dict))
-        else:
-            instances = []
-            for de, examples in de_dict.items():
-                for ex in examples[:MAX_INSTANCES]:
-                    instances.append({"de": de, "source": ex["source"], "target": ex["target"]})
-            inconsistent_capabilities.append({"en": en_verb, "instances": instances})
-
+    consistent_capabilities, inconsistent_capabilities = classify_pairs(cap_groups, MAX_INSTANCES)
     print(f"Capabilities — consistent: {len(consistent_capabilities)}, inconsistent: {len(inconsistent_capabilities)}.")
 
-    # ── Classify nouns (shortest phrase first for compound consistency) ──────
-
-    consistent_nouns:   dict[str, str] = {}
-    inconsistent_nouns: list[dict]     = []
-
-    _noun_phrases = set(noun_can.keys())
-
-    merged_bases, consumed_by_merge = _merge_ordinal_siblings(noun_can)
-    for base, de in merged_bases.items():
-        if base not in noun_can:
-            consistent_nouns.setdefault(base, de)
-
-    for en_phrase in sorted(noun_can.keys(), key=len):
-        if en_phrase in consumed_by_merge:
-            continue
-        if _is_ordinal_variant(en_phrase, _noun_phrases):
-            continue
-        de_map         = noun_can[en_phrase]
-        has_deviations = en_phrase in noun_deviations
-
-        # Consistent: single DE form, count == total, no deviations recorded
-        if not has_deviations and len(de_map) == 1:
-            de_info = next(iter(de_map.values()))
-            if de_info["count"] == de_info["total"]:
-                consistent_nouns[en_phrase] = next(iter(de_map))
-                continue
-
-        # Inconsistent — find canonical (majority) entry
-        canonical_de, canonical_info = max(
-            de_map.items(), key=lambda kv: kv[1]["count"]
-        )
-
-        deviations = [
-            d for d in noun_deviations.get(en_phrase, [])
-            if d["de"] != canonical_de
-        ]
-
-        inconsistent_nouns.append({
-            "en":              en_phrase,
-            "canonical_de":    canonical_de,
-            "canonical_count": canonical_info["count"],
-            "total":           canonical_info["total"],
-            "deviations":      deviations,
-        })
-
+    consistent_nouns, inconsistent_nouns, merged_bases = classify_nouns(noun_can, noun_deviations)
     print(f"Nouns  — consistent: {len(consistent_nouns)}, inconsistent: {len(inconsistent_nouns)}."
           + (f" ({len(merged_bases)} ordinal-sibling group(s) merged.)" if merged_bases else ""))
 
-    # ── Assemble JSON input ──────────────────────────────────────────────────
+    return CleanupInputs(
+        proj_dir=proj_dir,
+        project_id=project_id,
+        clean_glossary_path=clean_glossary_path,
+        standard=standard,
+        relevant_standard=relevant_standard,
+        source_text=source_text,
+        xlsx_found=xlsx_found,
+        epo_en=epo_en,
+        epo_de=epo_de,
+        verb_groups=verb_groups,
+        cap_groups=cap_groups,
+        noun_can=noun_can,
+        noun_deviations=noun_deviations,
+        consistent_verbs=consistent_verbs,
+        inconsistent_verbs=inconsistent_verbs,
+        consistent_capabilities=consistent_capabilities,
+        inconsistent_capabilities=inconsistent_capabilities,
+        consistent_nouns=consistent_nouns,
+        inconsistent_nouns=inconsistent_nouns,
+        merged_bases=merged_bases,
+    )
 
-    input_data = {
-        "epo_title": {
-            "en": epo_en,
-            "de": epo_de,
-        },
-        "standard_glossary": [
-            {"en": en, "de": de} for en, de in relevant_standard.items()
-        ],
-        "consistent_terms": [
-            {"en": en, "de": de}
-            for en, de in {**consistent_verbs, **consistent_nouns, **consistent_capabilities}.items()
-        ],
-        "inconsistent_verbs": inconsistent_verbs,
-        "inconsistent_nouns": inconsistent_nouns,
-        "inconsistent_capabilities": inconsistent_capabilities,
-    }
 
-    input_json_str = json.dumps(input_data, ensure_ascii=False, indent=2)
+# ── Main entry point ───────────────────────────────────────────────────────
+
+
+@dataclass
+class GlossaryCleanupResult:
+    """Everything a caller (or a test) might want to inspect about one run.
+
+    `path` is the only thing production callers need; the rest surfaces the
+    pipeline's intermediate decisions (what the LLM omitted and had to be
+    restored, which standard-glossary terms were relevant, how nouns were
+    classified) without requiring a caller to re-derive them from the CSV.
+    """
+    path:               Path
+    clean_rows:         list[tuple[str, str]]
+    extra_standard:     list[tuple[str, str]]
+    filled:             list[tuple[str, str]]
+    standard:           dict[str, str]
+    input_json_str:     str
+    consistent_nouns:   dict[str, str]
+    inconsistent_nouns: list[dict] = field(default_factory=list)
+
+
+def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
+    """Resolve glossary inconsistencies for one project using DeepSeek via
+    OpenRouter, write the clean glossary CSV, and return a result describing
+    what happened.
+
+    Takes the project location as explicit arguments rather than reading the
+    shared current_project.json context, so it's safe to call for different
+    projects from concurrent requests (see llm_glossary_cleanup __main__ for
+    the standalone-script entry point that resolves those from context).
+    """
+
+    # ── Auth ────────────────────────────────────────────────────────────────
+
+    api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY not found in .env.")
+
+    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
+
+    # ── Load + classify (no network) ────────────────────────────────────────
+
+    inputs = load_cleanup_inputs(proj_dir, project_id)
+    relevant_standard = inputs.relevant_standard
+    epo_en, epo_de = inputs.epo_en, inputs.epo_de
+    consistent_verbs = inputs.consistent_verbs
+    inconsistent_verbs = inputs.inconsistent_verbs
+    consistent_capabilities = inputs.consistent_capabilities
+    consistent_nouns = inputs.consistent_nouns
+    inconsistent_nouns = inputs.inconsistent_nouns
+
+    input_json_str = inputs.build_input_json()
     estimated_tokens = len(input_json_str) // 4
     print(f"\nJSON input: ~{estimated_tokens:,} tokens estimated.")
 
@@ -814,7 +588,12 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     print(f"Calling {MODEL}...")
     response = client.chat.completions.create(
         model=MODEL,
-        max_tokens=4096,
+        # 4096 -> 8192 (2026-08-30): the widened noun-extraction rule grows
+        # consistent_terms/inconsistent_nouns, which this call must echo
+        # back in full — matches the ceiling glossary_agent/graph.py's
+        # resolve_inconsistent (the successor to this same call) already
+        # uses for the identical prompt/response shape.
+        max_tokens=8192,
         temperature=0,
         timeout=620,
         messages=[
@@ -845,7 +624,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
         )
         retry_resp = client.chat.completions.create(
             model=MODEL,
-            max_tokens=4096,
+            max_tokens=8192,  # matches the primary call above, same reasoning
             temperature=0,
             timeout=120,
             messages=[
@@ -889,7 +668,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     output_en = {_norm_en(en) for en, _ in clean_rows}
     filled: list[tuple[str, str]] = []
 
-    for en, de in {**consistent_verbs, **consistent_nouns, **consistent_capabilities}.items():
+    for en, de in inputs.consistent_terms().items():
         if _norm_en(en) not in output_en:
             filled.append((en, de))
             clean_rows.append((en, de))
@@ -903,7 +682,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
 
     # Build a canonical reference map to highlight LLM overrides
     canonical_ref: dict[str, str] = {}
-    for en, de_dict in verb_groups.items():
+    for en, de_dict in inputs.verb_groups.items():
         if de_dict:
             canonical_ref[en] = max(de_dict, key=lambda d: len(de_dict[d]))
     for noun_entry in inconsistent_nouns:
@@ -927,40 +706,37 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     llm_en_set = {en.lower() for en, _ in clean_rows}
     extra_standard = [(en, de) for en, de in relevant_standard.items() if en.lower() not in llm_en_set]
 
-    with open(clean_glossary_path, "w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.writer(f)
-        writer.writerow(["EN", "DE"])
-        if epo_en and epo_de:
-            writer.writerow([f"EPO EN: {epo_en}", f"EPO DE: {epo_de}"])
-        writer.writerow([])
-        for en, de in clean_rows:
-            writer.writerow([en, de])
-        if extra_standard:
-            writer.writerow([])
-            for en_lo, de in extra_standard:
-                writer.writerow([en_lo, de])
+    write_clean_glossary(
+        inputs.clean_glossary_path,
+        (epo_en, epo_de) if epo_en and epo_de else None,
+        clean_rows,
+        extra_standard,
+        labeled_title=True,
+    )
 
     total = len(clean_rows) + len(extra_standard)
-    print(f"\nGlossary written → {clean_glossary_path.name}  "
+    print(f"\nGlossary written → {inputs.clean_glossary_path.name}  "
           f"({len(clean_rows)} project terms + {len(extra_standard)} extra standard terms = {total} total)")
 
-    # ── Grow the shared verb lemma tables with any new verbs from this project ─
-    # See verb_lemma_sync.py — detects verb pairs (from the *cleaned* rows above,
-    # never raw spaCy output) not yet covered by EN_verb_lemma_lookup.json /
-    # DE_verb_lemma_lookup.json, and requests+merges their inflected forms.
+    # ── Grow this project's verb lemma overlay with any new verbs ────────────
+    # See glossary_lib/lemma_sync.py — detects verb pairs (from the *cleaned*
+    # rows above, never raw spaCy output) not yet covered by the merged
+    # baseline+overlay tables, and writes their inflected forms to the
+    # project-scoped overlay files (PRD §6b — the shared baseline is never
+    # written at runtime).
 
     from verb_lemma_sync import sync_verb_lemma_tables
 
-    sync_verb_lemma_tables(clean_rows, consistent_verbs, inconsistent_verbs, client, MODEL)
+    sync_verb_lemma_tables(clean_rows, consistent_verbs, inconsistent_verbs, client, MODEL, proj_dir=proj_dir)
 
     print("Next step: lara_glossary_upload.py")
 
     return GlossaryCleanupResult(
-        path=clean_glossary_path,
+        path=inputs.clean_glossary_path,
         clean_rows=clean_rows,
         extra_standard=extra_standard,
         filled=filled,
-        standard=standard,
+        standard=inputs.standard,
         input_json_str=input_json_str,
         consistent_nouns=consistent_nouns,
         inconsistent_nouns=inconsistent_nouns,

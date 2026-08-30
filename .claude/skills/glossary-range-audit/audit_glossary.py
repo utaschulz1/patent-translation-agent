@@ -4,6 +4,11 @@ Cross-check a clean_glossary_<PID>.csv against a specific segment-ID range of
 the bilingual _translated.xlsx, plus whatever *_canonical_glossary.csv /
 *_inconsistency_table.csv / *_flags.csv frequency tables sit next to it.
 
+The evidence-gathering logic (segment loading, whole-word attestation,
+frequency-table cross-referencing) lives in agent/glossary_lib/attestation.py
+since PRD_glossary_agent.md Phase 0 — this script is the skill's CLI wrapper
+around it.
+
 Produces two files (never prints the full corpus/report to stdout — read
 them with the Read tool, per this project's convention of not reasoning over
 truncated chat output):
@@ -24,103 +29,32 @@ import csv
 import glob
 import json
 import os
-import re
 import sys
+from pathlib import Path
 
-import openpyxl
+# This script lives under agent/.claude/skills/glossary-range-audit/ — put
+# agent/ itself on the path so glossary_lib imports resolve when the script
+# is run directly from anywhere.
+_AGENT_DIR = Path(__file__).resolve().parent.parent.parent.parent
+if str(_AGENT_DIR) not in sys.path:
+    sys.path.insert(0, str(_AGENT_DIR))
 
-WORD_CLASS = r"[A-Za-zÀ-ÿ]"
+from glossary_lib.attestation import (  # noqa: E402
+    find_segs,
+    load_frequency_tables,
+    load_segments,
+    lookup_in_tables,
+)
 
 
 def resolve_path(path, pattern):
+    """Resolve a directory argument to the first file matching pattern in it."""
     if os.path.isdir(path):
         matches = sorted(glob.glob(os.path.join(path, pattern)))
         if not matches:
             sys.exit(f"No file matching {pattern!r} found in {path}")
         return matches[0]
     return path
-
-
-def as_int(x):
-    try:
-        return int(x)
-    except (TypeError, ValueError):
-        return None
-
-
-def load_segments(xlsx_path, min_id, max_id):
-    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
-    ws = wb.active
-    rows = list(ws.iter_rows(values_only=True))
-    segs = []
-    for r in rows:
-        sid = as_int(r[0])
-        if sid is None:
-            continue
-        if min_id is not None and sid < min_id:
-            continue
-        if max_id is not None and sid > max_id:
-            continue
-        segs.append((sid, r[1] or "", r[2] or ""))
-    segs.sort(key=lambda t: t[0])
-    return segs
-
-
-def find_segs(term, segs, which):
-    """Segment ids whose EN (which='en') or DE (which='de') text contains
-    term as a whole word. Checked per-segment rather than against one
-    concatenated/bracket-tagged string — patent body text routinely contains
-    literal "[0042]"-style paragraph numbers, which collided with an earlier
-    bracket-tag-scanning approach as soon as this ran against more than the
-    claims (paragraph numbers never appear in claims text, so the bug was
-    invisible until whole-document mode)."""
-    if not term:
-        return []
-    pat = re.compile(r"(?<!" + WORD_CLASS + r")" + re.escape(term) + r"(?!" + WORD_CLASS + r")", re.IGNORECASE)
-    return sorted(sid for sid, en, de in segs if pat.search(en if which == "en" else de))
-
-
-CANONICAL_GLOB_SUFFIXES = ("_canonical_glossary.csv", "_inconsistency_table.csv", "_flags.csv")
-
-
-def load_frequency_tables(glossary_dir):
-    """Auto-discover the pipeline's raw frequency/canonical-vote CSVs
-    (noun_canonical_glossary.csv, verb_canonical_glossary.csv,
-    capability_canonical_glossary.csv, noun_inconsistency_table.csv,
-    verb_flags.csv, capability_flags.csv, ...). Column names vary by table
-    type, so this is deliberately loose: any column that looks like an EN
-    key (starts with 'EN' or is literally 'Segment ID'/'EN Phrase') is
-    treated as the lookup key.
-    """
-    tables = {}
-    for path in glob.glob(os.path.join(glossary_dir, "*.csv")):
-        base = os.path.basename(path)
-        if not any(base.endswith(suf) for suf in CANONICAL_GLOB_SUFFIXES):
-            continue
-        try:
-            with open(path, encoding="utf-8-sig") as fh:
-                reader = csv.DictReader(fh)
-                rows = list(reader)
-        except Exception as e:
-            print(f"warning: failed to read {base}: {e}", file=sys.stderr)
-            continue
-        if not rows:
-            continue
-        en_col = next((c for c in reader.fieldnames if c and c.strip().lower() in
-                       ("en", "en verb", "en phrase")), None)
-        tables[base] = {"fieldnames": reader.fieldnames, "en_col": en_col, "rows": rows}
-    return tables
-
-
-def lookup_in_tables(term, tables):
-    hits = {}
-    for name, t in tables.items():
-        if not t["en_col"]:
-            continue
-        matches = [r for r in t["rows"] if (r.get(t["en_col"]) or "").strip().lower() == term.strip().lower()]
-        if matches:
-            hits[name] = matches
-    return hits
 
 
 def main():
