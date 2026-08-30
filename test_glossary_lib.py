@@ -173,6 +173,44 @@ class TestCsvRoundTrip:
         assert csv_io.read_epo_title(tmp_path / "nope.csv") == ("", "")
 
 
+class TestResolveEpoTitle:
+    """2026-08-30: resolve_epo_title (glossary_lib.csv_io) is the shared
+    exact-match-plus-fallback lookup both llm_glossary_cleanup.py and
+    llm_glossary_revise.py now use — same helper, not two copies."""
+
+    def test_exact_match_wins(self, tmp_path):
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: RIGHT","EPO DE: RICHTIG"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID") == ("RIGHT", "RICHTIG")
+
+    def test_falls_back_when_exact_match_missing(self, tmp_path):
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID-1") == ("A TITLE", "EIN TITEL")
+
+    def test_falls_back_when_exact_match_exists_but_is_empty(self, tmp_path):
+        """The gap a plain .exists() check misses: a placeholder/empty file
+        at the exact suffixed path (e.g. left behind by an unrelated
+        script) must not shadow a real title sitting under another id in
+        the same folder."""
+        (tmp_path / "glossary_BASEID-1.csv").write_text("term,de\n", encoding="utf-8")
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID-1") == ("A TITLE", "EIN TITEL")
+
+    def test_skips_a_title_less_candidate_to_find_the_real_one(self, tmp_path):
+        """Every candidate is tried in turn, not just the alphabetically
+        first one — an empty file that happens to sort first must not
+        shadow a real title in a later-sorting file."""
+        (tmp_path / "glossary_AAA_empty.csv").write_text("term,de\n", encoding="utf-8")
+        (tmp_path / "glossary_ZZZ_real.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        assert csv_io.resolve_epo_title(tmp_path, "NEITHER_OF_THESE") == ("A TITLE", "EIN TITEL")
+
+    def test_no_file_at_all_degrades_to_missing(self, tmp_path):
+        assert csv_io.resolve_epo_title(tmp_path, "BASEID") == ("", "")
+
+
 # ── parse_json_lenient (new shared parser, PRD §8) ───────────────────────────
 
 class TestParseJsonLenient:
@@ -221,3 +259,42 @@ class TestLoadCleanupInputs:
             "epo_title", "standard_glossary", "consistent_terms",
             "inconsistent_verbs", "inconsistent_nouns", "inconsistent_capabilities",
         }
+
+
+def _minimal_extraction_files(proj_dir):
+    for name in ("verb_segment_pairs.csv", "verb_canonical_glossary.csv",
+                 "noun_canonical_glossary.csv", "noun_inconsistency_table.csv"):
+        (proj_dir / name).write_text("a,b\n", encoding="utf-8")
+
+
+class TestLoadCleanupInputsGlossaryPathFallback:
+    """2026-08-29 fix: glossary_<PID>.csv is written once by the extraction
+    pipeline against the document's own id — a rebuild/retry run started
+    under a suffixed project_id (e.g. "BASEID-1", same folder) never gets
+    its own copy, so an exact-match-only lookup silently lost the EPO
+    title (read_epo_title got called on a nonexistent path, returned
+    ("", ""), and check_epo_title correctly reported a title that was
+    actually right there in the folder as "missing")."""
+
+    def test_glob_fallback_when_project_id_suffix_mismatches(self, tmp_path):
+        _minimal_extraction_files(tmp_path)
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: A TITLE","EPO DE: EIN TITEL"\n', encoding="utf-8")
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("A TITLE", "EIN TITEL")
+
+    def test_exact_match_still_wins_over_glob(self, tmp_path):
+        _minimal_extraction_files(tmp_path)
+        (tmp_path / "glossary_BASEID.csv").write_text(
+            '"EPO EN: WRONG","EPO DE: FALSCH"\n', encoding="utf-8")
+        (tmp_path / "glossary_BASEID-1.csv").write_text(
+            '"EPO EN: RIGHT","EPO DE: RICHTIG"\n', encoding="utf-8")
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("RIGHT", "RICHTIG")
+
+    def test_no_glossary_file_at_all_still_degrades_to_missing(self, tmp_path):
+        """No glossary_*.csv anywhere — must still degrade to ("", ""),
+        never raise, matching read_epo_title's own "never invent" contract."""
+        _minimal_extraction_files(tmp_path)
+        inputs = glc.load_cleanup_inputs(tmp_path, "BASEID-1")
+        assert (inputs.epo_en, inputs.epo_de) == ("", "")

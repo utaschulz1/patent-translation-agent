@@ -53,7 +53,7 @@ from glossary_lib.classify import (  # noqa: F401
     classify_nouns,
     classify_pairs,
 )
-from glossary_lib.csv_io import filter_relevant_standard, read_epo_title, write_clean_glossary
+from glossary_lib.csv_io import filter_relevant_standard, resolve_epo_title, write_clean_glossary
 from glossary_lib.validate import _norm_en, parse_response, validate_result  # noqa: F401
 
 HERE = Path(__file__).parent
@@ -337,7 +337,6 @@ def load_cleanup_inputs(proj_dir: Path, project_id: str) -> CleanupInputs:
     noun_can_path    = proj_dir / "noun_canonical_glossary.csv"
     noun_incon_path  = proj_dir / "noun_inconsistency_table.csv"
     cap_pairs_path   = proj_dir / "capability_segment_pairs.csv"
-    glossary_path       = proj_dir / f"glossary_{project_id}.csv"
     clean_glossary_path = proj_dir / f"clean_glossary_{project_id}.csv"
 
     for p in [verb_pairs_path, verb_can_path, noun_can_path, noun_incon_path]:
@@ -388,7 +387,7 @@ def load_cleanup_inputs(proj_dir: Path, project_id: str) -> CleanupInputs:
 
     # ── Read EPO title from project glossary ────────────────────────────────
 
-    epo_en, epo_de = read_epo_title(glossary_path)
+    epo_en, epo_de = resolve_epo_title(proj_dir, project_id)
     print(f"EPO title EN: {epo_en[:70]}" + ("..." if len(epo_en) > 70 else ""))
 
     # ── Read verb_segment_pairs ──────────────────────────────────────────────
@@ -589,7 +588,12 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
     print(f"Calling {MODEL}...")
     response = client.chat.completions.create(
         model=MODEL,
-        max_tokens=4096,
+        # 4096 -> 8192 (2026-08-30): the widened noun-extraction rule grows
+        # consistent_terms/inconsistent_nouns, which this call must echo
+        # back in full — matches the ceiling glossary_agent/graph.py's
+        # resolve_inconsistent (the successor to this same call) already
+        # uses for the identical prompt/response shape.
+        max_tokens=8192,
         temperature=0,
         timeout=620,
         messages=[
@@ -620,7 +624,7 @@ def clean_glossary(proj_dir: Path, project_id: str) -> GlossaryCleanupResult:
         )
         retry_resp = client.chat.completions.create(
             model=MODEL,
-            max_tokens=4096,
+            max_tokens=8192,  # matches the primary call above, same reasoning
             temperature=0,
             timeout=120,
             messages=[

@@ -47,7 +47,7 @@ from pathlib import Path
 import pandas as pd
 
 from glossary_lib.attestation import load_segments
-from glossary_lib.csv_io import filter_relevant_standard, load_standard_glossary, read_epo_title
+from glossary_lib.csv_io import filter_relevant_standard, load_standard_glossary, resolve_epo_title
 
 HERE = Path(__file__).parent
 DEFAULT_PROMPT_PATH = HERE / "glossary_revise_prompt.md"
@@ -154,7 +154,7 @@ def load_raw_context(proj_dir: Path, project_id: str) -> dict:
     xlsx_path = _find_translated_xlsx(proj_dir)
     segments = load_segments(xlsx_path) if xlsx_path else []
 
-    epo_en, epo_de = read_epo_title(proj_dir / f"glossary_{project_id}.csv")
+    epo_en, epo_de = resolve_epo_title(proj_dir, project_id)
     if epo_en and epo_de:
         epo_en, epo_de = clean_epo_title_row(epo_en, epo_de)
 

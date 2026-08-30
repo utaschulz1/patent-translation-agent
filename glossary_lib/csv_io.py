@@ -162,6 +162,37 @@ def read_epo_title(glossary_path: Path) -> tuple[str, str]:
     return epo_en, epo_de
 
 
+def resolve_epo_title(proj_dir: Path, project_id: str) -> tuple[str, str]:
+    """read_epo_title, plus a folder-wide fallback search (2026-08-30).
+
+    glossary_<project_id>.csv is written once by the extraction pipeline
+    against the document's own id — a caller using a different id against
+    the same folder (e.g. a glossary_agent rebuild/retry run started under
+    a suffixed id like "HALA_2608_P0655-1") would otherwise silently lose
+    a title that's genuinely sitting right there under the original id.
+
+    The fallback triggers whenever the exact-match path doesn't itself
+    yield a real title — whether because the file is missing entirely, or
+    because it exists but is empty/title-less (e.g. a placeholder file an
+    unrelated script created) — never because the exact match's own title
+    was rejected; a title found via the exact path always wins outright.
+    Every other glossary_*.csv in the folder is then tried in turn (not
+    just the alphabetically-first one) until one actually yields a title,
+    so a stray empty file sorting first can't shadow the real one.
+    """
+    exact = proj_dir / f"glossary_{project_id}.csv"
+    epo_en, epo_de = read_epo_title(exact)
+    if epo_en and epo_de:
+        return epo_en, epo_de
+    for candidate in sorted(proj_dir.glob("glossary_*.csv")):
+        if candidate == exact:
+            continue
+        epo_en, epo_de = read_epo_title(candidate)
+        if epo_en and epo_de:
+            return epo_en, epo_de
+    return "", ""
+
+
 def write_clean_glossary(
     path: Path,
     epo_row: tuple[str, str] | None,
