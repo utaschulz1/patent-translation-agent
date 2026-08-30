@@ -34,3 +34,15 @@ full in the glossary-range-audit skill's Step 4.
 - **Rule:** Translate anatomical “appendage” as “Glied” (or the anatomically specific body-part term when context provides one), not as “Ansatz”.
 - **Source term:** appendage
 - **Status:** confirmed
+
+## 2026-08-29 — FRKE_2604_P0334-rebuild-node17-7
+- **Trigger:** When resolving "guard", or a term like it, in future patents.
+- **Rule:** In patent claims, prefer the source-faithful German term without adding/omitting terms that would not back-translate to the English term. Example: source: guard, target: Schutzvorrichtung, back-translation: guard device, conclusion: -vorrichtung is an addition, correct target is: Schutz
+- **Source term:** guard
+- **Status:** confirmed
+
+## 2026-08-29 — FRKE_2604_P0334-rebuild-node17-7
+- **Trigger:** one or more [component name]
+- **Rule:** Do not store quantified component expressions such as “one or more processors” as glossary compounds; store only the bare singular component noun, because German quantifier and article inflection varies by context.
+- **Source term:** one or more processors
+- **Status:** confirmed

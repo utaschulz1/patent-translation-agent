@@ -226,7 +226,14 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
     needed to prove the *prompts* (both `_AUDIT_SYSTEM_PROMPT`'s new confidence rule and
     `_FEEDBACK_SYSTEM_PROMPT`) actually produce sensible real-model behavior before trusting this
     on a real project.
-- [ ] **`verify_against_checker` (post-merge)** (`tests/test_glossary_agent.py::TestPostMergeVerify`):
+- [ ] **`verify_against_checker` (post-merge) — placement superseded 2026-08-27**, see
+  `glossary_agent/corrected_PRD_GLOSSARY_AGENT.md` §1.7 "REDESIGNED": gates `apply_verdicts →
+  report` (before a report is ever generated), not `await_agreement → write_glossary`; the
+  case-(a)/(b)/(c) failure-routing tests below are unchanged in substance, just re-target the new
+  edge. `handle_agreement_feedback`'s exit-gate item further down is retired in favor of a
+  `route_report_feedback` dispatcher — a live 3-round feedback test found it ungrounded (no
+  styleguide/standard_glossary/segments/tools reached its LLM call) and stateless across rounds.
+  (`tests/test_glossary_agent.py::TestPostMergeVerify`):
   - Full-range re-check, not touched-rows-only: a delete that changes an *untouched* row's
     matching (the "shorter entry starts absorbing text the deleted longer compound used to own"
     shape) is caught.
@@ -277,7 +284,18 @@ the new self-learning mechanism is real, not just plumbing that never gets exerc
   `/status` never surfaces, e.g. `draft_rows`; paused exposing the raw interrupt payload) +
   `tests/test_glossary_agent_api.py::TestStatePassthrough`. Same gap exists on `/review-agent` —
   not fixed, flagged for later.
-- [x] **`await_agreement` HITL gate — the report is not the end state** — architecture correction,
+- [x] **`await_agreement` HITL gate — the report is not the end state** — architecture correction
+  (the `await_agreement` interrupt itself, and its "agree" vs "feedback" split, stay valid and are
+  NOT superseded). **`handle_agreement_feedback` specifically IS superseded 2026-08-27** — see
+  `glossary_agent/corrected_PRD_GLOSSARY_AGENT.md` §1.7 "REDESIGNED": a live 3-round feedback test
+  on FRKE_2604_P0334 found it ungrounded (no styleguide/standard_glossary/segments/tools reached
+  its LLM call despite the prompt instructing it to reason with them) and stateless across rounds
+  (no memory of a prior round's feedback on the same row). Replaced by `route_report_feedback`, a
+  deterministic dispatcher that routes the human's feedback into `audit_flagged` itself as a
+  one-row batch with full evidence + a new `feedback_history` field, rather than a separate
+  under-equipped LLM call. `confirm_glossary_rule`/`append_to_learning_doc`/`apply_verdicts` reuse
+  and the `flagged: []`-clearing discipline described below remain correct and are retained.
+  Original entry, describing the still-valid parts:
   2026-08-25, user-specified (rejected an earlier out-of-graph proposal): `report` routes to a new
   `await_agreement` interrupt instead of straight to `write_glossary`. Resume `{"decision":
   "agree"}` to finalize, or `{"decision": "feedback", "en", "de", "feedback"}` to comment on a row

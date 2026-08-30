@@ -236,8 +236,16 @@ piece with no proven precedent anywhere in either agent (the review agent's own 
   - [ ] Live round-trip test (see TEST §Phase 2b): one low-confidence row, one real
         `confirm_glossary_rule` confirm, reload on a second run, confirm the learned rule
         actually loads and gets applied.
-- [ ] **2b.2 `verify_against_checker` (post-merge)** (corrected PRD §1.7) — new node between
-      `apply_verdicts` and `write_glossary`: re-run `build_glossary_lookups` +
+- [ ] **2b.2 `verify_against_checker` (post-merge)** — **placement/scope superseded 2026-08-27,
+      see corrected PRD §1.7 "REDESIGNED" section: moves to `apply_verdicts → verify_against_checker
+      → {retry | report}` (before the report is ever generated, not between apply_verdicts and
+      write_glossary), and `handle_agreement_feedback` below is retired in favor of a
+      `route_report_feedback` dispatcher that routes into `audit_flagged` directly — live
+      3-round feedback test on FRKE_2604_P0334 found `handle_agreement_feedback` ungrounded
+      (no styleguide/standard_glossary/segments/tools reached its LLM call despite the prompt
+      instructing it to reason with them) and stateless across rounds. Description below is the
+      original (now-superseded) design; kept for history.** (corrected PRD §1.7, original text) —
+      new node between `apply_verdicts` and `write_glossary`: re-run `build_glossary_lookups` +
       `check_segment_glossary` over the **entire** audited range against merged `final_rows`
       (not just rows touched this run — checker matching is corpus-relative, per the corrected
       PRD's reasoning). Three-way failure routing: (a) note on a row `audit_flagged` just
